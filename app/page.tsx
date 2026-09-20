@@ -6,6 +6,7 @@ import { Search, ArrowRight, Image as ImageIcon, FileText, Code2, Calculator, Al
 import { getPopularTools, CATEGORIES, CATEGORY_ICONS, CATEGORY_DESCRIPTIONS, getToolsByCategory } from '@/lib/registry';
 import { searchTools } from '@/lib/search';
 import type { Tool } from '@/lib/types';
+import { CategoryParallelExplorer } from '@/components/tools/CategoryParallelExplorer';
 import * as Icons from 'lucide-react';
 
 const QUICK_ACTIONS = [
@@ -167,27 +168,17 @@ export default function HomePage() {
         )}
       </section>
 
-      {/* ── Categories grid ────────────────────────────────────────── */}
-      <section style={{ maxWidth: 1280, margin: '0 auto', padding: '0 16px 64px' }}>
-        <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 24, letterSpacing: '-0.02em' }}>Categories</h2>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 12 }}>
-          {CATEGORIES.map(cat => {
-            const iconName = CATEGORY_ICONS[cat] || 'Zap';
-            const IconEl = ((Icons as Record<string, unknown>)[iconName] || Icons.Zap) as React.ComponentType<{ size?: number; style?: React.CSSProperties }>;
-            const tools = getToolsByCategory(cat);
-            return (
-              <Link key={cat} href={`/${cat.toLowerCase()}`} style={{ textDecoration: 'none' }}>
-                <div className="card card-hover" style={{ padding: 20, cursor: 'pointer' }}>
-                  <div style={{ width: 36, height: 36, borderRadius: 'var(--radius-md)', background: 'var(--color-accent-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 12 }}>
-                    <IconEl size={18} style={{ color: 'var(--color-accent)' }} />
-                  </div>
-                  <div style={{ fontWeight: 600, fontSize: 14, color: 'var(--color-text)', marginBottom: 4 }}>{cat}</div>
-                  <div style={{ fontSize: 12, color: 'var(--color-faint)' }}>{tools.length} tools</div>
-                </div>
-              </Link>
-            );
-          })}
+      {/* ── Categories Parallel Menu & Tools Explorer ───────────── */}
+      <section style={{ maxWidth: 1360, margin: '0 auto', padding: '0 16px 80px' }}>
+        <div style={{ marginBottom: 28 }}>
+          <h2 style={{ fontSize: 24, fontWeight: 800, margin: '0 0 6px', letterSpacing: '-0.03em', color: 'var(--color-text)' }}>
+            Categories
+          </h2>
+          <p style={{ margin: 0, color: 'var(--color-muted)', fontSize: 14 }}>
+            Browse tools segregated by category with live execution indicators.
+          </p>
         </div>
+        <CategoryParallelExplorer />
       </section>
 
       {/* ── Popular Tools ──────────────────────────────────────────── */}
