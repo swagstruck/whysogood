@@ -96,8 +96,8 @@ export default function HomePage() {
         <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 600, color: 'var(--color-accent)', background: 'var(--color-accent-subtle)', padding: '4px 12px', borderRadius: 'var(--radius-full)', marginBottom: 20 }}>
           🔒 100% free · No sign-up · Runs in your browser
         </div>
-        <h1 style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)', fontWeight: 800, letterSpacing: '-0.04em', lineHeight: 1.1, margin: '0 0 16px', color: 'var(--color-text)' }}>
-          What do you need to do?
+        <h1 style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)', fontWeight: 800, letterSpacing: '-0.04em', lineHeight: 1.15, margin: '0 0 16px', color: 'var(--color-text)' }}>
+          100 Tools. Free. Private. Forever.
         </h1>
         <p style={{ fontSize: 'clamp(1rem, 2vw, 1.25rem)', color: 'var(--color-muted)', margin: '0 auto 36px', maxWidth: 560 }}>
           100+ free tools that process everything in your browser. No uploads. No accounts. Just results.
