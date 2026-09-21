@@ -10,7 +10,6 @@ type CompressionPreset = 'recommended' | 'extreme' | 'low' | 'custom';
 
 export default function PdfCompressorTool() {
   const [file, setFile] = useState<File | null>(null);
-  const [fileBuffer, setFileBuffer] = useState<ArrayBuffer | null>(null);
   const [pageCount, setPageCount] = useState<number>(0);
   const [isProcessing, setIsProcessing] = useState(false);
   const [progress, setProgress] = useState({ current: 0, total: 0, stage: '' });
@@ -42,7 +41,6 @@ export default function PdfCompressorTool() {
 
     try {
       const buffer = await f.arrayBuffer();
-      setFileBuffer(buffer);
       const pdfDoc = await PDFDocument.load(buffer, { ignoreEncryption: true });
       setPageCount(pdfDoc.getPageCount());
     } catch {
@@ -71,16 +69,18 @@ export default function PdfCompressorTool() {
   };
 
   const compressPdf = async () => {
-    if (!file || !fileBuffer) return;
+    if (!file) return;
     setIsProcessing(true);
     setError(null);
     setProgress({ current: 0, total: pageCount, stage: 'Preparing document...' });
 
     try {
+      const freshBuffer = await file.arrayBuffer();
+
       if (mode === 'stream') {
         // Stream optimization only (metadata stripping + object streams)
         setProgress({ current: 0, total: 1, stage: 'Optimizing internal object streams...' });
-        const pdfDoc = await PDFDocument.load(fileBuffer, { ignoreEncryption: true });
+        const pdfDoc = await PDFDocument.load(freshBuffer, { ignoreEncryption: true });
         pdfDoc.setTitle('');
         pdfDoc.setAuthor('');
         pdfDoc.setSubject('');
@@ -94,7 +94,7 @@ export default function PdfCompressorTool() {
           updateFieldAppearances: false,
         });
 
-        const finalBytes = compressedBytes.length < file.size ? compressedBytes : new Uint8Array(fileBuffer);
+        const finalBytes = compressedBytes.length < file.size ? compressedBytes : new Uint8Array(freshBuffer);
         const outBlob = new Blob([finalBytes as unknown as BlobPart], { type: 'application/pdf' });
         setResultBlob(outBlob);
         setResultSize(outBlob.size);
@@ -103,7 +103,7 @@ export default function PdfCompressorTool() {
         const pdfjs = await getPdfJs();
         if (!pdfjs) throw new Error('PDF rendering engine not available.');
 
-        const loadingTask = pdfjs.getDocument({ data: new Uint8Array(fileBuffer) });
+        const loadingTask = pdfjs.getDocument({ data: new Uint8Array(freshBuffer).slice() });
         const sourcePdf = await loadingTask.promise;
         const totalPages = sourcePdf.numPages;
 
@@ -177,7 +177,6 @@ export default function PdfCompressorTool() {
 
   const reset = () => {
     setFile(null);
-    setFileBuffer(null);
     setResultBlob(null);
     setResultSize(0);
     setError(null);

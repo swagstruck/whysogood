@@ -14,7 +14,6 @@ import { PdfPageGrid } from '@/components/tools/pdf/PdfPageGrid';
 
 export default function PdfSplitterTool() {
   const [file, setFile] = useState<File | null>(null);
-  const [fileBuffer, setFileBuffer] = useState<ArrayBuffer | null>(null);
   const [thumbnails, setThumbnails] = useState<PageThumbnail[]>([]);
   const [isLoadingThumbnails, setIsLoadingThumbnails] = useState(false);
   const [splitMode, setSplitMode] = useState<'ranges' | 'all' | 'custom'>('ranges');
@@ -36,7 +35,6 @@ export default function PdfSplitterTool() {
 
     try {
       const buffer = await f.arrayBuffer();
-      setFileBuffer(buffer);
       const thumbs = await renderAllThumbnails(buffer);
       setThumbnails(thumbs);
       setRangeInput(thumbs.length > 1 ? `1-${Math.ceil(thumbs.length / 2)}, ${Math.ceil(thumbs.length / 2) + 1}-${thumbs.length}` : '1');
@@ -58,13 +56,14 @@ export default function PdfSplitterTool() {
   };
 
   const splitPdf = async () => {
-    if (!file || !fileBuffer) return;
+    if (!file) return;
     setIsProcessing(true);
     setError(null);
 
     try {
       const baseName = file.name.replace(/\.pdf$/i, '');
-      const srcDoc = await PDFDocument.load(fileBuffer, { ignoreEncryption: true });
+      const buffer = await file.arrayBuffer();
+      const srcDoc = await PDFDocument.load(buffer, { ignoreEncryption: true });
       const totalPages = srcDoc.getPageCount();
 
       if (splitMode === 'all') {
@@ -129,7 +128,6 @@ export default function PdfSplitterTool() {
 
   const reset = () => {
     setFile(null);
-    setFileBuffer(null);
     setThumbnails([]);
     setError(null);
   };

@@ -7,7 +7,6 @@ import { getPdfJs, createZipArchive, type PageThumbnail } from '@/lib/pdfUtils';
 
 export default function PdfToJpgTool() {
   const [file, setFile] = useState<File | null>(null);
-  const [fileBuffer, setFileBuffer] = useState<ArrayBuffer | null>(null);
   const [pageCount, setPageCount] = useState(0);
   const [dpi, setDpi] = useState<number>(150);
   const [quality, setQuality] = useState<number>(0.85);
@@ -29,10 +28,9 @@ export default function PdfToJpgTool() {
 
     try {
       const buffer = await f.arrayBuffer();
-      setFileBuffer(buffer);
       const pdfjs = await getPdfJs();
       if (!pdfjs) throw new Error('PDF.js renderer not available.');
-      const doc = await pdfjs.getDocument({ data: new Uint8Array(buffer) }).promise;
+      const doc = await pdfjs.getDocument({ data: new Uint8Array(buffer).slice() }).promise;
       setPageCount(doc.numPages);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load PDF.');
@@ -40,14 +38,15 @@ export default function PdfToJpgTool() {
   };
 
   const convertToJpg = async () => {
-    if (!fileBuffer || !file) return;
+    if (!file) return;
     setIsConverting(true);
     setError(null);
     setProgress({ current: 0, total: pageCount });
 
     try {
       const pdfjs = await getPdfJs();
-      const doc = await pdfjs.getDocument({ data: new Uint8Array(fileBuffer) }).promise;
+      const buffer = await file.arrayBuffer();
+      const doc = await pdfjs.getDocument({ data: new Uint8Array(buffer).slice() }).promise;
       const images: { pageNumber: number; blob: Blob; dataUrl: string }[] = [];
       const scale = dpi / 72; // standard PDF base is 72 DPI
 
@@ -102,7 +101,6 @@ export default function PdfToJpgTool() {
 
   const reset = () => {
     setFile(null);
-    setFileBuffer(null);
     setPageCount(0);
     setRenderedImages([]);
     setError(null);

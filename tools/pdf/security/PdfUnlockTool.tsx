@@ -7,7 +7,6 @@ import { formatFileSize, downloadBlob } from '@/lib/utils';
 
 export default function PdfUnlockTool() {
   const [file, setFile] = useState<File | null>(null);
-  const [fileBuffer, setFileBuffer] = useState<ArrayBuffer | null>(null);
   const [isUnlocking, setIsUnlocking] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -22,23 +21,17 @@ export default function PdfUnlockTool() {
     setError(null);
     setFile(f);
     setSuccess(false);
-
-    try {
-      const buffer = await f.arrayBuffer();
-      setFileBuffer(buffer);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to read file.');
-    }
   };
 
   const unlockPdf = async () => {
-    if (!file || !fileBuffer) return;
+    if (!file) return;
     setIsUnlocking(true);
     setError(null);
 
     try {
       // Load document with encryption bypassed/stripped
-      const pdfDoc = await PDFDocument.load(fileBuffer, { ignoreEncryption: true });
+      const buffer = await file.arrayBuffer();
+      const pdfDoc = await PDFDocument.load(buffer, { ignoreEncryption: true });
 
       // Save as completely decrypted document with standard stream encoding
       const decryptedBytes = await pdfDoc.save({ useObjectStreams: true });
@@ -55,7 +48,6 @@ export default function PdfUnlockTool() {
 
   const reset = () => {
     setFile(null);
-    setFileBuffer(null);
     setSuccess(false);
     setError(null);
   };

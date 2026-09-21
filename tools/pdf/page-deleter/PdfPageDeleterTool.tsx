@@ -14,7 +14,6 @@ import { PdfPageGrid } from '@/components/tools/pdf/PdfPageGrid';
 
 export default function PdfPageDeleterTool() {
   const [file, setFile] = useState<File | null>(null);
-  const [fileBuffer, setFileBuffer] = useState<ArrayBuffer | null>(null);
   const [thumbnails, setThumbnails] = useState<PageThumbnail[]>([]);
   const [deletedPages, setDeletedPages] = useState<Set<number>>(new Set());
   const [rangeInput, setRangeInput] = useState('');
@@ -35,7 +34,6 @@ export default function PdfPageDeleterTool() {
 
     try {
       const buffer = await f.arrayBuffer();
-      setFileBuffer(buffer);
       const thumbs = await renderAllThumbnails(buffer);
       setThumbnails(thumbs);
       setDeletedPages(new Set());
@@ -70,7 +68,7 @@ export default function PdfPageDeleterTool() {
   };
 
   const deletePagesAndDownload = async () => {
-    if (!file || !fileBuffer) return;
+    if (!file) return;
     const totalPages = thumbnails.length;
     const remainingIndices: number[] = [];
 
@@ -94,7 +92,8 @@ export default function PdfPageDeleterTool() {
     setError(null);
 
     try {
-      const srcDoc = await PDFDocument.load(fileBuffer, { ignoreEncryption: true });
+      const buffer = await file.arrayBuffer();
+      const srcDoc = await PDFDocument.load(buffer, { ignoreEncryption: true });
       const outDoc = await PDFDocument.create();
       const copiedPages = await outDoc.copyPages(srcDoc, remainingIndices);
       copiedPages.forEach(p => outDoc.addPage(p));
@@ -112,7 +111,6 @@ export default function PdfPageDeleterTool() {
 
   const reset = () => {
     setFile(null);
-    setFileBuffer(null);
     setThumbnails([]);
     setDeletedPages(new Set());
     setRangeInput('');

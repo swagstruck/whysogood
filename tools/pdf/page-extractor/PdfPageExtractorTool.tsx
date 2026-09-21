@@ -15,7 +15,6 @@ import { PdfPageGrid } from '@/components/tools/pdf/PdfPageGrid';
 
 export default function PdfPageExtractorTool() {
   const [file, setFile] = useState<File | null>(null);
-  const [fileBuffer, setFileBuffer] = useState<ArrayBuffer | null>(null);
   const [thumbnails, setThumbnails] = useState<PageThumbnail[]>([]);
   const [selectedPages, setSelectedPages] = useState<Set<number>>(new Set());
   const [rangeText, setRangeText] = useState('');
@@ -37,7 +36,6 @@ export default function PdfPageExtractorTool() {
 
     try {
       const buffer = await f.arrayBuffer();
-      setFileBuffer(buffer);
       const thumbs = await renderAllThumbnails(buffer);
       setThumbnails(thumbs);
       const initialSet = new Set([0]);
@@ -79,7 +77,7 @@ export default function PdfPageExtractorTool() {
   };
 
   const extractPages = async () => {
-    if (!file || !fileBuffer) return;
+    if (!file) return;
     const indices = Array.from(selectedPages).sort((a, b) => a - b);
     if (indices.length === 0) {
       setError('Please select at least one page to extract.');
@@ -90,7 +88,8 @@ export default function PdfPageExtractorTool() {
     setError(null);
 
     try {
-      const srcDoc = await PDFDocument.load(fileBuffer, { ignoreEncryption: true });
+      const buffer = await file.arrayBuffer();
+      const srcDoc = await PDFDocument.load(buffer, { ignoreEncryption: true });
       const baseName = file.name.replace(/\.pdf$/i, '');
 
       if (extractMode === 'merged') {
@@ -121,7 +120,6 @@ export default function PdfPageExtractorTool() {
 
   const reset = () => {
     setFile(null);
-    setFileBuffer(null);
     setThumbnails([]);
     setSelectedPages(new Set());
     setRangeText('');

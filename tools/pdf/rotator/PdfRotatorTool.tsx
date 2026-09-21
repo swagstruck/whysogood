@@ -9,7 +9,6 @@ import { PdfPageGrid } from '@/components/tools/pdf/PdfPageGrid';
 
 export default function PdfRotatorTool() {
   const [file, setFile] = useState<File | null>(null);
-  const [fileBuffer, setFileBuffer] = useState<ArrayBuffer | null>(null);
   const [thumbnails, setThumbnails] = useState<PageThumbnail[]>([]);
   const [rotations, setRotations] = useState<Record<number, number>>({});
   const [isLoading, setIsLoading] = useState(false);
@@ -29,7 +28,6 @@ export default function PdfRotatorTool() {
 
     try {
       const buffer = await f.arrayBuffer();
-      setFileBuffer(buffer);
       const thumbs = await renderAllThumbnails(buffer);
       setThumbnails(thumbs);
       setRotations({});
@@ -63,12 +61,13 @@ export default function PdfRotatorTool() {
   };
 
   const saveAndDownload = async () => {
-    if (!file || !fileBuffer) return;
+    if (!file) return;
     setIsProcessing(true);
     setError(null);
 
     try {
-      const pdfDoc = await PDFDocument.load(fileBuffer, { ignoreEncryption: true });
+      const buffer = await file.arrayBuffer();
+      const pdfDoc = await PDFDocument.load(buffer, { ignoreEncryption: true });
       const pages = pdfDoc.getPages();
 
       pages.forEach((page, idx) => {
@@ -93,7 +92,6 @@ export default function PdfRotatorTool() {
 
   const reset = () => {
     setFile(null);
-    setFileBuffer(null);
     setThumbnails([]);
     setRotations({});
     setError(null);

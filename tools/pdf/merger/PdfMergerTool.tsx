@@ -45,7 +45,7 @@ export default function PdfMergerTool() {
         count = doc.getPageCount();
 
         if (pdfjs) {
-          const loadingTask = pdfjs.getDocument({ data: new Uint8Array(buffer) });
+          const loadingTask = pdfjs.getDocument({ data: new Uint8Array(buffer).slice() });
           const loadedDoc = await loadingTask.promise;
           const page = await loadedDoc.getPage(1);
           const viewport = page.getViewport({ scale: 0.3 });

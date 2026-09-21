@@ -51,7 +51,7 @@ export default function PdfMetadataViewerTool() {
       try {
         const pdfjs = await getPdfJs();
         if (pdfjs) {
-          const doc = await pdfjs.getDocument({ data: new Uint8Array(buffer) }).promise;
+          const doc = await pdfjs.getDocument({ data: new Uint8Array(buffer).slice() }).promise;
           const meta = await doc.getMetadata();
           pdfJsMeta = meta.info || {};
         }

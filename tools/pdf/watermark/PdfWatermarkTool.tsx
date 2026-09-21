@@ -8,7 +8,6 @@ import { getPdfJs } from '@/lib/pdfUtils';
 
 export default function PdfWatermarkTool() {
   const [file, setFile] = useState<File | null>(null);
-  const [fileBuffer, setFileBuffer] = useState<ArrayBuffer | null>(null);
   const [pageCount, setPageCount] = useState(0);
   const [watermarkText, setWatermarkText] = useState('CONFIDENTIAL');
   const [fontSize, setFontSize] = useState(48);
@@ -32,10 +31,9 @@ export default function PdfWatermarkTool() {
 
     try {
       const buffer = await f.arrayBuffer();
-      setFileBuffer(buffer);
       const pdfjs = await getPdfJs();
       if (!pdfjs) throw new Error('PDF.js renderer not available.');
-      const doc = await pdfjs.getDocument({ data: new Uint8Array(buffer) }).promise;
+      const doc = await pdfjs.getDocument({ data: new Uint8Array(buffer).slice() }).promise;
       setPageCount(doc.numPages);
 
       const page = await doc.getPage(1);
@@ -63,12 +61,13 @@ export default function PdfWatermarkTool() {
   };
 
   const applyWatermark = async () => {
-    if (!file || !fileBuffer) return;
+    if (!file) return;
     setIsProcessing(true);
     setError(null);
 
     try {
-      const pdfDoc = await PDFDocument.load(fileBuffer, { ignoreEncryption: true });
+      const buffer = await file.arrayBuffer();
+      const pdfDoc = await PDFDocument.load(buffer, { ignoreEncryption: true });
       const font = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
       const pages = pdfDoc.getPages();
       const { r, g, b } = hexToRgb(colorHex);
@@ -114,7 +113,6 @@ export default function PdfWatermarkTool() {
 
   const reset = () => {
     setFile(null);
-    setFileBuffer(null);
     setPageCount(0);
     setFirstPagePreview(null);
     setError(null);

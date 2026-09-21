@@ -7,7 +7,6 @@ import { formatFileSize, downloadBlob } from '@/lib/utils';
 
 export default function PdfPasswordTool() {
   const [file, setFile] = useState<File | null>(null);
-  const [fileBuffer, setFileBuffer] = useState<ArrayBuffer | null>(null);
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -23,12 +22,10 @@ export default function PdfPasswordTool() {
     }
     setError(null);
     setFile(f);
-    const buffer = await f.arrayBuffer();
-    setFileBuffer(buffer);
   };
 
   const protectPdf = async () => {
-    if (!file || !fileBuffer) return;
+    if (!file) return;
     if (!password) {
       setError('Please enter a password.');
       return;
@@ -46,7 +43,8 @@ export default function PdfPasswordTool() {
     setError(null);
 
     try {
-      const pdfDoc = await PDFDocument.load(fileBuffer, { ignoreEncryption: true });
+      const buffer = await file.arrayBuffer();
+      const pdfDoc = await PDFDocument.load(buffer, { ignoreEncryption: true });
 
       // Save PDF with sanitized metadata and security trailer marker
       pdfDoc.setProducer('whysogood Encrypted');
@@ -66,7 +64,6 @@ export default function PdfPasswordTool() {
 
   const reset = () => {
     setFile(null);
-    setFileBuffer(null);
     setPassword('');
     setConfirmPassword('');
     setError(null);

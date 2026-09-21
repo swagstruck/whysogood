@@ -37,7 +37,9 @@ export async function renderAllThumbnails(
   const pdfjs = await getPdfJs();
   if (!pdfjs) return [];
 
-  const loadingTask = pdfjs.getDocument({ data: new Uint8Array(data) });
+  // Clone buffer so PDF.js worker transfer cannot detach caller's ArrayBuffer
+  const safeData = new Uint8Array(data).slice();
+  const loadingTask = pdfjs.getDocument({ data: safeData });
   const doc = await loadingTask.promise;
   const numPages = doc.numPages;
   const thumbnails: PageThumbnail[] = [];

@@ -30,7 +30,7 @@ export default function PdfToTextTool() {
       const pdfjs = await getPdfJs();
       if (!pdfjs) throw new Error('PDF.js engine is not available.');
 
-      const doc = await pdfjs.getDocument({ data: new Uint8Array(buffer) }).promise;
+      const doc = await pdfjs.getDocument({ data: new Uint8Array(buffer).slice() }).promise;
       setPageCount(doc.numPages);
 
       let fullText = '';
