@@ -190,18 +190,28 @@ export function Header() {
       {/* ── Search overlay ─────────────────────────────────────────── */}
       {searchOpen && (
         <div
-          style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)' }}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 200,
+            background: 'rgba(0,0,0,0.7)',
+            backdropFilter: 'blur(4px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '20px 16px',
+          }}
           onClick={() => { setSearchOpen(false); setQuery(''); setResults([]); }}
         >
           <div
             style={{
-              position: 'absolute', top: '15%', left: '50%', transform: 'translateX(-50%)',
-              width: '100%', maxWidth: 560, padding: '0 16px',
+              width: '100%',
+              maxWidth: 560,
             }}
             onClick={e => e.stopPropagation()}
             className="animate-slide-down"
           >
-            <div className="c-card" style={{ overflow: 'hidden' }}>
+            <div className="c-card" style={{ overflow: 'hidden', maxHeight: '85vh', display: 'flex', flexDirection: 'column' }}>
               {/* Search input */}
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '14px 16px', borderBottom: results.length ? '1px solid var(--border)' : 'none' }}>
                 <Search size={18} style={{ color: 'var(--brand)', flexShrink: 0 }} />
@@ -222,7 +232,7 @@ export function Header() {
 
               {/* Results */}
               {results.length > 0 && (
-                <ul style={{ listStyle: 'none', margin: 0, padding: '6px 0' }}>
+                <ul style={{ listStyle: 'none', margin: 0, padding: '6px 0', overflowY: 'auto', maxHeight: '60vh' }}>
                   {results.map((r, i) => (
                     <li key={r.tool.slug}>
                       <button
