@@ -12,43 +12,36 @@ interface SessionContextType {
   setTheme: (t: ThemeValue) => void;
 }
 
+const THEME_STORAGE_KEY = 'whysogood_theme';
+
 const SessionContext = createContext<SessionContextType>({
   recentTools: [],
   addRecentTool: () => {},
   clearRecent: () => {},
-  theme: 'dark',
+  theme: 'system',
   setTheme: () => {},
 });
 
 function applyTheme(theme: ThemeValue) {
   if (typeof document === 'undefined') return;
   const html = document.documentElement;
-  if (theme === 'dark') {
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const isDark = theme === 'dark' || (theme === 'system' && prefersDark);
+
+  if (isDark) {
     html.setAttribute('data-theme', 'dark');
     html.classList.remove('light');
-  } else if (theme === 'light') {
+  } else {
     html.setAttribute('data-theme', 'light');
     html.classList.add('light');
-  } else {
-    // System — follow OS preference
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    if (prefersDark) {
-      html.setAttribute('data-theme', 'dark');
-      html.classList.remove('light');
-    } else {
-      html.setAttribute('data-theme', 'light');
-      html.classList.add('light');
-    }
   }
 }
 
-const THEME_STORAGE_KEY = 'whysogood_theme';
-
 export function SessionProvider({ children }: { children: React.ReactNode }) {
   const [recentTools, setRecentTools] = useState<Tool[]>([]);
-  const [theme, setThemeState] = useState<ThemeValue>('dark');
+  const [theme, setThemeState] = useState<ThemeValue>('system');
 
-  // Load persisted theme on mount and listen for OS system preference changes
+  // Load saved theme from localStorage on mount (defaults to 'system')
   useEffect(() => {
     try {
       const savedTheme = localStorage.getItem(THEME_STORAGE_KEY) as ThemeValue | null;
@@ -56,24 +49,24 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
         setThemeState(savedTheme);
         applyTheme(savedTheme);
       } else {
-        applyTheme('dark');
+        applyTheme('system');
       }
     } catch {
-      applyTheme('dark');
+      applyTheme('system');
     }
+  }, []);
 
+  // Listen for system OS color scheme changes when in system mode
+  useEffect(() => {
     const mq = window.matchMedia('(prefers-color-scheme: dark)');
     const handler = () => {
-      try {
-        const current = (localStorage.getItem(THEME_STORAGE_KEY) as ThemeValue) || 'dark';
-        if (current === 'system') applyTheme('system');
-      } catch {
-        if (theme === 'system') applyTheme('system');
+      if (theme === 'system') {
+        applyTheme('system');
       }
     };
     mq.addEventListener('change', handler);
     return () => mq.removeEventListener('change', handler);
-  }, []);
+  }, [theme]);
 
   const addRecentTool = useCallback((tool: Tool) => {
     setRecentTools(prev => {
@@ -89,7 +82,9 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     applyTheme(t);
     try {
       localStorage.setItem(THEME_STORAGE_KEY, t);
-    } catch {}
+    } catch (e) {
+      console.error('Failed to save theme in localStorage', e);
+    }
   }, []);
 
   return (

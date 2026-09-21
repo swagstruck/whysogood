@@ -4,9 +4,9 @@
 /* ── whysogood global base ─────────────────────────────────── */
 
 @theme inline {
-  /* Typography (System Default Fonts) */
-  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
-  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  /* Typography (Tailwind theme compat) */
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
 
   /* Expose color tokens to Tailwind theme */
   --color-bg:          var(--bg);

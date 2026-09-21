@@ -24,24 +24,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         <script
           dangerouslySetInnerHTML={{
-            __html: `
-              (function() {
-                try {
-                  var theme = localStorage.getItem('whysogood_theme') || 'dark';
-                  if (theme === 'system') {
-                    var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                    document.documentElement.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
-                    if (!prefersDark) document.documentElement.classList.add('light');
-                  } else if (theme === 'light') {
-                    document.documentElement.setAttribute('data-theme', 'light');
-                    document.documentElement.classList.add('light');
-                  } else {
-                    document.documentElement.setAttribute('data-theme', 'dark');
-                    document.documentElement.classList.remove('light');
-                  }
-                } catch (e) {}
-              })();
-            `,
+            __html: `(function(){try{var s=localStorage.getItem('whysogood_theme');var t=s||'system';var p=window.matchMedia('(prefers-color-scheme: dark)').matches;var d=t==='dark'||(t==='system'&&p);var r=document.documentElement;if(d){r.setAttribute('data-theme','dark');r.classList.remove('light');}else{r.setAttribute('data-theme','light');r.classList.add('light');}}catch(e){}})();`,
           }}
         />
       </head>
