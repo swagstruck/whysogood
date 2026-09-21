@@ -21,7 +21,7 @@ export function ComingSoon({ toolName, description }: ComingSoonProps) {
       </p>
       <span className="c-badge c-badge--pos" style={{ fontSize: 12, padding: '6px 14px' }}>
         <Lock size={12} style={{ marginRight: 4 }} />
-        When ready, all processing will happen in your browser — no uploads
+        Coming Soon!
       </span>
     </div>
   );
