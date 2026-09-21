@@ -63,7 +63,7 @@ export function CategoryParallelExplorer() {
   const activeTools = useMemo(() => displayedTools.filter(t => t.status === 'active'), [displayedTools]);
   const stubTools   = useMemo(() => displayedTools.filter(t => t.status !== 'active'), [displayedTools]);
 
-  const currentStats = categoryStats[selectedCategory] || { total: 0, active: 0, stubs: 0 };
+
   const currentDesc = selectedCategory === 'All'
     ? 'Browse all client-side tools across 11 categories. Runs entirely on your device with 0 server uploads.'
     : CATEGORY_DESCRIPTIONS[selectedCategory];
@@ -229,64 +229,45 @@ export function CategoryParallelExplorer() {
 
         {/* ── Right Content: Parallel Tools Explorer ───────────────────────── */}
         <main style={{ minWidth: 0, display: 'flex', flexDirection: 'column', gap: 24 }}>
-          {/* Header Banner for Selected Category */}
-          <div className="c-card" style={{
-            padding: '24px 28px',
+          {/* Header for Selected Category — Flat layout: Heading, description, and search box */}
+          <div style={{
             display: 'flex',
             flexDirection: 'column',
             gap: 16,
           }}>
-            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-                <div style={{
-                  width: 44, height: 44, borderRadius: 'var(--radius-lg)',
-                  background: 'var(--brand-subtle)',
-                  color: 'var(--brand)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                }}>
-                  <SelectedIcon size={22} />
-                </div>
-                <div>
-                  <h3 style={{ fontSize: 'clamp(1.25rem, 3vw, 1.625rem)', fontWeight: 800, letterSpacing: '-0.03em', margin: '0 0 4px', color: 'var(--ink)' }}>
-                    {selectedCategory === 'All' ? 'All Web Utilities' : selectedCategory}
-                  </h3>
-                  <p style={{ fontSize: 13, color: 'var(--ink-2)', margin: 0, lineHeight: 1.5 }}>
-                    {currentDesc}
-                  </p>
-                </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+              <div style={{
+                width: 44, height: 44, borderRadius: 'var(--radius-lg)',
+                background: 'var(--brand-subtle)',
+                color: 'var(--brand-500)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                flexShrink: 0,
+              }}>
+                <SelectedIcon size={22} />
               </div>
-
-              {/* Stat badges */}
-              <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
-                <span className="c-badge c-badge--pos" style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-                  <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'currentColor' }} />
-                  {currentStats.active} Available Now
-                </span>
-
-                {currentStats.stubs > 0 && (
-                  <span className="c-badge c-badge--neutral">
-                    {currentStats.stubs} Coming Soon
-                  </span>
-                )}
-
+              <div>
+                <h3 style={{ fontSize: 'clamp(1.25rem, 3vw, 1.625rem)', fontWeight: 800, letterSpacing: '-0.03em', margin: '0 0 4px', color: 'var(--ink)' }}>
+                  {selectedCategory === 'All' ? 'All Web Utilities' : selectedCategory}
+                </h3>
+                <p style={{ fontSize: 13, color: 'var(--ink-2)', margin: 0, lineHeight: 1.5 }}>
+                  {currentDesc}
+                </p>
               </div>
             </div>
 
-            {/* Search within category */}
-            <div style={{ paddingTop: 8, borderTop: '1px solid var(--border)' }}>
-              <div style={{ position: 'relative' }}>
-                <Search size={15} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--ink-3)', pointerEvents: 'none' }} />
-                <input
-                  value={searchQuery}
-                  onChange={e => setSearchQuery(e.target.value)}
-                  placeholder={`Search ${selectedCategory === 'All' ? 'all' : selectedCategory.toLowerCase()} tools…`}
-                  className="input-base"
-                  style={{
-                    width: '100%', height: 38, paddingLeft: 36, paddingRight: 12,
-                    fontSize: 13, boxSizing: 'border-box',
-                  }}
-                />
-              </div>
+            {/* Search within category — Flat, no separator line */}
+            <div style={{ position: 'relative' }}>
+              <Search size={15} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--ink-3)', pointerEvents: 'none' }} />
+              <input
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                placeholder={`Search ${selectedCategory === 'All' ? 'all' : selectedCategory.toLowerCase()} tools…`}
+                className="input-base"
+                style={{
+                  width: '100%', height: 38, paddingLeft: 36, paddingRight: 12,
+                  fontSize: 13, boxSizing: 'border-box',
+                }}
+              />
             </div>
           </div>
 
