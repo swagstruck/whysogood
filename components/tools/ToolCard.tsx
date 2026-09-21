@@ -19,28 +19,28 @@ export function ToolCard({ tool, compact = false }: ToolCardProps) {
       <div
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
+        className="c-card c-card--hover"
         style={{
-          background: 'var(--color-surface)',
-          border: `1px solid ${hovered ? 'var(--color-border-hover)' : 'var(--color-border)'}`,
-          borderRadius: 'var(--radius-lg)',
           padding: compact ? 14 : 20,
           display: 'flex', flexDirection: 'column', gap: 10,
           height: '100%', cursor: 'pointer',
-          transform: hovered ? 'translateY(-2px)' : 'none',
-          transition: 'border-color var(--transition-base), transform var(--transition-base)',
           boxSizing: 'border-box',
+          /* override c-card--hover for more pronounced lift */
+          transform: hovered ? 'translateY(-2px)' : 'none',
+          borderColor: hovered ? 'var(--border-hover)' : 'var(--border)',
         }}
       >
         {/* Icon + badges row */}
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
           <div style={{
             width: compact ? 32 : 40, height: compact ? 32 : 40,
-            borderRadius: 'var(--radius-md)',
-            background: hovered ? 'var(--color-accent-subtle)' : 'var(--color-surface2)',
+            borderRadius: 'var(--radius-lg)',
+            background: hovered ? 'var(--brand-subtle)' : 'var(--bg-2)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             transition: 'background var(--transition-base)',
           }}>
-            <IconEl size={compact ? 16 : 20} style={{ color: hovered ? 'var(--color-accent)' : 'var(--color-muted)' }} />
+            {/* brand-500 for decorative icon per spec */}
+            <IconEl size={compact ? 16 : 20} style={{ color: hovered ? 'var(--brand-500)' : 'var(--ink-2)' }} />
           </div>
           <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
             {tool.status === 'active' && <Badge variant="success">Live</Badge>}
@@ -51,11 +51,11 @@ export function ToolCard({ tool, compact = false }: ToolCardProps) {
 
         {/* Name + description */}
         <div>
-          <div style={{ fontWeight: 700, fontSize: compact ? 13 : 14, color: 'var(--color-text)', marginBottom: 4, lineHeight: 1.3 }}>
+          <div style={{ fontWeight: 700, fontSize: compact ? 13 : 14, color: 'var(--ink)', marginBottom: 4, lineHeight: 1.3 }}>
             {tool.name}
           </div>
           <div style={{
-            fontSize: 12, color: 'var(--color-muted)', lineHeight: 1.5,
+            fontSize: 12, color: 'var(--ink-2)', lineHeight: 1.5,
             display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden',
           }}>
             {tool.description}
@@ -67,18 +67,18 @@ export function ToolCard({ tool, compact = false }: ToolCardProps) {
           <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginTop: 'auto' }}>
             {tool.formats.in.slice(0, 4).map(f => (
               <span key={f} style={{
-                fontSize: 10, fontWeight: 600, color: 'var(--color-faint)',
-                background: 'var(--color-surface2)', padding: '2px 6px',
+                fontSize: 10, fontWeight: 600, color: 'var(--ink-3)',
+                background: 'var(--bg-2)', padding: '2px 6px',
                 borderRadius: 'var(--radius-sm)', textTransform: 'uppercase',
               }}>{f}</span>
             ))}
             {tool.formats.in.length > 4 && (
-              <span style={{ fontSize: 10, color: 'var(--color-faint)', padding: '2px 4px' }}>+{tool.formats.in.length - 4}</span>
+              <span style={{ fontSize: 10, color: 'var(--ink-3)', padding: '2px 4px' }}>+{tool.formats.in.length - 4}</span>
             )}
           </div>
         ) : (
           tool.status === 'stub' ? (
-            <span style={{ fontSize: 11, color: 'var(--color-faint)', marginTop: 'auto' }}>Coming soon</span>
+            <span style={{ fontSize: 11, color: 'var(--ink-3)', marginTop: 'auto' }}>Coming soon</span>
           ) : null
         )}
       </div>

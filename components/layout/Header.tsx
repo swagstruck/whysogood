@@ -72,17 +72,17 @@ export function Header() {
       {/* ── Header bar ──────────────────────────────────────────────── */}
       <header style={{
         position: 'sticky', top: 0, zIndex: 100,
-        background: 'var(--color-surface)',
-        borderBottom: '1px solid var(--color-border)',
+        background: 'var(--bg-1)',
+        borderBottom: '1px solid var(--border)',
         backdropFilter: 'blur(12px)',
       }}>
         <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 16px', height: 60, display: 'flex', alignItems: 'center', gap: 16 }}>
-          {/* Logo */}
+          {/* Logo — brand-500 is decorative per spec */}
           <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 8, textDecoration: 'none', flexShrink: 0 }}>
-            <div style={{ width: 28, height: 28, borderRadius: 'var(--radius-md)', background: 'var(--color-accent)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ width: 28, height: 28, borderRadius: 'var(--radius-md)', background: 'var(--brand-500)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <Zap size={16} color="#fff" fill="#fff" />
             </div>
-            <span style={{ fontWeight: 700, fontSize: 18, color: 'var(--color-text)', letterSpacing: '-0.02em' }}>
+            <span style={{ fontWeight: 700, fontSize: 18, color: 'var(--ink)', letterSpacing: '-0.02em' }}>
               whysogood
             </span>
           </Link>
@@ -92,19 +92,19 @@ export function Header() {
             onClick={() => { setSearchOpen(true); setTimeout(() => inputRef.current?.focus(), 50); }}
             style={{
               flex: 1, maxWidth: 520, height: 38,
-              background: 'var(--color-surface2)',
-              border: '1px solid var(--color-border)',
+              background: 'var(--bg-2)',
+              border: '1px solid var(--border)',
               borderRadius: 'var(--radius-md)',
               display: 'flex', alignItems: 'center', gap: 8, padding: '0 12px',
-              cursor: 'text', color: 'var(--color-faint)', fontSize: 14,
+              cursor: 'text', color: 'var(--ink-3)', fontSize: 14,
               transition: 'border-color var(--transition-fast)',
             }}
-            onMouseEnter={e => (e.currentTarget.style.borderColor = 'var(--color-border-hover)')}
-            onMouseLeave={e => (e.currentTarget.style.borderColor = 'var(--color-border)')}
+            onMouseEnter={e => (e.currentTarget.style.borderColor = 'var(--border-hover)')}
+            onMouseLeave={e => (e.currentTarget.style.borderColor = 'var(--border)')}
           >
             <Search size={15} />
             <span>Search tools&hellip;</span>
-            <span style={{ marginLeft: 'auto', fontSize: 11, background: 'var(--color-surface3)', padding: '2px 6px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--color-border)' }}>/</span>
+            <span style={{ marginLeft: 'auto', fontSize: 11, background: 'var(--bg-3)', padding: '2px 6px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)' }}>/</span>
           </button>
 
           {/* Desktop nav links */}
@@ -112,11 +112,11 @@ export function Header() {
             {(['Images','PDF','Developer','Data','Calculators'] as const).map(cat => (
               <Link key={cat} href={`/${cat.toLowerCase()}`} style={{
                 padding: '6px 10px', borderRadius: 'var(--radius-sm)',
-                fontSize: 13, fontWeight: 500, color: 'var(--color-muted)',
+                fontSize: 13, fontWeight: 500, color: 'var(--ink-2)',
                 textDecoration: 'none', transition: 'color var(--transition-fast), background var(--transition-fast)',
               }}
-              onMouseEnter={e => { e.currentTarget.style.color = 'var(--color-text)'; e.currentTarget.style.background = 'var(--color-surface2)'; }}
-              onMouseLeave={e => { e.currentTarget.style.color = 'var(--color-muted)'; e.currentTarget.style.background = 'transparent'; }}
+              onMouseEnter={e => { e.currentTarget.style.color = 'var(--ink)'; e.currentTarget.style.background = 'var(--bg-2)'; }}
+              onMouseLeave={e => { e.currentTarget.style.color = 'var(--ink-2)'; e.currentTarget.style.background = 'transparent'; }}
               >
                 {cat}
               </Link>
@@ -129,7 +129,7 @@ export function Header() {
             title={`Current theme: ${theme}. Click to cycle.`}
             style={{
               width: 36, height: 36, borderRadius: 'var(--radius-md)',
-              background: 'var(--color-surface2)', border: '1px solid var(--color-border)',
+              background: 'var(--bg-2)', border: '1px solid var(--border)',
               cursor: 'pointer', fontSize: 16, display: 'flex', alignItems: 'center', justifyContent: 'center',
               transition: 'background var(--transition-fast)',
               flexShrink: 0,
@@ -143,9 +143,9 @@ export function Header() {
             onClick={() => setMobileOpen(o => !o)}
             style={{
               width: 36, height: 36, borderRadius: 'var(--radius-md)',
-              background: 'var(--color-surface2)', border: '1px solid var(--color-border)',
+              background: 'var(--bg-2)', border: '1px solid var(--border)',
               cursor: 'pointer', display: 'none', alignItems: 'center', justifyContent: 'center',
-              flexShrink: 0, color: 'var(--color-text)',
+              flexShrink: 0, color: 'var(--ink)',
             }}
             className="mobile-ham"
           >
@@ -158,8 +158,8 @@ export function Header() {
       {mobileOpen && (
         <div style={{
           position: 'fixed', top: 60, left: 0, right: 0, zIndex: 99,
-          background: 'var(--color-surface)',
-          borderBottom: '1px solid var(--color-border)',
+          background: 'var(--bg-1)',
+          borderBottom: '1px solid var(--border)',
           padding: '12px 16px',
           display: 'flex', flexDirection: 'column', gap: 4,
         }}>
@@ -167,9 +167,9 @@ export function Header() {
             onClick={() => { setMobileOpen(false); setSearchOpen(true); setTimeout(() => inputRef.current?.focus(), 50); }}
             style={{
               display: 'flex', alignItems: 'center', gap: 8, padding: '10px 12px',
-              background: 'var(--color-surface2)', border: '1px solid var(--color-border)',
+              background: 'var(--bg-2)', border: '1px solid var(--border)',
               borderRadius: 'var(--radius-md)', cursor: 'text',
-              color: 'var(--color-faint)', fontSize: 14, width: '100%',
+              color: 'var(--ink-3)', fontSize: 14, width: '100%',
             }}
           >
             <Search size={15} /> Search tools&hellip;
@@ -179,7 +179,7 @@ export function Header() {
               onClick={() => setMobileOpen(false)}
               style={{
                 padding: '10px 12px', borderRadius: 'var(--radius-md)',
-                fontSize: 14, fontWeight: 500, color: 'var(--color-muted)',
+                fontSize: 14, fontWeight: 500, color: 'var(--ink-2)',
                 textDecoration: 'none', display: 'block',
               }}
             >{cat}</Link>
@@ -201,10 +201,10 @@ export function Header() {
             onClick={e => e.stopPropagation()}
             className="animate-slide-down"
           >
-            <div className="card" style={{ overflow: 'hidden' }}>
+            <div className="c-card" style={{ overflow: 'hidden' }}>
               {/* Search input */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '14px 16px', borderBottom: results.length ? '1px solid var(--color-border)' : 'none' }}>
-                <Search size={18} style={{ color: 'var(--color-accent)', flexShrink: 0 }} />
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '14px 16px', borderBottom: results.length ? '1px solid var(--border)' : 'none' }}>
+                <Search size={18} style={{ color: 'var(--brand)', flexShrink: 0 }} />
                 <input
                   ref={inputRef}
                   value={query}
@@ -213,11 +213,11 @@ export function Header() {
                   placeholder="Search tools… (e.g. compress image, json format)"
                   style={{
                     flex: 1, background: 'none', border: 'none', outline: 'none',
-                    color: 'var(--color-text)', fontSize: 16, fontFamily: 'var(--font-sans)',
+                    color: 'var(--ink)', fontSize: 16, fontFamily: 'var(--font-sans)',
                   }}
                   autoFocus
                 />
-                <kbd style={{ fontSize: 11, color: 'var(--color-faint)', background: 'var(--color-surface2)', padding: '2px 6px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--color-border)' }}>Esc</kbd>
+                <kbd style={{ fontSize: 11, color: 'var(--ink-3)', background: 'var(--bg-2)', padding: '2px 6px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)' }}>Esc</kbd>
               </div>
 
               {/* Results */}
@@ -229,21 +229,21 @@ export function Header() {
                         onClick={() => goTo(r.tool.slug)}
                         style={{
                           width: '100%', display: 'flex', alignItems: 'center', gap: 12,
-                          padding: '10px 16px', background: focusedIdx === i ? 'var(--color-surface2)' : 'transparent',
+                          padding: '10px 16px', background: focusedIdx === i ? 'var(--bg-2)' : 'transparent',
                           border: 'none', cursor: 'pointer', textAlign: 'left',
                           transition: 'background var(--transition-fast)',
-                          color: 'var(--color-text)',
+                          color: 'var(--ink)',
                         }}
                         onMouseEnter={() => setFocusedIdx(i)}
                       >
-                        <div style={{ width: 36, height: 36, borderRadius: 'var(--radius-md)', background: 'var(--color-accent-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                          <Search size={16} style={{ color: 'var(--color-accent)' }} />
+                        <div style={{ width: 36, height: 36, borderRadius: 'var(--radius-md)', background: 'var(--brand-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                          <Search size={16} style={{ color: 'var(--brand)' }} />
                         </div>
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <div style={{ fontWeight: 600, fontSize: 14 }}>{r.tool.name}</div>
-                          <div style={{ fontSize: 12, color: 'var(--color-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.tool.description}</div>
+                          <div style={{ fontSize: 12, color: 'var(--ink-2)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.tool.description}</div>
                         </div>
-                        <span style={{ fontSize: 11, color: 'var(--color-faint)', background: 'var(--color-surface2)', padding: '2px 8px', borderRadius: 'var(--radius-full)', flexShrink: 0 }}>{r.tool.category}</span>
+                        <span style={{ fontSize: 11, color: 'var(--ink-3)', background: 'var(--bg-2)', padding: '2px 8px', borderRadius: 'var(--radius-sm)', flexShrink: 0 }}>{r.tool.category}</span>
                       </button>
                     </li>
                   ))}
@@ -251,13 +251,13 @@ export function Header() {
               )}
 
               {query.trim() && results.length === 0 && (
-                <div style={{ padding: '20px 16px', textAlign: 'center', color: 'var(--color-faint)', fontSize: 14 }}>
+                <div style={{ padding: '20px 16px', textAlign: 'center', color: 'var(--ink-3)', fontSize: 14 }}>
                   No tools found for &ldquo;{query}&rdquo;
                 </div>
               )}
 
               {!query && (
-                <div style={{ padding: '12px 16px', color: 'var(--color-faint)', fontSize: 12 }}>
+                <div style={{ padding: '12px 16px', color: 'var(--ink-3)', fontSize: 12 }}>
                   Try: compress image, format json, word count, sip calculator…
                 </div>
               )}

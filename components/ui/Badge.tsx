@@ -1,16 +1,17 @@
 'use client';
 import React from 'react';
 
-export type BadgeVariant = 'default' | 'accent' | 'success' | 'warning' | 'error' | 'new' | 'beta';
+export type BadgeVariant = 'default' | 'accent' | 'brand' | 'success' | 'warning' | 'error' | 'new' | 'beta';
 
-const STYLES: Record<BadgeVariant, React.CSSProperties> = {
-  default: { background: 'var(--color-surface2)', color: 'var(--color-muted)', border: '1px solid var(--color-border)' },
-  accent:  { background: 'var(--color-accent-subtle)', color: 'var(--color-accent)', border: '1px solid rgba(99,102,241,0.25)' },
-  success: { background: 'var(--color-success-subtle)', color: 'var(--color-success)', border: '1px solid rgba(34,197,94,0.25)' },
-  warning: { background: 'rgba(245,158,11,0.12)', color: 'var(--color-warning)', border: '1px solid rgba(245,158,11,0.25)' },
-  error:   { background: 'var(--color-error-subtle)', color: 'var(--color-error)', border: '1px solid rgba(239,68,68,0.25)' },
-  new:     { background: 'var(--color-accent-subtle)', color: 'var(--color-accent)', border: '1px solid rgba(99,102,241,0.25)' },
-  beta:    { background: 'rgba(245,158,11,0.12)', color: 'var(--color-warning)', border: '1px solid rgba(245,158,11,0.25)' },
+const VARIANT_CLASS: Record<BadgeVariant, string> = {
+  default: 'c-badge c-badge--neutral',
+  accent:  'c-badge c-badge--brand',
+  brand:   'c-badge c-badge--brand',
+  success: 'c-badge c-badge--pos',
+  warning: 'c-badge c-badge--warn',
+  error:   'c-badge c-badge--neg',
+  new:     'c-badge c-badge--brand',
+  beta:    'c-badge c-badge--warn',
 };
 
 interface BadgeProps {
@@ -20,14 +21,9 @@ interface BadgeProps {
   style?: React.CSSProperties;
 }
 
-export function Badge({ variant = 'default', children, style }: BadgeProps) {
+export function Badge({ variant = 'default', children, className = '', style }: BadgeProps) {
   return (
-    <span style={{
-      display: 'inline-block', padding: '2px 8px', borderRadius: 'var(--radius-full)',
-      fontSize: 11, fontWeight: 700, letterSpacing: '0.04em',
-      textTransform: 'uppercase' as const, lineHeight: 1.5,
-      ...STYLES[variant], ...style,
-    }}>
+    <span className={[VARIANT_CLASS[variant], className].filter(Boolean).join(' ')} style={style}>
       {children}
     </span>
   );

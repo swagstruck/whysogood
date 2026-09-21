@@ -24,14 +24,21 @@ function applyTheme(theme: ThemeValue) {
   if (typeof document === 'undefined') return;
   const html = document.documentElement;
   if (theme === 'dark') {
+    html.setAttribute('data-theme', 'dark');
     html.classList.remove('light');
   } else if (theme === 'light') {
+    html.setAttribute('data-theme', 'light');
     html.classList.add('light');
   } else {
-    // System
+    // System — follow OS preference
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    if (prefersDark) html.classList.remove('light');
-    else html.classList.add('light');
+    if (prefersDark) {
+      html.setAttribute('data-theme', 'dark');
+      html.classList.remove('light');
+    } else {
+      html.setAttribute('data-theme', 'light');
+      html.classList.add('light');
+    }
   }
 }
 

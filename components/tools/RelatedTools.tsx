@@ -13,7 +13,7 @@ export function RelatedTools({ slugs, title = 'You may also need' }: RelatedTool
   if (!tools.length) return null;
   return (
     <div>
-      <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--color-text)', marginBottom: 16, marginTop: 0 }}>
+      <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--ink)', marginBottom: 16, marginTop: 0 }}>
         {title}
       </h2>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 12 }}>

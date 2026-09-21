@@ -91,26 +91,24 @@ export function CategoryParallelExplorer() {
       className="parallel-explorer-grid"
       >
         {/* ── Left Sidebar: Category Parallel Menu ─────────────────────────── */}
-        <aside style={{
-          position: 'sticky',
-          top: 88,
-          background: 'var(--color-surface)',
-          border: '1px solid var(--color-border)',
-          borderRadius: 'var(--radius-xl)',
-          padding: '16px 12px',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 6,
-          maxHeight: 'calc(100vh - 110px)',
-          overflowY: 'auto',
-        }}
-        className="parallel-sidebar"
+        <aside
+          className="c-card parallel-sidebar"
+          style={{
+            position: 'sticky',
+            top: 88,
+            padding: '16px 12px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 6,
+            maxHeight: 'calc(100vh - 110px)',
+            overflowY: 'auto',
+          }}
         >
-          <div style={{ padding: '6px 10px 10px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid var(--color-border)', marginBottom: 4 }}>
-            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--color-muted)' }}>
+          <div style={{ padding: '6px 10px 10px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid var(--border)', marginBottom: 4 }}>
+            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--ink-2)' }}>
               Categories
             </span>
-            <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-faint)', background: 'var(--color-surface2)', padding: '2px 6px', borderRadius: 'var(--radius-sm)' }}>
+            <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--ink-3)', background: 'var(--bg-2)', padding: '2px 6px', borderRadius: 'var(--radius-sm)' }}>
               {CATEGORIES.length}
             </span>
           </div>
@@ -127,39 +125,39 @@ export function CategoryParallelExplorer() {
               fontSize: 13,
               fontWeight: selectedCategory === 'All' ? 600 : 500,
               cursor: 'pointer',
-              border: selectedCategory === 'All' ? '1px solid var(--color-accent)' : '1px solid transparent',
-              background: selectedCategory === 'All' ? 'var(--color-surface2)' : 'transparent',
-              color: selectedCategory === 'All' ? 'var(--color-text)' : 'var(--color-muted)',
+              border: selectedCategory === 'All' ? '1px solid var(--brand)' : '1px solid transparent',
+              background: selectedCategory === 'All' ? 'var(--brand-subtle)' : 'transparent',
+              color: selectedCategory === 'All' ? 'var(--brand)' : 'var(--ink-2)',
               transition: 'all var(--transition-fast)',
               textAlign: 'left',
               width: '100%',
             }}
             onMouseEnter={e => {
               if (selectedCategory !== 'All') {
-                e.currentTarget.style.background = 'var(--color-surface2)';
-                e.currentTarget.style.color = 'var(--color-text)';
+                e.currentTarget.style.background = 'var(--bg-2)';
+                e.currentTarget.style.color = 'var(--ink)';
               }
             }}
             onMouseLeave={e => {
               if (selectedCategory !== 'All') {
                 e.currentTarget.style.background = 'transparent';
-                e.currentTarget.style.color = 'var(--color-muted)';
+                e.currentTarget.style.color = 'var(--ink-2)';
               }
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <div style={{
                 width: 26, height: 26, borderRadius: 'var(--radius-sm)',
-                background: selectedCategory === 'All' ? 'var(--color-accent-subtle)' : 'var(--color-surface2)',
+                background: selectedCategory === 'All' ? 'var(--brand-subtle)' : 'var(--bg-2)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                color: selectedCategory === 'All' ? 'var(--color-accent)' : 'var(--color-muted)',
+                color: selectedCategory === 'All' ? 'var(--brand)' : 'var(--ink-2)',
               }}>
                 <Sparkles size={14} />
               </div>
               <span>All Categories</span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <span style={{ fontSize: 11, color: 'var(--color-faint)' }}>{categoryStats['All']?.total}</span>
+              <span style={{ fontSize: 11, color: 'var(--ink-3)' }}>{categoryStats['All']?.total}</span>
             </div>
           </button>
 
@@ -183,32 +181,32 @@ export function CategoryParallelExplorer() {
                   fontSize: 13,
                   fontWeight: isSelected ? 600 : 500,
                   cursor: 'pointer',
-                  border: isSelected ? '1px solid var(--color-border-hover)' : '1px solid transparent',
-                  background: isSelected ? 'var(--color-surface2)' : 'transparent',
-                  color: isSelected ? 'var(--color-text)' : 'var(--color-muted)',
+                  border: isSelected ? '1px solid var(--border-hover)' : '1px solid transparent',
+                  background: isSelected ? 'var(--bg-2)' : 'transparent',
+                  color: isSelected ? 'var(--ink)' : 'var(--ink-2)',
                   transition: 'all var(--transition-fast)',
                   textAlign: 'left',
                   width: '100%',
                 }}
                 onMouseEnter={e => {
                   if (!isSelected) {
-                    e.currentTarget.style.background = 'var(--color-surface2)';
-                    e.currentTarget.style.color = 'var(--color-text)';
+                    e.currentTarget.style.background = 'var(--bg-2)';
+                    e.currentTarget.style.color = 'var(--ink)';
                   }
                 }}
                 onMouseLeave={e => {
                   if (!isSelected) {
                     e.currentTarget.style.background = 'transparent';
-                    e.currentTarget.style.color = 'var(--color-muted)';
+                    e.currentTarget.style.color = 'var(--ink-2)';
                   }
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
                   <div style={{
                     width: 26, height: 26, borderRadius: 'var(--radius-sm)',
-                    background: isSelected ? 'var(--color-accent-subtle)' : 'var(--color-surface2)',
+                    background: isSelected ? 'var(--brand-subtle)' : 'var(--bg-2)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                    color: isSelected ? 'var(--color-accent)' : 'var(--color-muted)',
+                    color: isSelected ? 'var(--brand)' : 'var(--ink-2)',
                   }}>
                     <IconEl size={14} />
                   </div>
@@ -220,15 +218,15 @@ export function CategoryParallelExplorer() {
                     <span style={{
                       fontSize: 10,
                       fontWeight: 700,
-                      color: 'var(--color-success)',
-                      background: 'var(--color-success-subtle)',
+                      color: 'var(--pos)',
+                      background: 'var(--pos-subtle)',
                       padding: '1px 5px',
-                      borderRadius: 'var(--radius-full)',
+                      borderRadius: 'var(--radius-sm)',
                     }}>
                       {stats.active} live
                     </span>
                   )}
-                  <span style={{ fontSize: 11, color: 'var(--color-faint)' }}>
+                  <span style={{ fontSize: 11, color: 'var(--ink-3)' }}>
                     {stats.total}
                   </span>
                 </div>
@@ -240,10 +238,7 @@ export function CategoryParallelExplorer() {
         {/* ── Right Content: Parallel Tools Explorer ───────────────────────── */}
         <main style={{ minWidth: 0, display: 'flex', flexDirection: 'column', gap: 24 }}>
           {/* Header Banner for Selected Category */}
-          <div style={{
-            background: 'var(--color-surface)',
-            border: '1px solid var(--color-border)',
-            borderRadius: 'var(--radius-xl)',
+          <div className="c-card" style={{
             padding: '24px 28px',
             display: 'flex',
             flexDirection: 'column',
@@ -253,17 +248,17 @@ export function CategoryParallelExplorer() {
               <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
                 <div style={{
                   width: 44, height: 44, borderRadius: 'var(--radius-lg)',
-                  background: 'var(--color-accent-subtle)',
-                  color: 'var(--color-accent)',
+                  background: 'var(--brand-subtle)',
+                  color: 'var(--brand)',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                 }}>
                   <SelectedIcon size={22} />
                 </div>
                 <div>
-                  <h3 style={{ fontSize: 'clamp(1.25rem, 3vw, 1.625rem)', fontWeight: 800, letterSpacing: '-0.03em', margin: '0 0 4px', color: 'var(--color-text)' }}>
+                  <h3 style={{ fontSize: 'clamp(1.25rem, 3vw, 1.625rem)', fontWeight: 800, letterSpacing: '-0.03em', margin: '0 0 4px', color: 'var(--ink)' }}>
                     {selectedCategory === 'All' ? 'All Web Utilities' : selectedCategory}
                   </h3>
-                  <p style={{ fontSize: 13, color: 'var(--color-muted)', margin: 0, lineHeight: 1.5 }}>
+                  <p style={{ fontSize: 13, color: 'var(--ink-2)', margin: 0, lineHeight: 1.5 }}>
                     {currentDesc}
                   </p>
                 </div>
@@ -271,21 +266,13 @@ export function CategoryParallelExplorer() {
 
               {/* Stat badges */}
               <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
-                <span style={{
-                  fontSize: 12, fontWeight: 600, color: 'var(--color-success)',
-                  background: 'var(--color-success-subtle)', padding: '4px 10px',
-                  borderRadius: 'var(--radius-full)', display: 'inline-flex', alignItems: 'center', gap: 6,
-                }}>
-                  <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-success)' }} />
+                <span className="c-badge c-badge--pos" style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                  <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'currentColor' }} />
                   {currentStats.active} Available Now
                 </span>
 
                 {currentStats.stubs > 0 && (
-                  <span style={{
-                    fontSize: 12, fontWeight: 500, color: 'var(--color-faint)',
-                    background: 'var(--color-surface2)', padding: '4px 10px',
-                    borderRadius: 'var(--radius-full)',
-                  }}>
+                  <span className="c-badge c-badge--neutral">
                     {currentStats.stubs} Coming Soon
                   </span>
                 )}
@@ -295,7 +282,7 @@ export function CategoryParallelExplorer() {
                     href={`/${selectedCategory.toLowerCase()}`}
                     style={{
                       display: 'inline-flex', alignItems: 'center', gap: 4,
-                      fontSize: 12, fontWeight: 600, color: 'var(--color-accent)',
+                      fontSize: 12, fontWeight: 600, color: 'var(--brand)',
                       textDecoration: 'none', marginLeft: 4,
                     }}
                   >
@@ -306,10 +293,10 @@ export function CategoryParallelExplorer() {
             </div>
 
             {/* Filter Toolbar: Search + Status Tabs */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap', paddingTop: 8, borderTop: '1px solid var(--color-border)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap', paddingTop: 8, borderTop: '1px solid var(--border)' }}>
               {/* Search box within category */}
               <div style={{ position: 'relative', flex: '1 1 240px', minWidth: 200 }}>
-                <Search size={15} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--color-faint)', pointerEvents: 'none' }} />
+                <Search size={15} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--ink-3)', pointerEvents: 'none' }} />
                 <input
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
@@ -323,43 +310,23 @@ export function CategoryParallelExplorer() {
               </div>
 
               {/* Status filter tabs */}
-              <div style={{ display: 'flex', gap: 4, background: 'var(--color-surface2)', padding: 3, borderRadius: 'var(--radius-md)' }}>
+              <div className="tabs-bar">
                 <button
                   onClick={() => setStatusFilter('all')}
-                  style={{
-                    padding: '5px 12px', borderRadius: 'var(--radius-sm)', fontSize: 12, fontWeight: 600,
-                    border: 'none', cursor: 'pointer',
-                    background: statusFilter === 'all' ? 'var(--color-surface)' : 'transparent',
-                    color: statusFilter === 'all' ? 'var(--color-text)' : 'var(--color-muted)',
-                    boxShadow: statusFilter === 'all' ? '0 1px 3px rgba(0,0,0,0.3)' : 'none',
-                    transition: 'all var(--transition-fast)',
-                  }}
+                  className={`tab-item${statusFilter === 'all' ? ' active' : ''}`}
                 >
                   All ({displayedTools.length})
                 </button>
                 <button
                   onClick={() => setStatusFilter('active')}
-                  style={{
-                    padding: '5px 12px', borderRadius: 'var(--radius-sm)', fontSize: 12, fontWeight: 600,
-                    border: 'none', cursor: 'pointer',
-                    background: statusFilter === 'active' ? 'var(--color-surface)' : 'transparent',
-                    color: statusFilter === 'active' ? 'var(--color-success)' : 'var(--color-muted)',
-                    boxShadow: statusFilter === 'active' ? '0 1px 3px rgba(0,0,0,0.3)' : 'none',
-                    transition: 'all var(--transition-fast)',
-                  }}
+                  className={`tab-item${statusFilter === 'active' ? ' active' : ''}`}
+                  style={{ color: statusFilter === 'active' ? 'var(--pos)' : undefined }}
                 >
                   Live ({activeTools.length})
                 </button>
                 <button
                   onClick={() => setStatusFilter('stub')}
-                  style={{
-                    padding: '5px 12px', borderRadius: 'var(--radius-sm)', fontSize: 12, fontWeight: 600,
-                    border: 'none', cursor: 'pointer',
-                    background: statusFilter === 'stub' ? 'var(--color-surface)' : 'transparent',
-                    color: statusFilter === 'stub' ? 'var(--color-text)' : 'var(--color-muted)',
-                    boxShadow: statusFilter === 'stub' ? '0 1px 3px rgba(0,0,0,0.3)' : 'none',
-                    transition: 'all var(--transition-fast)',
-                  }}
+                  className={`tab-item${statusFilter === 'stub' ? ' active' : ''}`}
                 >
                   Coming Soon ({stubTools.length})
                 </button>
@@ -372,11 +339,11 @@ export function CategoryParallelExplorer() {
             <section style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--color-success)', boxShadow: '0 0 8px rgba(34,197,94,0.4)' }} />
-                  <h4 style={{ fontSize: 15, fontWeight: 700, margin: 0, color: 'var(--color-text)', letterSpacing: '-0.01em' }}>
+                  <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--pos)', boxShadow: '0 0 8px rgba(34,197,94,0.4)' }} />
+                  <h4 style={{ fontSize: 15, fontWeight: 700, margin: 0, color: 'var(--ink)', letterSpacing: '-0.01em' }}>
                     Available Now
                   </h4>
-                  <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--color-success)', background: 'var(--color-success-subtle)', padding: '2px 8px', borderRadius: 'var(--radius-full)' }}>
+                  <span className="c-badge c-badge--pos">
                     {activeTools.length} online
                   </span>
                 </div>
@@ -399,11 +366,11 @@ export function CategoryParallelExplorer() {
             <section style={{ display: 'flex', flexDirection: 'column', gap: 14, marginTop: activeTools.length > 0 ? 12 : 0 }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--color-faint)' }} />
-                  <h4 style={{ fontSize: 15, fontWeight: 700, margin: 0, color: 'var(--color-muted)', letterSpacing: '-0.01em' }}>
+                  <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--ink-3)' }} />
+                  <h4 style={{ fontSize: 15, fontWeight: 700, margin: 0, color: 'var(--ink-2)', letterSpacing: '-0.01em' }}>
                     Coming Soon
                   </h4>
-                  <span style={{ fontSize: 12, color: 'var(--color-faint)', background: 'var(--color-surface2)', padding: '2px 8px', borderRadius: 'var(--radius-full)' }}>
+                  <span className="c-badge c-badge--neutral">
                     {stubTools.length} in roadmap
                   </span>
                 </div>
@@ -426,21 +393,20 @@ export function CategoryParallelExplorer() {
             <div style={{
               textAlign: 'center',
               padding: '64px 20px',
-              background: 'var(--color-surface)',
-              border: '1px dashed var(--color-border)',
+              background: 'var(--bg-1)',
+              border: '1px dashed var(--border)',
               borderRadius: 'var(--radius-xl)',
             }}>
               <div style={{ fontSize: 36, marginBottom: 12 }}>🔍</div>
-              <h4 style={{ fontSize: 16, fontWeight: 700, margin: '0 0 6px', color: 'var(--color-text)' }}>
+              <h4 style={{ fontSize: 16, fontWeight: 700, margin: '0 0 6px', color: 'var(--ink)' }}>
                 No tools found matching &ldquo;{searchQuery}&rdquo;
               </h4>
-              <p style={{ fontSize: 13, color: 'var(--color-muted)', margin: '0 0 16px' }}>
+              <p style={{ fontSize: 13, color: 'var(--ink-2)', margin: '0 0 16px' }}>
                 Try another keyword or select a different category.
               </p>
               <button
                 onClick={() => { setSearchQuery(''); setStatusFilter('all'); }}
-                className="btn-secondary"
-                style={{ height: 34, padding: '0 14px', fontSize: 13, borderRadius: 'var(--radius-md)' }}
+                className="c-btn c-btn--secondary c-btn--sm"
               >
                 Clear filter
               </button>
