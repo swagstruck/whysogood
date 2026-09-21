@@ -3,7 +3,6 @@ import React from 'react';
 import Link from 'next/link';
 import * as Icons from 'lucide-react';
 import type { Tool } from '@/lib/types';
-import { Badge } from '@/components/ui/Badge';
 
 interface ToolCardProps {
   tool: Tool;
@@ -41,11 +40,6 @@ export function ToolCard({ tool, compact = false }: ToolCardProps) {
           }}>
             {/* brand-500 for decorative icon per spec */}
             <IconEl size={compact ? 16 : 20} style={{ color: hovered ? 'var(--brand-500)' : 'var(--ink-2)' }} />
-          </div>
-          <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
-            {tool.status === 'active' && <Badge variant="success">Live</Badge>}
-            {tool.isBeta && <Badge variant="beta">Beta</Badge>}
-            {tool.isNew && <Badge variant="new">New</Badge>}
           </div>
         </div>
 

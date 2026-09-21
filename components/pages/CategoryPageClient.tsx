@@ -19,12 +19,6 @@ function ToolCard({ tool }: { tool: Tool }) {
           <div style={{ width: 40, height: 40, borderRadius: 'var(--radius-lg)', background: 'var(--brand-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <IconEl size={20} style={{ color: 'var(--brand-500)' }} />
           </div>
-          {tool.status === 'active' && (
-            <span className="c-badge c-badge--pos">LIVE</span>
-          )}
-          {tool.status === 'beta' && (
-            <span className="c-badge c-badge--warn">BETA</span>
-          )}
         </div>
         <div>
           <div style={{ fontWeight: 600, fontSize: 14, color: 'var(--ink)', marginBottom: 4 }}>{tool.name}</div>

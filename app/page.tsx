@@ -89,10 +89,6 @@ export default function HomePage() {
     >
       {/* ── Hero ──────────────────────────────────────────────────────── */}
       <section style={{ textAlign: 'center', padding: '72px 16px 48px' }}>
-        {/* Hero badge — c-badge--brand */}
-        <div className="c-badge c-badge--brand" style={{ fontSize: 12, padding: '5px 14px', marginBottom: 20, display: 'inline-flex' }}>
-          🛡️ Zero server uploads · Processed entirely on your machine
-        </div>
         <h1 style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)', fontWeight: 800, letterSpacing: '-0.04em', lineHeight: 1.15, margin: '0 0 16px', color: 'var(--ink)' }}>
           100 Tools. Free. Private. Forever.
         </h1>
@@ -108,7 +104,7 @@ export default function HomePage() {
               value={query}
               onChange={e => handleSearch(e.target.value)}
               onKeyDown={e => { if (e.key === 'Enter' && query.trim()) router.push(`/search?q=${encodeURIComponent(query.trim())}`); }}
-              placeholder="Search tools… compress image, format json, word count…"
+              placeholder="Search tools…"
               style={{
                 width: '100%', height: 56, paddingLeft: 48, paddingRight: 16,
                 fontSize: 16, background: 'var(--bg-1)',

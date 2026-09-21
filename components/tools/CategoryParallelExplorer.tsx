@@ -1,7 +1,7 @@
 'use client';
 import React, { useState, useMemo } from 'react';
-import Link from 'next/link';
-import { Search, Sparkles, ArrowRight } from 'lucide-react';
+
+import { Search, Sparkles } from 'lucide-react';
 import * as Icons from 'lucide-react';
 import { CATEGORIES, CATEGORY_ICONS, CATEGORY_DESCRIPTIONS, getToolsByCategory, TOOLS_DEDUPED } from '@/lib/registry';
 import { ToolCard } from '@/components/tools/ToolCard';
@@ -10,7 +10,6 @@ import type { Category, Tool } from '@/lib/types';
 export function CategoryParallelExplorer() {
   const [selectedCategory, setSelectedCategory] = useState<Category | 'All'>('Images');
   const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'stub'>('all');
 
   // Compute stats per category for the sidebar
   const categoryStats = useMemo(() => {
@@ -58,15 +57,8 @@ export function CategoryParallelExplorer() {
       );
     }
 
-    // Apply status filter
-    if (statusFilter === 'active') {
-      list = list.filter(t => t.status === 'active');
-    } else if (statusFilter === 'stub') {
-      list = list.filter(t => t.status !== 'active');
-    }
-
     return list;
-  }, [selectedCategory, searchQuery, statusFilter]);
+  }, [selectedCategory, searchQuery]);
 
   const activeTools = useMemo(() => displayedTools.filter(t => t.status === 'active'), [displayedTools]);
   const stubTools   = useMemo(() => displayedTools.filter(t => t.status !== 'active'), [displayedTools]);
@@ -277,25 +269,12 @@ export function CategoryParallelExplorer() {
                   </span>
                 )}
 
-                {selectedCategory !== 'All' && (
-                  <Link
-                    href={`/${selectedCategory.toLowerCase()}`}
-                    style={{
-                      display: 'inline-flex', alignItems: 'center', gap: 4,
-                      fontSize: 12, fontWeight: 600, color: 'var(--brand)',
-                      textDecoration: 'none', marginLeft: 4,
-                    }}
-                  >
-                    Dedicated page <ArrowRight size={12} />
-                  </Link>
-                )}
               </div>
             </div>
 
-            {/* Filter Toolbar: Search + Status Tabs */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap', paddingTop: 8, borderTop: '1px solid var(--border)' }}>
-              {/* Search box within category */}
-              <div style={{ position: 'relative', flex: '1 1 240px', minWidth: 200 }}>
+            {/* Search within category */}
+            <div style={{ paddingTop: 8, borderTop: '1px solid var(--border)' }}>
+              <div style={{ position: 'relative' }}>
                 <Search size={15} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--ink-3)', pointerEvents: 'none' }} />
                 <input
                   value={searchQuery}
@@ -308,34 +287,11 @@ export function CategoryParallelExplorer() {
                   }}
                 />
               </div>
-
-              {/* Status filter tabs */}
-              <div className="tabs-bar">
-                <button
-                  onClick={() => setStatusFilter('all')}
-                  className={`tab-item${statusFilter === 'all' ? ' active' : ''}`}
-                >
-                  All ({displayedTools.length})
-                </button>
-                <button
-                  onClick={() => setStatusFilter('active')}
-                  className={`tab-item${statusFilter === 'active' ? ' active' : ''}`}
-                  style={{ color: statusFilter === 'active' ? 'var(--pos)' : undefined }}
-                >
-                  Live ({activeTools.length})
-                </button>
-                <button
-                  onClick={() => setStatusFilter('stub')}
-                  className={`tab-item${statusFilter === 'stub' ? ' active' : ''}`}
-                >
-                  Coming Soon ({stubTools.length})
-                </button>
-              </div>
             </div>
           </div>
 
           {/* ── Segregated Section 1: Available Now (Online) ─────────────────── */}
-          {(statusFilter === 'all' || statusFilter === 'active') && activeTools.length > 0 && (
+          {activeTools.length > 0 && (
             <section style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -362,7 +318,7 @@ export function CategoryParallelExplorer() {
           )}
 
           {/* ── Segregated Section 2: Coming Soon ────────────────────────────── */}
-          {(statusFilter === 'all' || statusFilter === 'stub') && stubTools.length > 0 && (
+          {stubTools.length > 0 && (
             <section style={{ display: 'flex', flexDirection: 'column', gap: 14, marginTop: activeTools.length > 0 ? 12 : 0 }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -405,7 +361,7 @@ export function CategoryParallelExplorer() {
                 Try another keyword or select a different category.
               </p>
               <button
-                onClick={() => { setSearchQuery(''); setStatusFilter('all'); }}
+                onClick={() => setSearchQuery('')}
                 className="c-btn c-btn--secondary c-btn--sm"
               >
                 Clear filter
