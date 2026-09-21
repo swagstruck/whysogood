@@ -42,19 +42,38 @@ function applyTheme(theme: ThemeValue) {
   }
 }
 
+const THEME_STORAGE_KEY = 'whysogood_theme';
+
 export function SessionProvider({ children }: { children: React.ReactNode }) {
   const [recentTools, setRecentTools] = useState<Tool[]>([]);
   const [theme, setThemeState] = useState<ThemeValue>('dark');
 
-  // Apply theme on mount
+  // Load persisted theme on mount and listen for OS system preference changes
   useEffect(() => {
-    applyTheme(theme);
-    // Listen for system preference changes
+    try {
+      const savedTheme = localStorage.getItem(THEME_STORAGE_KEY) as ThemeValue | null;
+      if (savedTheme && ['dark', 'light', 'system'].includes(savedTheme)) {
+        setThemeState(savedTheme);
+        applyTheme(savedTheme);
+      } else {
+        applyTheme('dark');
+      }
+    } catch {
+      applyTheme('dark');
+    }
+
     const mq = window.matchMedia('(prefers-color-scheme: dark)');
-    const handler = () => { if (theme === 'system') applyTheme('system'); };
+    const handler = () => {
+      try {
+        const current = (localStorage.getItem(THEME_STORAGE_KEY) as ThemeValue) || 'dark';
+        if (current === 'system') applyTheme('system');
+      } catch {
+        if (theme === 'system') applyTheme('system');
+      }
+    };
     mq.addEventListener('change', handler);
     return () => mq.removeEventListener('change', handler);
-  }, [theme]);
+  }, []);
 
   const addRecentTool = useCallback((tool: Tool) => {
     setRecentTools(prev => {
@@ -68,6 +87,9 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
   const setTheme = useCallback((t: ThemeValue) => {
     setThemeState(t);
     applyTheme(t);
+    try {
+      localStorage.setItem(THEME_STORAGE_KEY, t);
+    } catch {}
   }, []);
 
   return (
