@@ -26,10 +26,13 @@
   --info-500: #3b82f6;
 
   /* ── Radius Tokens ─────────────────────────────── */
-  --radius-sm: 9999px;   /* pill buttons, chips, badges */
-  --radius-md: 9999px;   /* pill inputs, nav items */
-  --radius-lg: 16px;     /* cards */
-  --radius-xl: 20px;     /* modals, large panels */
+  /* Radius — capped under 48px for cards and inner containers, full pill for buttons/badges */
+  --radius-xs:   4px;
+  --radius-sm:   8px;    /* icon containers, chips, small elements */
+  --radius-md:   14px;   /* inner cards, options, alert banners (max 48px) */
+  --radius-lg:   18px;   /* cards */
+  --radius-xl:   24px;   /* modals, large panels */
+  --radius-full: 9999px; /* pill buttons, badges, search inputs */
 
   /* ── Transitions ──────────────────────────────── */
   --transition-fast: 120ms ease;
@@ -147,7 +150,7 @@
   white-space: nowrap;
   cursor: pointer;
   border: none;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-full);
   transition:
     background var(--transition-fast),
     color var(--transition-fast),
@@ -225,7 +228,7 @@
   align-items: center;
   gap: 4px;
   padding: 2px 10px;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-full);
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.04em;
@@ -260,11 +263,11 @@
 .c-field__input {
   background: var(--bg-2);
   border: 1px solid var(--border);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-full);
   color: var(--ink);
   font-family: var(--font-sans);
   font-size: 14px;
-  padding: 0 14px;
+  padding: 0 16px;
   height: 40px;
   width: 100%;
   box-sizing: border-box;
@@ -314,11 +317,11 @@
   gap: 4px;
   background: var(--bg-2);
   padding: 3px;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-full);
 }
 .tab-item {
   padding: 5px 14px;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-full);
   font-size: 12px;
   font-weight: 600;
   border: none;
