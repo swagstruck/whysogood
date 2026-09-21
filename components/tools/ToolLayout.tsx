@@ -3,7 +3,6 @@ import React, { useEffect } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, ChevronRight } from 'lucide-react';
 import type { Tool } from '@/lib/types';
-import { PrivacyBadge } from '@/components/ui/PrivacyBadge';
 import { RelatedTools } from './RelatedTools';
 import { useSession } from '@/lib/session';
 import { CATEGORY_ICONS } from '@/lib/registry';
@@ -46,7 +45,7 @@ export function ToolLayout({ tool, children }: ToolLayoutProps) {
       </nav>
 
       {/* Tool header */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16, marginBottom: 20 }}>
+      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16, marginBottom: 32 }}>
         <div style={{
           width: 52, height: 52, borderRadius: 'var(--radius-lg)',
           background: 'var(--brand-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
@@ -60,10 +59,6 @@ export function ToolLayout({ tool, children }: ToolLayoutProps) {
           </h1>
           <p style={{ margin: 0, color: 'var(--ink-2)', fontSize: 15, lineHeight: 1.5 }}>{tool.description}</p>
         </div>
-      </div>
-
-      <div style={{ marginBottom: 28 }}>
-        <PrivacyBadge />
       </div>
 
       {/* Tool UI */}
