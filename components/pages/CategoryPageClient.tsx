@@ -1,7 +1,7 @@
 'use client';
 import React, { useState, useMemo } from 'react';
 import Link from 'next/link';
-import { Search, ArrowLeft } from 'lucide-react';
+import { Search, ArrowLeft, Sparkles } from 'lucide-react';
 import * as Icons from 'lucide-react';
 import { getToolsByCategory, CATEGORY_ICONS, CATEGORY_DESCRIPTIONS } from '@/lib/registry';
 import type { Category, Tool } from '@/lib/types';
@@ -19,6 +19,12 @@ function ToolCard({ tool }: { tool: Tool }) {
           <div style={{ width: 40, height: 40, borderRadius: 'var(--radius-lg)', background: 'var(--brand-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <IconEl size={20} style={{ color: 'var(--brand-500)' }} />
           </div>
+          {tool.isBeta && (
+            <span className="c-badge c-badge--warn" style={{ fontSize: 10, padding: '3px 8px', display: 'flex', alignItems: 'center', gap: 3 }}>
+              <Sparkles size={9} />
+              Beta
+            </span>
+          )}
         </div>
         <div>
           <div style={{ fontWeight: 600, fontSize: 14, color: 'var(--ink)', marginBottom: 4 }}>{tool.name}</div>

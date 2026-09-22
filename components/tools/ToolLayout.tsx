@@ -1,7 +1,7 @@
 'use client';
 import React, { useEffect } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, ChevronRight } from 'lucide-react';
+import { ArrowLeft, ChevronRight, Sparkles } from 'lucide-react';
 import type { Tool } from '@/lib/types';
 import { RelatedTools } from './RelatedTools';
 import { useSession } from '@/lib/session';
@@ -54,9 +54,17 @@ export function ToolLayout({ tool, children }: ToolLayoutProps) {
           <ToolIcon size={26} style={{ color: 'var(--brand-500)' }} />
         </div>
         <div style={{ flex: 1 }}>
-          <h1 style={{ fontSize: 'clamp(1.375rem, 4vw, 1.875rem)', fontWeight: 800, letterSpacing: '-0.03em', margin: '0 0 6px', color: 'var(--ink)', lineHeight: 1.2 }}>
-            {tool.name}
-          </h1>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginBottom: 6 }}>
+            <h1 style={{ fontSize: 'clamp(1.375rem, 4vw, 1.875rem)', fontWeight: 800, letterSpacing: '-0.03em', margin: 0, color: 'var(--ink)', lineHeight: 1.2 }}>
+              {tool.name}
+            </h1>
+            {tool.isBeta && (
+              <span className="c-badge c-badge--warn" style={{ fontSize: 11, padding: '4px 10px', display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0 }}>
+                <Sparkles size={10} />
+                Beta
+              </span>
+            )}
+          </div>
           <p style={{ margin: 0, color: 'var(--ink-2)', fontSize: 15, lineHeight: 1.5 }}>{tool.description}</p>
         </div>
       </div>

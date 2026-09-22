@@ -42,6 +42,7 @@ const TOOL_COMPONENTS: Record<string, React.LazyExoticComponent<React.ComponentT
   'svg-to-png': lazy(() => import('@/tools/image/svg/SvgToPngTool')),
   'svg-to-jpg': lazy(() => import('@/tools/image/svg/SvgToJpgTool')),
   'svg-preview': lazy(() => import('@/tools/image/svg/SvgPreviewTool')),
+  'background-remover': lazy(() => import('@/tools/image/background-remover/BackgroundRemoverTool')),
 
   // ── PDF ─────────────────────────────────────────────────────────────────
   'pdf-compressor': lazy(() => import('@/tools/pdf/compressor/PdfCompressorTool')),
