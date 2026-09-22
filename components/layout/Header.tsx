@@ -2,14 +2,14 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Search, Menu, X, Zap } from 'lucide-react';
+import { Search, Menu, X, Zap, Sparkles } from 'lucide-react';
 import { useSession } from '@/lib/session';
 import { searchTools } from '@/lib/search';
 import { CATEGORIES } from '@/lib/registry';
 import type { SearchResult } from '@/lib/search';
 
 export function Header() {
-  const { theme, setTheme } = useSession();
+  const { theme, setTheme, simpleMode, toggleSimpleMode } = useSession();
   const [searchOpen, setSearchOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<SearchResult[]>([]);
@@ -37,9 +37,11 @@ export function Header() {
   }, []);
 
   useEffect(() => {
-    if (!query.trim()) { setResults([]); return; }
-    setResults(searchTools(query, 6));
-    setFocusedIdx(-1);
+    queueMicrotask(() => {
+      if (!query.trim()) { setResults([]); return; }
+      setResults(searchTools(query, 6));
+      setFocusedIdx(-1);
+    });
   }, [query]);
 
   const nextTheme = () => {
@@ -48,6 +50,14 @@ export function Header() {
     setTheme(cycle[(idx + 1) % 3]);
   };
   const themeLabel = theme === 'dark' ? '🌙' : theme === 'light' ? '☀️' : '💻';
+
+  const handleToggleSimpleMode = () => {
+    const willEnable = !simpleMode;
+    toggleSimpleMode();
+    if (willEnable && typeof window !== 'undefined' && window.location.pathname !== '/') {
+      router.push('/');
+    }
+  };
 
   const goTo = (slug: string) => {
     setSearchOpen(false);
@@ -122,6 +132,33 @@ export function Header() {
               </Link>
             ))}
           </nav>
+
+          {/* Simple Mode Toggle CTA */}
+          <button
+            onClick={handleToggleSimpleMode}
+            title={simpleMode ? "Switch to Classic Catalog" : "Switch to Simple Mode Workbench"}
+            aria-label="Toggle Simple Mode"
+            className="simple-mode-toggle-btn"
+            style={{
+              height: 36,
+              borderRadius: 'var(--radius-full)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+              padding: '0 12px',
+              fontSize: 13,
+              fontWeight: 600,
+              cursor: 'pointer',
+              flexShrink: 0,
+              transition: 'all var(--transition-fast)',
+              background: simpleMode ? 'var(--brand)' : 'var(--bg-2)',
+              color: simpleMode ? '#ffffff' : 'var(--ink)',
+              border: simpleMode ? '1px solid var(--brand)' : '1px solid var(--border)',
+            }}
+          >
+            <Sparkles size={14} style={{ color: simpleMode ? '#ffffff' : 'var(--brand)' }} />
+            <span className="simple-mode-label">Simple Mode</span>
+          </button>
 
           {/* Theme toggle */}
           <button
@@ -277,6 +314,10 @@ export function Header() {
       )}
 
       <style>{`
+        @media (max-width: 640px) {
+          .simple-mode-label { display: none !important; }
+          .simple-mode-toggle-btn { padding: 0 !important; width: 36px !important; justify-content: center !important; border-radius: var(--radius-md) !important; }
+        }
         @media (max-width: 768px) {
           .desktop-nav { display: none !important; }
           .mobile-ham { display: flex !important; }

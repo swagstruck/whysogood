@@ -1,12 +1,14 @@
 'use client';
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Search, ArrowRight, Image as ImageIcon, FileText, Code2, Calculator, AlignLeft, Shield, Wand2, Table, Folder } from 'lucide-react';
-import { getPopularTools, CATEGORIES, CATEGORY_ICONS, CATEGORY_DESCRIPTIONS, getToolsByCategory } from '@/lib/registry';
+import { Search, ArrowRight } from 'lucide-react';
+import { getPopularTools } from '@/lib/registry';
 import { searchTools } from '@/lib/search';
 import type { Tool } from '@/lib/types';
 import { CategoryParallelExplorer } from '@/components/tools/CategoryParallelExplorer';
+import { useSession } from '@/lib/session';
+import { SimpleModeWorkbench } from '@/components/simple-mode';
 import * as Icons from 'lucide-react';
 
 const QUICK_ACTIONS = [
@@ -49,11 +51,16 @@ function ToolCardSmall({ tool }: { tool: Tool }) {
 }
 
 export default function HomePage() {
+  const { simpleMode } = useSession();
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<ReturnType<typeof searchTools>>([]);
   const [dragging, setDragging] = useState(false);
   const router = useRouter();
   const popularTools = getPopularTools(9);
+
+  if (simpleMode) {
+    return <SimpleModeWorkbench />;
+  }
 
   const handleSearch = (q: string) => {
     setQuery(q);

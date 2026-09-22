@@ -4,15 +4,19 @@ import type { Tool } from './types';
 
 type ThemeValue = 'dark' | 'light' | 'system';
 
-interface SessionContextType {
+export interface SessionContextType {
   recentTools: Tool[];
   addRecentTool: (tool: Tool) => void;
   clearRecent: () => void;
   theme: ThemeValue;
   setTheme: (t: ThemeValue) => void;
+  simpleMode: boolean;
+  setSimpleMode: (enabled: boolean) => void;
+  toggleSimpleMode: () => void;
 }
 
 const THEME_STORAGE_KEY = 'whysogood_theme';
+const SIMPLE_MODE_STORAGE_KEY = 'whysogood_simple_mode';
 
 const SessionContext = createContext<SessionContextType>({
   recentTools: [],
@@ -20,6 +24,9 @@ const SessionContext = createContext<SessionContextType>({
   clearRecent: () => {},
   theme: 'system',
   setTheme: () => {},
+  simpleMode: false,
+  setSimpleMode: () => {},
+  toggleSimpleMode: () => {},
 });
 
 function applyTheme(theme: ThemeValue) {
@@ -40,19 +47,36 @@ function applyTheme(theme: ThemeValue) {
 export function SessionProvider({ children }: { children: React.ReactNode }) {
   const [recentTools, setRecentTools] = useState<Tool[]>([]);
   const [theme, setThemeState] = useState<ThemeValue>('system');
+  const [simpleMode, setSimpleModeState] = useState<boolean>(false);
 
   // Load saved theme from localStorage on mount (defaults to 'system')
   useEffect(() => {
     try {
       const savedTheme = localStorage.getItem(THEME_STORAGE_KEY) as ThemeValue | null;
       if (savedTheme && ['dark', 'light', 'system'].includes(savedTheme)) {
-        setThemeState(savedTheme);
-        applyTheme(savedTheme);
+        queueMicrotask(() => {
+          setThemeState(savedTheme);
+          applyTheme(savedTheme);
+        });
       } else {
         applyTheme('system');
       }
     } catch {
       applyTheme('system');
+    }
+  }, []);
+
+  // Load saved simpleMode from localStorage on mount (defaults to false for SSR safety)
+  useEffect(() => {
+    try {
+      const savedMode = localStorage.getItem(SIMPLE_MODE_STORAGE_KEY);
+      if (savedMode === 'true') {
+        queueMicrotask(() => {
+          setSimpleModeState(true);
+        });
+      }
+    } catch {
+      // Gracefully ignore storage exceptions (e.g. incognito)
     }
   }, []);
 
@@ -87,8 +111,38 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  const setSimpleMode = useCallback((enabled: boolean) => {
+    setSimpleModeState(enabled);
+    try {
+      localStorage.setItem(SIMPLE_MODE_STORAGE_KEY, enabled ? 'true' : 'false');
+    } catch (e) {
+      console.error('Failed to save simple mode in localStorage', e);
+    }
+  }, []);
+
+  const toggleSimpleMode = useCallback(() => {
+    setSimpleModeState(prev => {
+      const next = !prev;
+      try {
+        localStorage.setItem(SIMPLE_MODE_STORAGE_KEY, next ? 'true' : 'false');
+      } catch (e) {
+        console.error('Failed to save simple mode in localStorage', e);
+      }
+      return next;
+    });
+  }, []);
+
   return (
-    <SessionContext.Provider value={{ recentTools, addRecentTool, clearRecent, theme, setTheme }}>
+    <SessionContext.Provider value={{
+      recentTools,
+      addRecentTool,
+      clearRecent,
+      theme,
+      setTheme,
+      simpleMode,
+      setSimpleMode,
+      toggleSimpleMode,
+    }}>
       {children}
     </SessionContext.Provider>
   );
