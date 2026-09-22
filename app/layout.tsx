@@ -4,6 +4,7 @@ import { SessionProvider } from "@/lib/session";
 import { ToastProvider } from "@/components/ui/ToastProvider";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
+import { FeedbackBubble } from "@/components/layout/FeedbackBubble";
 
 export const metadata: Metadata = {
   title: { default: "whysogood — Free Online Tools", template: "%s | whysogood" },
@@ -36,6 +37,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <main style={{ flex: 1 }}>{children}</main>
               <Footer />
             </div>
+            <FeedbackBubble />
           </ToastProvider>
         </SessionProvider>
       </body>
