@@ -50,6 +50,7 @@ jobs:
       - name: Build with Next.js
         env:
           NEXT_PUBLIC_BASE_PATH: ${{ steps.pages.outputs.base_path }}
+          NEXT_PUBLIC_FEEDBACK_ENDPOINT: ${{ secrets.NEXT_PUBLIC_FEEDBACK_ENDPOINT }}
         run: npm run build
 
       - name: Upload artifact
