@@ -138,8 +138,8 @@ export function ToolSelector({
           <div
             style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
-              gap: 12,
+              gridTemplateColumns: 'repeat(auto-fill, minmax(175px, 1fr))',
+              gap: 10,
             }}
           >
             {activeTools.map(tool => {
@@ -153,71 +153,55 @@ export function ToolSelector({
                   key={tool.slug}
                   onClick={() => onSelectTool(tool)}
                   className="c-card c-card--hover"
+                  title={`${tool.name} — ${tool.description}`}
                   style={{
-                    padding: 14,
-                    borderRadius: 'var(--radius-lg)',
+                    padding: '8px 12px',
+                    borderRadius: 'var(--radius-md)',
                     background: isSelected ? 'var(--brand-subtle)' : 'var(--bg-1)',
-                    border: isSelected ? '2px solid var(--brand)' : '1px solid var(--border)',
+                    border: isSelected ? '1.5px solid var(--brand)' : '1px solid var(--border)',
                     textAlign: 'left',
                     cursor: 'pointer',
                     display: 'flex',
-                    flexDirection: 'column',
-                    gap: 8,
+                    alignItems: 'center',
+                    gap: 10,
+                    minHeight: 48,
                     transition: 'all var(--transition-fast)',
-                    boxShadow: isSelected ? '0 0 0 1px var(--brand)' : 'none',
+                    boxShadow: isSelected
+                      ? '0 0 0 1px var(--brand), 0 2px 8px rgba(96, 96, 232, 0.15)'
+                      : 'none',
                   }}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <div
-                      style={{
-                        width: 32,
-                        height: 32,
-                        borderRadius: 'var(--radius-md)',
-                        background: isSelected ? 'var(--brand)' : 'var(--bg-2)',
-                        color: isSelected ? '#ffffff' : 'var(--brand)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                      }}
-                    >
-                      <IconEl size={16} />
-                    </div>
-
-                    {isSelected && (
-                      <span
-                        className="c-badge c-badge--brand"
-                        style={{ fontSize: 10, padding: '2px 6px', borderRadius: 'var(--radius-full)' }}
-                      >
-                        Selected
-                      </span>
-                    )}
+                  <div
+                    style={{
+                      width: 32,
+                      height: 32,
+                      borderRadius: 'var(--radius-sm)',
+                      background: isSelected ? 'var(--brand)' : 'var(--bg-2)',
+                      color: isSelected ? '#ffffff' : 'var(--brand-500)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0,
+                      transition: 'all var(--transition-fast)',
+                    }}
+                  >
+                    <IconEl size={16} />
                   </div>
 
-                  <div>
-                    <div
-                      style={{
-                        fontWeight: 600,
-                        fontSize: 13,
-                        color: 'var(--ink)',
-                        marginBottom: 2,
-                      }}
-                    >
-                      {tool.name}
-                    </div>
-                    <div
-                      style={{
-                        fontSize: 11,
-                        color: 'var(--ink-2)',
-                        lineHeight: 1.4,
-                        display: '-webkit-box',
-                        WebkitLineClamp: 2,
-                        WebkitBoxOrient: 'vertical',
-                        overflow: 'hidden',
-                      }}
-                    >
-                      {tool.description}
-                    </div>
-                  </div>
+                  <span
+                    style={{
+                      fontWeight: isSelected ? 700 : 600,
+                      fontSize: 13,
+                      color: isSelected ? 'var(--brand)' : 'var(--ink)',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                      flex: 1,
+                      letterSpacing: '-0.01em',
+                    }}
+                  >
+                    {tool.name}
+                  </span>
                 </button>
               );
             })}
@@ -272,7 +256,7 @@ export function ToolSelector({
           <div
             style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(175px, 1fr))',
               gap: 10,
             }}
           >
@@ -285,7 +269,7 @@ export function ToolSelector({
                 <div
                   key={tool.slug}
                   style={{
-                    padding: 12,
+                    padding: '8px 12px',
                     borderRadius: 'var(--radius-md)',
                     background: 'var(--bg-2)',
                     border: '1px dashed var(--border)',
@@ -293,14 +277,16 @@ export function ToolSelector({
                     display: 'flex',
                     alignItems: 'center',
                     gap: 10,
+                    minHeight: 48,
                     cursor: 'not-allowed',
+                    opacity: 0.65,
                   }}
-                  title="This tool is on the roadmap and coming soon"
+                  title={`${tool.name} (Coming Soon)`}
                 >
                   <div
                     style={{
-                      width: 28,
-                      height: 28,
+                      width: 32,
+                      height: 32,
                       borderRadius: 'var(--radius-sm)',
                       background: 'var(--bg-3)',
                       color: 'var(--ink-3)',
@@ -310,24 +296,22 @@ export function ToolSelector({
                       flexShrink: 0,
                     }}
                   >
-                    <IconEl size={14} />
+                    <IconEl size={15} />
                   </div>
 
-                  <div style={{ minWidth: 0, flex: 1 }}>
-                    <div
-                      style={{
-                        fontWeight: 600,
-                        fontSize: 12,
-                        color: 'var(--ink-2)',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap',
-                      }}
-                    >
-                      {tool.name}
-                    </div>
-                    <span style={{ fontSize: 10, color: 'var(--ink-3)' }}>Coming Soon</span>
-                  </div>
+                  <span
+                    style={{
+                      fontWeight: 500,
+                      fontSize: 13,
+                      color: 'var(--ink-3)',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                      flex: 1,
+                    }}
+                  >
+                    {tool.name}
+                  </span>
                 </div>
               );
             })}
