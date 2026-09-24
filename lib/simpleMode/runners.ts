@@ -600,6 +600,54 @@ async function runBackgroundRemover(file: File): Promise<ToolRunnerResult> {
   }
 }
 
+async function runImageToText(file: File, options?: RunnerOptions): Promise<ToolRunnerResult> {
+  const { createWorker } = await import('tesseract.js');
+  const url = URL.createObjectURL(file);
+  try {
+    const lang = (options?.language as string) || 'eng';
+    const worker = await createWorker(lang, 1);
+    const result = await worker.recognize(url);
+    await worker.terminate();
+
+    let lines: string[] = [];
+    if (result.data.blocks && result.data.blocks.length > 0) {
+      for (const block of result.data.blocks) {
+        for (const para of block.paragraphs) {
+          for (const line of para.lines) {
+            const cleaned = line.text.replace(/\r?\n$/, '').trim();
+            if (cleaned.length > 0) {
+              lines.push(cleaned);
+            }
+          }
+        }
+      }
+    }
+
+    if (lines.length === 0) {
+      lines = (result.data.text || '')
+        .split(/\r?\n/)
+        .map(l => l.trim())
+        .filter(l => l.length > 0);
+    }
+
+    const formattedText = lines.join('\n');
+    const baseName = file.name.replace(/\.[^.]+$/, '');
+    const blob = new Blob([formattedText], { type: 'text/plain;charset=utf-8' });
+
+    return {
+      blob,
+      filename: `${baseName}_extracted_text.txt`,
+      metadata: {
+        'Engine': 'Tesseract.js OCR (WebAssembly)',
+        'Extracted Lines': lines.length,
+        'Confidence': `${Math.round(result.data.confidence)}%`,
+      },
+    };
+  } finally {
+    URL.revokeObjectURL(url);
+  }
+}
+
 async function runImageQuality(file: File, options?: RunnerOptions): Promise<ToolRunnerResult> {
   const quality = typeof options?.quality === 'number' ? options.quality : 80;
   const qFactor = Math.max(0.05, Math.min(1, quality / 100));
@@ -1237,6 +1285,13 @@ async function runBase64Encoder(file: File): Promise<ToolRunnerResult> {
 
 export const TOOL_RUNNERS: Record<string, ToolRunner> = {
   // Images
+  'image-to-text': {
+    slug: 'image-to-text',
+    name: 'Images to Text',
+    category: 'Images',
+    description: 'Extract and format text line after line with in-browser OCR',
+    run: runImageToText,
+  },
   'image-compressor': {
     slug: 'image-compressor',
     name: 'Image Compressor',

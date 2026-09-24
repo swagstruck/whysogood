@@ -413,6 +413,13 @@ export function ToolConfigPanel({
         </div>
       )}
 
+      {/* Images to Text */}
+      {tool.slug === 'image-to-text' && (
+        <div style={{ fontSize: 13, color: 'var(--ink-2)', lineHeight: 1.5 }}>
+          Extracts and formats text from &ldquo;{file.name}&rdquo; line after line using in-browser WebAssembly OCR.
+        </div>
+      )}
+
       {/* Background Remover */}
       {tool.slug === 'background-remover' && (
         <div style={{ fontSize: 13, color: 'var(--ink-2)', lineHeight: 1.5 }}>

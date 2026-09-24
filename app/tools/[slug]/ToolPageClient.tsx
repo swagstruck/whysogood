@@ -6,7 +6,8 @@ import { ComingSoon } from '@/components/tools/ComingSoon';
 
 // Lazy-load active tool implementations
 const TOOL_COMPONENTS: Record<string, React.LazyExoticComponent<React.ComponentType>> = {
-  // ── Images (35 Tools) ─────────────────────────────────────────────────────
+  // ── Images (36 Tools) ─────────────────────────────────────────────────────
+  'image-to-text': lazy(() => import('@/tools/image/ocr/ImageToTextTool')),
   'image-compressor': lazy(() => import('@/tools/image/compressor/ImageCompressorTool')),
   'image-resizer': lazy(() => import('@/tools/image/resizer/ImageResizerTool')),
   'image-cropper': lazy(() => import('@/tools/image/cropper/ImageCropperTool')),
