@@ -1,10 +1,10 @@
 'use client';
 import React, { useState, useRef } from 'react';
-import { Download, FileText, AlertCircle, Sliders, Zap, CheckCircle2, RefreshCw } from 'lucide-react';
+import { Download, FileText, AlertCircle, Sliders, Zap, CheckCircle2, RefreshCw, ShieldAlert, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { formatFileSize, calcReductionPct, downloadBlob } from '@/lib/utils';
 import { PDFDocument } from 'pdf-lib';
-import { getPdfJs } from '@/lib/pdfUtils';
+import { compressPdf, type PdfPreset, type PdfCompressResult, PDF_PRESETS } from '@/lib/pdfCompressor';
 
 type CompressionPreset = 'recommended' | 'extreme' | 'low' | 'custom';
 
@@ -12,7 +12,7 @@ export default function PdfCompressorTool() {
   const [file, setFile] = useState<File | null>(null);
   const [pageCount, setPageCount] = useState<number>(0);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [progress, setProgress] = useState({ current: 0, total: 0, stage: '' });
+  const [progress, setProgress] = useState({ current: 0, total: 100, stage: '' });
 
   // Options
   const [preset, setPreset] = useState<CompressionPreset>('recommended');
@@ -25,6 +25,7 @@ export default function PdfCompressorTool() {
   // Results
   const [resultBlob, setResultBlob] = useState<Blob | null>(null);
   const [resultSize, setResultSize] = useState<number>(0);
+  const [compressResult, setCompressResult] = useState<PdfCompressResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -38,6 +39,7 @@ export default function PdfCompressorTool() {
     setFile(f);
     setResultBlob(null);
     setResultSize(0);
+    setCompressResult(null);
 
     try {
       const buffer = await f.arrayBuffer();
@@ -50,126 +52,55 @@ export default function PdfCompressorTool() {
 
   const applyPreset = (p: CompressionPreset) => {
     setPreset(p);
-    if (p === 'recommended') {
-      setDpi(130);
-      setQuality(0.72);
+    const config = PDF_PRESETS[p];
+    if (config) {
+      setDpi(config.dpi);
+      setQuality(config.quality);
       setGrayscale(false);
-      setMode('smart');
-    } else if (p === 'extreme') {
-      setDpi(96);
-      setQuality(0.50);
-      setGrayscale(false);
-      setMode('smart');
-    } else if (p === 'low') {
-      setDpi(180);
-      setQuality(0.85);
-      setGrayscale(false);
-      setMode('smart');
     }
   };
 
-  const compressPdf = async () => {
+  const compressPdfAction = async () => {
     if (!file) return;
     setIsProcessing(true);
     setError(null);
-    setProgress({ current: 0, total: pageCount, stage: 'Preparing document...' });
+    setProgress({ current: 0, total: 100, stage: 'Preparing document...' });
 
     try {
-      const freshBuffer = await file.arrayBuffer();
+      const res = await compressPdf(file, {
+        preset: mode === 'stream' ? undefined : preset,
+        imageDpi: mode === 'stream' ? undefined : dpi,
+        imageQuality: mode === 'stream' ? undefined : quality,
+        grayscale,
+        compressObjectStreams: true,
+        onProgress: (pct, stage) => {
+          setProgress({ current: pct, total: 100, stage: stage || 'Compressing PDF...' });
+        },
+      });
 
-      if (mode === 'stream') {
-        // Stream optimization only (metadata stripping + object streams)
-        setProgress({ current: 0, total: 1, stage: 'Optimizing internal object streams...' });
-        const pdfDoc = await PDFDocument.load(freshBuffer, { ignoreEncryption: true });
-        pdfDoc.setTitle('');
-        pdfDoc.setAuthor('');
-        pdfDoc.setSubject('');
-        pdfDoc.setKeywords([]);
-        pdfDoc.setProducer('whysogood compressor');
-        pdfDoc.setCreator('whysogood');
-
-        const compressedBytes = await pdfDoc.save({
-          useObjectStreams: true,
-          addDefaultPage: false,
-          updateFieldAppearances: false,
-        });
-
-        const finalBytes = compressedBytes.length < file.size ? compressedBytes : new Uint8Array(freshBuffer);
-        const outBlob = new Blob([finalBytes as unknown as BlobPart], { type: 'application/pdf' });
-        setResultBlob(outBlob);
-        setResultSize(outBlob.size);
-      } else {
-        // Smart Downsampling & Image Compression Algorithm
-        const pdfjs = await getPdfJs();
-        if (!pdfjs) throw new Error('PDF rendering engine not available.');
-
-        const loadingTask = pdfjs.getDocument({ data: new Uint8Array(freshBuffer).slice() });
-        const sourcePdf = await loadingTask.promise;
-        const totalPages = sourcePdf.numPages;
-
-        const targetPdf = await PDFDocument.create();
-
-        for (let i = 1; i <= totalPages; i++) {
-          setProgress({ current: i, total: totalPages, stage: `Compressing page ${i} of ${totalPages}...` });
-
-          const page = await sourcePdf.getPage(i);
-          const baseViewport = page.getViewport({ scale: 1.0 });
-
-          // Compute scale based on target DPI (base is 72 DPI)
-          const scale = dpi / 72;
-          const viewport = page.getViewport({ scale });
-
-          const canvas = document.createElement('canvas');
-          canvas.width = viewport.width;
-          canvas.height = viewport.height;
-          const ctx = canvas.getContext('2d');
-          if (!ctx) continue;
-
-          // White background
-          ctx.fillStyle = '#ffffff';
-          ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-          await page.render({ canvasContext: ctx, viewport }).promise;
-
-          // Convert to grayscale if requested
-          if (grayscale) {
-            const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            const data = imgData.data;
-            for (let j = 0; j < data.length; j += 4) {
-              const avg = 0.299 * data[j] + 0.587 * data[j + 1] + 0.114 * data[j + 2];
-              data[j] = avg;
-              data[j + 1] = avg;
-              data[j + 2] = avg;
-            }
-            ctx.putImageData(imgData, 0, 0);
-          }
-
-          // Compress to JPEG blob
-          const blob = await new Promise<Blob | null>(res => canvas.toBlob(res, 'image/jpeg', quality));
-          if (!blob) continue;
-
-          const jpgBytes = await blob.arrayBuffer();
-          const embeddedImage = await targetPdf.embedJpg(jpgBytes);
-
-          // Maintain original page physical dimensions in PDF points
-          const newPage = targetPdf.addPage([baseViewport.width, baseViewport.height]);
-          newPage.drawImage(embeddedImage, {
-            x: 0,
-            y: 0,
-            width: baseViewport.width,
-            height: baseViewport.height,
-          });
-        }
-
-        setProgress({ current: totalPages, total: totalPages, stage: 'Finalizing compressed document...' });
-        const compressedBytes = await targetPdf.save({ useObjectStreams: true });
-        const outBlob = new Blob([compressedBytes as unknown as BlobPart], { type: 'application/pdf' });
-
-        setResultBlob(outBlob);
-        setResultSize(outBlob.size);
+      setCompressResult(res);
+      setResultBlob(res.blob);
+      setResultSize(res.compressedSize);
+      if (res.pageCount > 0) {
+        setPageCount(res.pageCount);
       }
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Failed to compress PDF.');
+      // Safety tier guarantee: Never break UI state
+      const fallbackBlob = file;
+      const fallbackResult: PdfCompressResult = {
+        blob: fallbackBlob,
+        originalSize: file.size,
+        compressedSize: file.size,
+        reductionPercentage: 0,
+        reductionFormatted: '0%',
+        pageCount: pageCount || 1,
+        status: 'fallback',
+        tierUsed: 3,
+        statusMessage: err instanceof Error ? err.message : 'Original PDF preserved safely',
+      };
+      setCompressResult(fallbackResult);
+      setResultBlob(fallbackBlob);
+      setResultSize(file.size);
     } finally {
       setIsProcessing(false);
     }
@@ -179,6 +110,7 @@ export default function PdfCompressorTool() {
     setFile(null);
     setResultBlob(null);
     setResultSize(0);
+    setCompressResult(null);
     setError(null);
   };
 
@@ -566,7 +498,7 @@ export default function PdfCompressorTool() {
           {!resultBlob && (
             <div style={{ display: 'flex', gap: 10 }}>
               <Button
-                onClick={compressPdf}
+                onClick={compressPdfAction}
                 loading={isProcessing}
                 disabled={isProcessing}
                 icon={<Zap size={15} />}
@@ -585,27 +517,53 @@ export default function PdfCompressorTool() {
                 display: 'flex',
                 flexDirection: 'column',
                 gap: 16,
-                border: '1px solid var(--pos)',
+                border: compressResult?.status === 'compressed' ? '1px solid var(--pos)' : '1px solid var(--border)',
                 background: 'var(--bg-1)',
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <CheckCircle2 size={20} style={{ color: 'var(--pos)' }} />
+                  {compressResult?.status === 'compressed' ? (
+                    <CheckCircle2 size={20} style={{ color: 'var(--pos)' }} />
+                  ) : compressResult?.status === 'encrypted' || compressResult?.status === 'corrupted' ? (
+                    <ShieldAlert size={20} style={{ color: 'var(--warn, #eab308)' }} />
+                  ) : (
+                    <ShieldCheck size={20} style={{ color: 'var(--brand)' }} />
+                  )}
                   <span style={{ fontSize: 16, fontWeight: 700, color: 'var(--ink)' }}>
-                    Compression Succeeded!
+                    {compressResult?.status === 'compressed'
+                      ? 'Compression Succeeded!'
+                      : compressResult?.status === 'optimal'
+                      ? 'Document Already Optimal'
+                      : compressResult?.status === 'encrypted'
+                      ? 'Password-Protected PDF Preserved'
+                      : compressResult?.status === 'corrupted'
+                      ? 'Unreadable PDF Preserved Safely'
+                      : 'Document Preserved Safely'}
                   </span>
                 </div>
 
                 <span
-                  className="c-badge c-badge--pos"
+                  className={`c-badge ${compressResult?.status === 'compressed' ? 'c-badge--pos' : 'c-badge--brand'}`}
                   style={{ fontSize: 13, padding: '4px 12px' }}
                 >
-                  {resultSize < file.size
-                    ? `-${calcReductionPct(file.size, resultSize)}% Smaller`
-                    : 'Optimal Size'}
+                  {compressResult?.status === 'compressed'
+                    ? `-${compressResult.reductionFormatted} Smaller (Tier ${compressResult.tierUsed})`
+                    : compressResult?.status === 'optimal'
+                    ? 'Already Optimal (0%)'
+                    : compressResult?.status === 'encrypted'
+                    ? 'Encrypted (Safe Pass-through)'
+                    : compressResult?.status === 'corrupted'
+                    ? 'Corrupted (Safe Pass-through)'
+                    : 'Safe Fallback'}
                 </span>
               </div>
+
+              {compressResult?.statusMessage && (
+                <p style={{ margin: 0, fontSize: 13, color: 'var(--ink-2)' }}>
+                  {compressResult.statusMessage}
+                </p>
+              )}
 
               {/* Size comparison numbers */}
               <div
@@ -626,8 +584,8 @@ export default function PdfCompressorTool() {
                 </div>
 
                 <div>
-                  <div style={{ fontSize: 12, color: 'var(--ink-3)' }}>Compressed Size</div>
-                  <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--pos)' }}>
+                  <div style={{ fontSize: 12, color: 'var(--ink-3)' }}>Output Size</div>
+                  <div style={{ fontSize: 16, fontWeight: 700, color: compressResult?.status === 'compressed' ? 'var(--pos)' : 'var(--ink)' }}>
                     {formatFileSize(resultSize)}
                   </div>
                 </div>
@@ -635,7 +593,7 @@ export default function PdfCompressorTool() {
                 <div>
                   <div style={{ fontSize: 12, color: 'var(--ink-3)' }}>Space Saved</div>
                   <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--brand)' }}>
-                    {file.size > resultSize ? formatFileSize(file.size - resultSize) : '0 KB'}
+                    {file.size > resultSize ? formatFileSize(file.size - resultSize) : '0 B'}
                   </div>
                 </div>
               </div>
@@ -651,7 +609,7 @@ export default function PdfCompressorTool() {
                 <Button
                   variant="secondary"
                   icon={<RefreshCw size={14} />}
-                  onClick={compressPdf}
+                  onClick={compressPdfAction}
                   disabled={isProcessing}
                 >
                   Re-compress with Different Settings

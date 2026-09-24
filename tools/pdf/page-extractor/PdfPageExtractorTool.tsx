@@ -108,7 +108,7 @@ export default function PdfPageExtractorTool() {
           const bytes = await singleDoc.save({ useObjectStreams: true });
           filesMap[`${baseName}_page_${idx + 1}.pdf`] = bytes;
         }
-        const zipBlob = createZipArchive(filesMap);
+        const zipBlob = await createZipArchive(filesMap);
         downloadBlob(zipBlob, `${baseName}_extracted_pages.zip`);
       }
     } catch (err) {

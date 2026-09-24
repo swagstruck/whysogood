@@ -1,5 +1,6 @@
 'use client';
 import { zipSync } from 'fflate';
+import { createStreamingZip, type ArchiveFileEntry } from './archiveUtils';
 
 let pdfjsInstance: any = null;
 
@@ -137,9 +138,20 @@ export function formatPageRange(zeroIndexedPages: number[]): string {
 }
 
 /**
- * Creates a zip archive from a record of filenames and byte arrays using fflate.
+ * Creates a zip archive from a record of filenames and byte arrays or Blobs using memory-safe streaming ZIP.
  */
-export function createZipArchive(files: Record<string, Uint8Array>): Blob {
+export async function createZipArchive(files: Record<string, Uint8Array | Blob>): Promise<Blob> {
+  const entries: ArchiveFileEntry[] = Object.entries(files).map(([name, data]) => ({
+    name,
+    data,
+  }));
+  return createStreamingZip(entries);
+}
+
+/**
+ * Synchronous fallback for legacy or non-async callers.
+ */
+export function createZipArchiveSync(files: Record<string, Uint8Array>): Blob {
   const zipped = zipSync(files, { level: 6 });
   return new Blob([zipped as unknown as BlobPart], { type: 'application/zip' });
 }

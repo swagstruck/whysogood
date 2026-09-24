@@ -84,12 +84,11 @@ export default function PdfToPngTool() {
       if (images.length === 1) {
         downloadBlob(images[0].blob, `${baseName}_page_1.png`);
       } else {
-        const filesMap: Record<string, Uint8Array> = {};
+        const filesMap: Record<string, Blob> = {};
         for (const item of images) {
-          const arrBuffer = await item.blob.arrayBuffer();
-          filesMap[`${baseName}_page_${item.pageNumber}.png`] = new Uint8Array(arrBuffer);
+          filesMap[`${baseName}_page_${item.pageNumber}.png`] = item.blob;
         }
-        const zipBlob = createZipArchive(filesMap);
+        const zipBlob = await createZipArchive(filesMap);
         downloadBlob(zipBlob, `${baseName}_png_images.zip`);
       }
     } catch (err) {

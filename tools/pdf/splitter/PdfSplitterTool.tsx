@@ -76,7 +76,7 @@ export default function PdfSplitterTool() {
           const bytes = await singleDoc.save({ useObjectStreams: true });
           filesMap[`${baseName}_page_${i + 1}.pdf`] = bytes;
         }
-        const zipBlob = createZipArchive(filesMap);
+        const zipBlob = await createZipArchive(filesMap);
         downloadBlob(zipBlob, `${baseName}_pages.zip`);
       } else if (splitMode === 'ranges') {
         // Multiple ranges
@@ -104,7 +104,7 @@ export default function PdfSplitterTool() {
           const blob = new Blob([filesMap[fileKeys[0]] as unknown as BlobPart], { type: 'application/pdf' });
           downloadBlob(blob, fileKeys[0]);
         } else {
-          const zipBlob = createZipArchive(filesMap);
+          const zipBlob = await createZipArchive(filesMap);
           downloadBlob(zipBlob, `${baseName}_split_ranges.zip`);
         }
       } else if (splitMode === 'custom') {

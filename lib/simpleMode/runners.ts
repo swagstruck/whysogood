@@ -1,63 +1,16 @@
 import type { ToolRunner, ToolRunnerResult, RunnerOptions, SimpleModeOutput } from './types';
 import { calcReductionPct } from '../utils';
-import { zipSync } from 'fflate';
+import { compressImage, stripJpegMetadata as safeStripJpegMetadata, minifySvgSync } from '../imageCompressor';
+import { createStreamingZip, type ArchiveFileEntry } from '../archiveUtils';
 
 // ── Shared Helpers ────────────────────────────────────────────────────────────
 
 export function stripJpegMetadata(bytes: Uint8Array): Uint8Array {
-  if (bytes.length < 4 || bytes[0] !== 0xff || bytes[1] !== 0xd8) return bytes;
-  const out: number[] = [0xff, 0xd8];
-  let i = 2;
-  while (i < bytes.length - 1) {
-    if (bytes[i] !== 0xff) {
-      while (i < bytes.length) out.push(bytes[i++]);
-      break;
-    }
-    const marker = bytes[i + 1];
-    if ((marker >= 0xd0 && marker <= 0xd7) || marker === 0x01 || marker === 0xd9) {
-      out.push(0xff, marker);
-      i += 2;
-      continue;
-    }
-    if (marker === 0xda) {
-      const len = (bytes[i + 2] << 8) | bytes[i + 3];
-      for (let j = 0; j < len + 2 && i + j < bytes.length; j++) out.push(bytes[i + j]);
-      i += len + 2;
-      while (i < bytes.length) {
-        out.push(bytes[i]);
-        if (bytes[i] === 0xff && i + 1 < bytes.length && bytes[i + 1] === 0xd9) {
-          out.push(bytes[i + 1]);
-          i += 2;
-          break;
-        }
-        i++;
-      }
-      break;
-    }
-    if (i + 4 > bytes.length) break;
-    const segLen = (bytes[i + 2] << 8) | bytes[i + 3];
-    const strip = marker === 0xe1 || (marker >= 0xe2 && marker <= 0xef) || marker === 0xfe;
-    if (!strip) {
-      for (let j = 0; j < segLen + 2 && i + j < bytes.length; j++) out.push(bytes[i + j]);
-    }
-    i += segLen + 2;
-  }
-  return new Uint8Array(out);
+  return safeStripJpegMetadata(bytes);
 }
 
 export function minifySvg(text: string): string {
-  return text
-    .replace(/<!--[\s\S]*?-->/g, '')
-    .replace(/<\?xml[\s\S]*?\?>/gi, '')
-    .replace(/<!DOCTYPE[\s\S]*?>/gi, '')
-    .replace(/<metadata[\s\S]*?<\/metadata>/gi, '')
-    .replace(/<desc[\s\S]*?<\/desc>/gi, '')
-    .replace(/\s+xmlns:(inkscape|sodipodi|sketch|i|adobe)="[^"]*"/gi, '')
-    .replace(/\s+(inkscape|sodipodi|sketch):[a-zA-Z0-9_-]+="[^"]*"/gi, '')
-    .replace(/\s+version="1\.[01]"/gi, '')
-    .replace(/\s+xml:space="preserve"/gi, '')
-    .replace(/>\s+</g, '><')
-    .trim();
+  return minifySvgSync(text);
 }
 
 export function cleanSvgMarkup(svg: string): string {
@@ -149,69 +102,28 @@ export function parseCsv(text: string, delimiter = ','): string[][] {
 // ── Image Runners ─────────────────────────────────────────────────────────────
 
 async function runImageCompressor(file: File, options?: RunnerOptions): Promise<ToolRunnerResult> {
-  const quality = typeof options?.quality === 'number' ? options.quality : 80;
-  const buffer = await file.arrayBuffer();
-  const ext = (file.name.split('.').pop() || '').toLowerCase();
+  const qualityOpt = typeof options?.quality === 'number' ? options.quality : 80;
+  const quality = qualityOpt > 1 ? qualityOpt / 100 : qualityOpt;
 
-  if (ext === 'svg' || file.type.includes('svg')) {
-    const text = new TextDecoder().decode(buffer);
-    const minified = minifySvg(text);
-    const outBlob = new Blob([minified], { type: 'image/svg+xml' });
-    const baseName = file.name.replace(/\.[^.]+$/, '');
-    return {
-      blob: outBlob,
-      filename: `${baseName}_compressed.svg`,
-      metadata: {
-        'Original Size': file.size,
-        'Compressed Size': outBlob.size,
-        'Saved': Math.max(0, file.size - outBlob.size),
-        'Reduction': `${calcReductionPct(file.size, outBlob.size)}%`,
-      },
-    };
-  }
+  const result = await compressImage(file, {
+    quality,
+  });
 
-  const img = await loadImageFromFile(file);
-  const canvas = document.createElement('canvas');
-  canvas.width = img.naturalWidth || img.width;
-  canvas.height = img.naturalHeight || img.height;
-  const ctx = canvas.getContext('2d');
-  if (!ctx) throw new Error('Canvas 2D context not available');
-
-  ctx.drawImage(img, 0, 0);
-
-  const qFactor = Math.max(0.05, Math.min(1, quality / 100));
-  let targetMime = file.type || 'image/jpeg';
-  if (!targetMime.startsWith('image/')) targetMime = 'image/jpeg';
-
-  let rawBlob: Blob;
-  if (targetMime === 'image/jpeg') {
-    rawBlob = await new Promise<Blob>((res, rej) =>
-      canvas.toBlob(b => (b ? res(b) : rej(new Error('Canvas export failed'))), 'image/jpeg', qFactor)
-    );
-    const stripped = stripJpegMetadata(new Uint8Array(await rawBlob.arrayBuffer()));
-    rawBlob = new Blob([stripped as unknown as BlobPart], { type: 'image/jpeg' });
-  } else if (targetMime === 'image/webp') {
-    rawBlob = await new Promise<Blob>((res, rej) =>
-      canvas.toBlob(b => (b ? res(b) : rej(new Error('Canvas export failed'))), 'image/webp', qFactor)
-    );
-  } else {
-    rawBlob = await new Promise<Blob>((res, rej) =>
-      canvas.toBlob(b => (b ? res(b) : rej(new Error('Canvas export failed'))), targetMime)
-    );
-  }
-
-  // Use smaller between original and compressed
-  const finalBlob = rawBlob.size < file.size ? rawBlob : new Blob([buffer], { type: file.type });
   const baseName = file.name.replace(/\.[^.]+$/, '');
-  const outExt = ext || (targetMime === 'image/png' ? 'png' : targetMime === 'image/webp' ? 'webp' : 'jpg');
+  const ext = (file.name.split('.').pop() || '').toLowerCase();
+  const outExt = ext || (result.format === 'image/png' ? 'png' : result.format === 'image/webp' ? 'webp' : 'jpg');
 
   return {
-    blob: finalBlob,
+    blob: result.blob,
     filename: `${baseName}_compressed.${outExt}`,
     metadata: {
-      'Quality': `${quality}%`,
-      'Dimensions': `${canvas.width} × ${canvas.height}`,
-      'Reduction': `${calcReductionPct(file.size, finalBlob.size)}%`,
+      'Quality': `${Math.round(quality * 100)}%`,
+      'Dimensions': result.dimensions ? `${result.dimensions.width} × ${result.dimensions.height}` : 'Original',
+      'Reduction': `${result.reductionPercentage}%`,
+      'Original Size': file.size,
+      'Compressed Size': result.compressedSize,
+      'Saved': Math.max(0, file.size - result.compressedSize),
+      'Status': result.statusMessage || (result.reductionPercentage > 0 ? 'Compressed' : 'File is already optimal'),
     },
   };
 }
@@ -880,37 +792,33 @@ async function runSvgPreview(file: File): Promise<ToolRunnerResult> {
 
 // ── PDF Runners ───────────────────────────────────────────────────────────────
 
-async function runPdfCompressor(file: File): Promise<ToolRunnerResult> {
-  const { PDFDocument } = await import('pdf-lib');
-  const buffer = await file.arrayBuffer();
+async function runPdfCompressor(file: File, options?: RunnerOptions): Promise<ToolRunnerResult> {
+  const { compressPdf } = await import('../pdfCompressor');
 
-  const pdfDoc = await PDFDocument.load(buffer, { ignoreEncryption: true });
-  // Clean heavy metadata strings
-  pdfDoc.setTitle('');
-  pdfDoc.setAuthor('');
-  pdfDoc.setSubject('');
-  pdfDoc.setKeywords([]);
-  pdfDoc.setProducer('whysogood');
-  pdfDoc.setCreator('whysogood');
+  const preset = (options?.preset as any) || 'recommended';
+  const imageDpi = options?.imageDpi ? Number(options.imageDpi) : (options?.dpi ? Number(options.dpi) : undefined);
+  const imageQuality = options?.imageQuality ? Number(options.imageQuality) : (options?.quality ? Number(options.quality) : undefined);
+  const grayscale = Boolean(options?.grayscale);
 
-  const compressedBytes = await pdfDoc.save({
-    useObjectStreams: true,
-    addDefaultPage: false,
-    updateFieldAppearances: false,
+  const result = await compressPdf(file, {
+    preset,
+    imageDpi,
+    imageQuality,
+    grayscale,
   });
 
-  const finalBytes = compressedBytes.length < file.size ? compressedBytes : new Uint8Array(buffer);
-  const outBlob = new Blob([finalBytes as unknown as BlobPart], { type: 'application/pdf' });
   const baseName = file.name.replace(/\.pdf$/i, '');
-
   return {
-    blob: outBlob,
+    blob: result.blob,
     filename: `${baseName}_compressed.pdf`,
     metadata: {
-      'Page Count': pdfDoc.getPageCount(),
+      'Page Count': result.pageCount,
       'Original Size': file.size,
-      'Compressed Size': outBlob.size,
-      'Reduction': `${calcReductionPct(file.size, outBlob.size)}%`,
+      'Compressed Size': result.compressedSize,
+      'Reduction': result.reductionFormatted,
+      'Status': result.status,
+      ...(result.statusMessage ? { 'Status Message': result.statusMessage } : {}),
+      'Tier Applied': `Tier ${result.tierUsed}`,
     },
   };
 }
@@ -1707,13 +1615,11 @@ export async function executeTool(
 }
 
 /**
- * Bundles all generated outputs into a single .zip archive using fflate.
+ * Bundles all generated outputs into a single .zip archive using memory-safe streaming ZIP creation.
  */
 export async function createOutputsZip(outputs: SimpleModeOutput[]): Promise<Blob> {
-  const filesMap: Record<string, Uint8Array> = {};
   const nameCount: Record<string, number> = {};
-
-  for (const item of outputs) {
+  const entries: ArchiveFileEntry[] = outputs.map(item => {
     let name = item.outputFilename;
     if (nameCount[name]) {
       const parts = name.split('.');
@@ -1723,10 +1629,10 @@ export async function createOutputsZip(outputs: SimpleModeOutput[]): Promise<Blo
     } else {
       nameCount[name] = 1;
     }
-    const buf = new Uint8Array(await item.blob.arrayBuffer());
-    filesMap[name] = buf;
-  }
-
-  const zipData = zipSync(filesMap, { level: 6 });
-  return new Blob([zipData as unknown as BlobPart], { type: 'application/zip' });
+    return {
+      name,
+      data: item.blob,
+    };
+  });
+  return createStreamingZip(entries);
 }

@@ -4,7 +4,7 @@ import { RefreshCw, Download, Archive, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { formatFileSize, downloadBlob, uid } from '@/lib/utils';
 import { useToast } from '@/components/ui/ToastProvider';
-import { zipSync } from 'fflate';
+import { createStreamingZip, type ArchiveFileEntry } from '@/lib/archiveUtils';
 
 interface BatchItem {
   id: string;
@@ -91,24 +91,26 @@ export default function BatchImageConverterTool() {
     }
   };
 
-  const downloadAllZip = () => {
+  const downloadAllZip = async () => {
     const ready = items.filter(i => i.status === 'done' && i.convertedBlob);
     if (!ready.length) return;
 
     const fmt = FORMATS.find(f => f.value === targetFormat);
     const ext = fmt ? fmt.ext : 'img';
 
-    const zipFiles: Record<string, Uint8Array> = {};
-    Promise.all(
-      ready.map(async item => {
-        const buf = new Uint8Array(await item.convertedBlob!.arrayBuffer());
+    try {
+      const entries: ArchiveFileEntry[] = ready.map(item => {
         const base = item.name.substring(0, item.name.lastIndexOf('.')) || item.name;
-        zipFiles[`${base}.${ext}`] = buf;
-      })
-    ).then(() => {
-      const zipped = zipSync(zipFiles);
-      downloadBlob(new Blob([zipped as unknown as BlobPart], { type: 'application/zip' }), `converted_${ext}_images.zip`);
-    });
+        return {
+          name: `${base}.${ext}`,
+          data: item.convertedBlob!,
+        };
+      });
+      const zipBlob = await createStreamingZip(entries);
+      downloadBlob(zipBlob, `converted_${ext}_images.zip`);
+    } catch (err) {
+      console.error('Failed to create ZIP archive:', err);
+    }
   };
 
   const clearAll = () => {

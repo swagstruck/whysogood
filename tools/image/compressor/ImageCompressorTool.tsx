@@ -1,10 +1,10 @@
 'use client';
 import React, { useState, useRef } from 'react';
-import { Download, Archive, RefreshCw, AlertTriangle, CheckCircle, FileImage, Trash2 } from 'lucide-react';
+import { Download, Archive, CheckCircle, FileImage, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
-import { Slider } from '@/components/ui/Slider';
 import { formatFileSize, calcReductionPct, downloadBlob, uid } from '@/lib/utils';
-import { zipSync } from 'fflate';
+import { compressImage } from '@/lib/imageCompressor';
+import { createStreamingZip, type ArchiveFileEntry } from '@/lib/archiveUtils';
 
 interface ImageItem {
   id: string;
@@ -18,65 +18,10 @@ interface ImageItem {
   compressedSize?: number;
   savedBytes?: number;
   reductionPct?: number;
+  statusMessage?: string;
+  compressionStatus?: 'compressed' | 'optimal' | 'fallback' | 'original';
+  tierUsed?: 1 | 2 | 3;
   errorMessage?: string;
-}
-
-// SVG minifier
-function minifySvg(text: string): string {
-  return text
-    .replace(/<!--[\s\S]*?-->/g, '')
-    .replace(/<\?xml[\s\S]*?\?>/gi, '')
-    .replace(/<!DOCTYPE[\s\S]*?>/gi, '')
-    .replace(/<metadata[\s\S]*?<\/metadata>/gi, '')
-    .replace(/<desc[\s\S]*?<\/desc>/gi, '')
-    .replace(/\s+xmlns:(inkscape|sodipodi|sketch|i|adobe)="[^"]*"/gi, '')
-    .replace(/\s+(inkscape|sodipodi|sketch):[a-zA-Z0-9_-]+="[^"]*"/gi, '')
-    .replace(/\s+version="1\.[01]"/gi, '')
-    .replace(/\s+xml:space="preserve"/gi, '')
-    .replace(/>\s+</g, '><')
-    .trim();
-}
-
-// Strip JPEG metadata
-function stripJpegMetadata(bytes: Uint8Array): Uint8Array {
-  if (bytes.length < 4 || bytes[0] !== 0xff || bytes[1] !== 0xd8) return bytes;
-  const out: number[] = [0xff, 0xd8];
-  let i = 2;
-  while (i < bytes.length - 1) {
-    if (bytes[i] !== 0xff) {
-      while (i < bytes.length) out.push(bytes[i++]);
-      break;
-    }
-    const marker = bytes[i + 1];
-    if ((marker >= 0xd0 && marker <= 0xd7) || marker === 0x01 || marker === 0xd9) {
-      out.push(0xff, marker);
-      i += 2;
-      continue;
-    }
-    if (marker === 0xda) {
-      const len = (bytes[i + 2] << 8) | bytes[i + 3];
-      for (let j = 0; j < len + 2 && i + j < bytes.length; j++) out.push(bytes[i + j]);
-      i += len + 2;
-      while (i < bytes.length) {
-        out.push(bytes[i]);
-        if (bytes[i] === 0xff && i + 1 < bytes.length && bytes[i + 1] === 0xd9) {
-          out.push(bytes[i + 1]);
-          i += 2;
-          break;
-        }
-        i++;
-      }
-      break;
-    }
-    if (i + 4 > bytes.length) break;
-    const segLen = (bytes[i + 2] << 8) | bytes[i + 3];
-    const strip = marker === 0xe1 || (marker >= 0xe2 && marker <= 0xef) || marker === 0xfe;
-    if (!strip) {
-      for (let j = 0; j < segLen + 2 && i + j < bytes.length; j++) out.push(bytes[i + j]);
-    }
-    i += segLen + 2;
-  }
-  return new Uint8Array(out);
 }
 
 export default function ImageCompressorTool() {
@@ -104,69 +49,34 @@ export default function ImageCompressorTool() {
 
   const compressSingle = async (item: ImageItem, qVal: number): Promise<ImageItem> => {
     try {
-      const buffer = await item.file.arrayBuffer();
-      const ext = item.format.toLowerCase();
+      const result = await compressImage(item.file, {
+        quality: qVal / 100,
+      });
 
-      // SVG handling
-      if (ext === 'svg' || item.file.type.includes('svg')) {
-        const text = new TextDecoder().decode(buffer);
-        const minified = minifySvg(text);
-        const outBlob = new Blob([minified], { type: 'image/svg+xml' });
-        const saved = Math.max(0, item.originalSize - outBlob.size);
-        return {
-          ...item,
-          status: 'done',
-          compressedBlob: outBlob,
-          compressedSize: outBlob.size,
-          savedBytes: saved,
-          reductionPct: calcReductionPct(item.originalSize, outBlob.size),
-        };
-      }
-
-      // Raster image handling via OffscreenCanvas / HTMLCanvasElement
-      const imgBitmap = await createImageBitmap(new Blob([buffer], { type: item.file.type }));
-      const { width, height } = imgBitmap;
-      const canvas = new OffscreenCanvas(width, height);
-      const ctx = canvas.getContext('2d');
-      if (!ctx) throw new Error('Could not get canvas context');
-      ctx.drawImage(imgBitmap, 0, 0);
-      imgBitmap.close();
-
-      const qFactor = qVal / 100;
-      let targetMime = item.file.type;
-      if (!targetMime || targetMime === 'application/octet-stream') {
-        targetMime = ext === 'png' ? 'image/png' : ext === 'webp' ? 'image/webp' : 'image/jpeg';
-      }
-
-      let outBlob: Blob;
-      if (targetMime === 'image/jpeg') {
-        const rawBlob = await canvas.convertToBlob({ type: 'image/jpeg', quality: qFactor });
-        const stripped = stripJpegMetadata(new Uint8Array(await rawBlob.arrayBuffer()));
-        outBlob = new Blob([stripped as unknown as BlobPart], { type: 'image/jpeg' });
-      } else if (targetMime === 'image/webp') {
-        outBlob = await canvas.convertToBlob({ type: 'image/webp', quality: qFactor });
-      } else {
-        outBlob = await canvas.convertToBlob({ type: 'image/png' });
-      }
-
-      // If compressed is bigger than original, retain original blob
-      const finalBlob = outBlob.size < item.originalSize ? outBlob : new Blob([buffer], { type: item.file.type });
-      const finalSize = finalBlob.size;
-      const saved = Math.max(0, item.originalSize - finalSize);
-
+      const saved = Math.max(0, item.originalSize - result.compressedSize);
       return {
         ...item,
         status: 'done',
-        compressedBlob: finalBlob,
-        compressedSize: finalSize,
+        compressedBlob: result.blob,
+        compressedSize: result.compressedSize,
         savedBytes: saved,
-        reductionPct: calcReductionPct(item.originalSize, finalSize),
+        reductionPct: result.reductionPercentage,
+        statusMessage: result.statusMessage,
+        compressionStatus: result.status,
+        tierUsed: result.tierUsed,
       };
     } catch (err: unknown) {
+      // Safety tier guarantee: even on unexpected error, return original file intact with done status
       return {
         ...item,
-        status: 'error',
-        errorMessage: err instanceof Error ? err.message : 'Compression failed',
+        status: 'done',
+        compressedBlob: item.file,
+        compressedSize: item.originalSize,
+        savedBytes: 0,
+        reductionPct: 0,
+        statusMessage: err instanceof Error ? `Preserved (${err.message})` : 'File preserved intact',
+        compressionStatus: 'original',
+        tierUsed: 3,
       };
     }
   };
@@ -174,39 +84,50 @@ export default function ImageCompressorTool() {
   const processAll = async () => {
     if (!items.length) return;
     setIsProcessing(true);
-    const updated = await Promise.all(
-      items.map(async item => {
-        if (item.status === 'done') return item;
-        return await compressSingle(item, quality);
-      })
-    );
-    setItems(updated);
+
+    const pending = items.filter(i => i.status !== 'done');
+    if (!pending.length) {
+      setIsProcessing(false);
+      return;
+    }
+
+    setItems(prev => prev.map(i => (i.status !== 'done' ? { ...i, status: 'processing' } : i)));
+
+    const concurrency = 2; // Strict concurrency throttling for mobile memory safety
+    let nextIndex = 0;
+
+    const runWorker = async () => {
+      while (nextIndex < pending.length) {
+        const itemToProcess = pending[nextIndex++];
+        const updated = await compressSingle(itemToProcess, quality);
+        setItems(prev => prev.map(i => (i.id === updated.id ? updated : i)));
+      }
+    };
+
+    const workerPromises: Promise<void>[] = [];
+    const count = Math.min(concurrency, pending.length);
+    for (let c = 0; c < count; c++) {
+      workerPromises.push(runWorker());
+    }
+
+    await Promise.all(workerPromises);
     setIsProcessing(false);
   };
 
-  const downloadAllZip = () => {
+  const downloadAllZip = async () => {
     const ready = items.filter(i => i.status === 'done' && i.compressedBlob);
     if (!ready.length) return;
 
-    const zipFiles: Record<string, Uint8Array> = {};
-    const seenNames = new Set<string>();
-
-    Promise.all(
-      ready.map(async item => {
-        const buf = new Uint8Array(await item.compressedBlob!.arrayBuffer());
-        let name = item.name;
-        if (seenNames.has(name)) {
-          const parts = name.split('.');
-          const ext = parts.pop();
-          name = `${parts.join('.')}_${uid().slice(0, 4)}.${ext}`;
-        }
-        seenNames.add(name);
-        zipFiles[name] = buf;
-      })
-    ).then(() => {
-      const zipped = zipSync(zipFiles);
-      downloadBlob(new Blob([zipped as unknown as BlobPart], { type: 'application/zip' }), 'compressed_images.zip');
-    });
+    try {
+      const entries: ArchiveFileEntry[] = ready.map(item => ({
+        name: item.name,
+        data: item.compressedBlob!,
+      }));
+      const zipBlob = await createStreamingZip(entries);
+      downloadBlob(zipBlob, 'compressed_images.zip');
+    } catch (err) {
+      console.error('Failed to create ZIP archive:', err);
+    }
   };
 
   const removeItem = (id: string) => {
@@ -309,9 +230,11 @@ export default function ImageCompressorTool() {
               padding: '10px 14px', borderRadius: 'var(--radius-md)',
               background: 'var(--color-surface2)', fontSize: 13,
             }}>
-              <span><strong>{doneCount}</strong> of {items.length} files compressed</span>
-              <span style={{ color: 'var(--color-success)', fontWeight: 600 }}>
-                Saved {formatFileSize(totalSaved)} ({calcReductionPct(totalOriginal, totalCompressed)}% smaller)
+              <span><strong>{doneCount}</strong> of {items.length} files processed</span>
+              <span style={{ color: totalSaved > 0 ? 'var(--color-success)' : 'var(--color-muted)', fontWeight: 600 }}>
+                {totalSaved > 0
+                  ? `Saved ${formatFileSize(totalSaved)} (${calcReductionPct(totalOriginal, totalCompressed)}% smaller)`
+                  : 'Files are already optimal'}
               </span>
             </div>
           )}
@@ -356,12 +279,19 @@ export default function ImageCompressorTool() {
               {item.status === 'done' && (
                 <div style={{
                   padding: '8px 10px', borderRadius: 'var(--radius-sm)',
-                  background: 'var(--color-surface2)', fontSize: 12, display: 'flex', justifyContent: 'space-between',
+                  background: 'var(--color-surface2)', fontSize: 12, display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                 }}>
                   <span>{formatFileSize(item.compressedSize || item.originalSize)}</span>
-                  <span style={{ color: 'var(--color-success)', fontWeight: 600 }}>
-                    -{item.reductionPct}%
-                  </span>
+                  {item.reductionPct && item.reductionPct > 0 ? (
+                    <span style={{ color: 'var(--color-success)', fontWeight: 600 }}>
+                      -{item.reductionPct}%
+                    </span>
+                  ) : (
+                    <span style={{ color: 'var(--color-muted)', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                      <CheckCircle size={13} style={{ color: 'var(--color-success)' }} />
+                      Already Optimal
+                    </span>
+                  )}
                 </div>
               )}
 

@@ -4,7 +4,7 @@ import { Download, Archive, Image as ImageIcon, Smile, Copy, Check } from 'lucid
 import { Button } from '@/components/ui/Button';
 import { useToast } from '@/components/ui/ToastProvider';
 import { copyToClipboard, downloadBlob } from '@/lib/utils';
-import { zipSync } from 'fflate';
+import { createStreamingZip, type ArchiveFileEntry } from '@/lib/archiveUtils';
 
 const SIZES = [
   { name: 'favicon-16x16.png', size: 16, label: '16×16 Browser Tab' },
@@ -89,13 +89,12 @@ export default function FaviconGeneratorTool() {
 
   const downloadZipPackage = async () => {
     toast.info('Building Favicon package...');
-    const zipFiles: Record<string, Uint8Array> = {};
-
+    const entries: ArchiveFileEntry[] = [];
     for (const item of SIZES) {
       const canvas = await renderToCanvas(item.size);
       const blob = await new Promise<Blob | null>(res => canvas.toBlob(res, 'image/png'));
       if (blob) {
-        zipFiles[item.name] = new Uint8Array(await blob.arrayBuffer());
+        entries.push({ name: item.name, data: blob });
       }
     }
 
@@ -103,7 +102,7 @@ export default function FaviconGeneratorTool() {
     const icoCanvas = await renderToCanvas(32);
     const icoBlob = await new Promise<Blob | null>(res => icoCanvas.toBlob(res, 'image/png'));
     if (icoBlob) {
-      zipFiles['favicon.ico'] = new Uint8Array(await icoBlob.arrayBuffer());
+      entries.push({ name: 'favicon.ico', data: icoBlob });
     }
 
     // Include HTML snippet text file
@@ -113,10 +112,10 @@ export default function FaviconGeneratorTool() {
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
 `;
-    zipFiles['favicon_instructions.html'] = new TextEncoder().encode(snippet);
+    entries.push({ name: 'favicon_instructions.html', data: new TextEncoder().encode(snippet) });
 
-    const zipped = zipSync(zipFiles);
-    downloadBlob(new Blob([zipped as unknown as BlobPart], { type: 'application/zip' }), 'favicons.zip');
+    const zipBlob = await createStreamingZip(entries);
+    downloadBlob(zipBlob, 'favicons.zip');
     toast.success('Downloaded complete Favicon package!');
   };
 

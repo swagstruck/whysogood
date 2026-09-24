@@ -4,7 +4,7 @@ import { LayoutGrid, Download, Archive, Trash2, FileImage } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { formatFileSize, downloadBlob, uid } from '@/lib/utils';
 import { useToast } from '@/components/ui/ToastProvider';
-import { zipSync } from 'fflate';
+import { createStreamingZip, type ArchiveFileEntry } from '@/lib/archiveUtils';
 
 interface BatchItem {
   id: string;
@@ -120,23 +120,25 @@ export default function BatchImageResizerTool() {
     }
   };
 
-  const downloadAllZip = () => {
+  const downloadAllZip = async () => {
     const ready = items.filter(i => i.status === 'done' && i.resizedBlob);
     if (!ready.length) return;
 
-    const zipFiles: Record<string, Uint8Array> = {};
-    Promise.all(
-      ready.map(async item => {
-        const buf = new Uint8Array(await item.resizedBlob!.arrayBuffer());
+    try {
+      const entries: ArchiveFileEntry[] = ready.map(item => {
         const parts = item.name.split('.');
         const ext = parts.pop();
         const newName = `${parts.join('.')}_${item.resizedWidth}x${item.resizedHeight}.${ext}`;
-        zipFiles[newName] = buf;
-      })
-    ).then(() => {
-      const zipped = zipSync(zipFiles);
-      downloadBlob(new Blob([zipped as unknown as BlobPart], { type: 'application/zip' }), 'resized_images.zip');
-    });
+        return {
+          name: newName,
+          data: item.resizedBlob!,
+        };
+      });
+      const zipBlob = await createStreamingZip(entries);
+      downloadBlob(zipBlob, 'resized_images.zip');
+    } catch (err) {
+      console.error('Failed to create ZIP archive:', err);
+    }
   };
 
   const clearAll = () => {
