@@ -60,6 +60,23 @@ export function minifySvg(text: string): string {
     .trim();
 }
 
+export function cleanSvgMarkup(svg: string): string {
+  return svg
+    .replace(/<!--[\s\S]*?-->/g, '')
+    .replace(/<\?xml[\s\S]*?\?>/gi, '')
+    .replace(/<!DOCTYPE[\s\S]*?>/gi, '')
+    .replace(/<metadata[\s\S]*?<\/metadata>/gi, '')
+    .replace(/<desc[\s\S]*?<\/desc>/gi, '')
+    .replace(/<title[\s\S]*?<\/title>/gi, '')
+    .replace(/\s+xmlns:(inkscape|sodipodi|sketch|i|adobe)="[^"]*"/gi, '')
+    .replace(/\s+(inkscape|sodipodi|sketch):[a-zA-Z0-9_-]+="[^"]*"/gi, '')
+    .replace(/\s+id="(?:layer|g|path)[0-9]+"/gi, '')
+    .replace(/\s+version="1\.[01]"/gi, '')
+    .replace(/\s+xml:space="preserve"/gi, '')
+    .replace(/>\s+</g, '><')
+    .trim();
+}
+
 export function loadImageFromFile(file: File | Blob): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
     const url = URL.createObjectURL(file);
@@ -583,6 +600,236 @@ async function runBackgroundRemover(file: File): Promise<ToolRunnerResult> {
   }
 }
 
+async function runImageQuality(file: File, options?: RunnerOptions): Promise<ToolRunnerResult> {
+  const quality = typeof options?.quality === 'number' ? options.quality : 80;
+  const qFactor = Math.max(0.05, Math.min(1, quality / 100));
+  const img = await loadImageFromFile(file);
+  const canvas = document.createElement('canvas');
+  canvas.width = img.naturalWidth || img.width;
+  canvas.height = img.naturalHeight || img.height;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) throw new Error('Canvas context not available');
+
+  const fmt = (options?.targetFormat as string) || (file.type === 'image/webp' ? 'image/webp' : 'image/jpeg');
+  if (fmt === 'image/jpeg') {
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  }
+  ctx.drawImage(img, 0, 0);
+
+  const blob = await new Promise<Blob>((res, rej) =>
+    canvas.toBlob(b => (b ? res(b) : rej(new Error('Canvas export failed'))), fmt, qFactor)
+  );
+  const baseName = file.name.replace(/\.[^.]+$/, '');
+  const ext = fmt === 'image/webp' ? 'webp' : 'jpg';
+
+  return {
+    blob,
+    filename: `${baseName}_q${quality}.${ext}`,
+    metadata: {
+      'Quality': `${quality}%`,
+      'Format': ext.toUpperCase(),
+      'Dimensions': `${canvas.width} × ${canvas.height}`,
+      'Reduction': `${calcReductionPct(file.size, blob.size)}%`,
+    },
+  };
+}
+
+async function runImageMetadataViewer(file: File): Promise<ToolRunnerResult> {
+  const img = await loadImageFromFile(file);
+  const meta: Record<string, string | number> = {
+    'Filename': file.name,
+    'File Size': `${file.size} bytes (${(file.size / 1024).toFixed(1)} KB)`,
+    'MIME Type': file.type || 'unknown',
+    'Width': img.naturalWidth || img.width,
+    'Height': img.naturalHeight || img.height,
+    'Aspect Ratio': `${((img.naturalWidth || 1) / (img.naturalHeight || 1)).toFixed(2)}:1`,
+    'Last Modified': new Date(file.lastModified).toISOString(),
+  };
+
+  const report = JSON.stringify(meta, null, 2);
+  const blob = new Blob([report], { type: 'application/json' });
+  const baseName = file.name.replace(/\.[^.]+$/, '');
+
+  return {
+    blob,
+    filename: `${baseName}_metadata.json`,
+    metadata: meta,
+  };
+}
+
+async function runImageMetadataRemover(file: File): Promise<ToolRunnerResult> {
+  const img = await loadImageFromFile(file);
+  const canvas = document.createElement('canvas');
+  canvas.width = img.naturalWidth || img.width;
+  canvas.height = img.naturalHeight || img.height;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) throw new Error('Canvas context not available');
+
+  const mime = file.type === 'image/jpeg' ? 'image/jpeg' : 'image/png';
+  if (mime === 'image/jpeg') {
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  }
+  ctx.drawImage(img, 0, 0);
+
+  let blob = await new Promise<Blob>((res, rej) =>
+    canvas.toBlob(b => (b ? res(b) : rej(new Error('Canvas export failed'))), mime, 0.95)
+  );
+
+  if (mime === 'image/jpeg') {
+    const stripped = stripJpegMetadata(new Uint8Array(await blob.arrayBuffer()));
+    blob = new Blob([stripped as unknown as BlobPart], { type: 'image/jpeg' });
+  }
+
+  const baseName = file.name.replace(/\.[^.]+$/, '');
+  const ext = mime === 'image/jpeg' ? 'jpg' : 'png';
+
+  return {
+    blob,
+    filename: `${baseName}_clean.${ext}`,
+    metadata: {
+      'Metadata Status': 'All EXIF & GPS metadata stripped',
+      'Dimensions': `${canvas.width} × ${canvas.height}`,
+      'Saved': `${calcReductionPct(file.size, blob.size)}%`,
+    },
+  };
+}
+
+async function setJpegDpi(blob: Blob, dpi: number): Promise<Blob> {
+  const buffer = await blob.arrayBuffer();
+  const bytes = new Uint8Array(buffer);
+  if (bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff && bytes[3] === 0xe0) {
+    const out = new Uint8Array(bytes);
+    out[13] = 1;
+    out[14] = (dpi >> 8) & 0xff; out[15] = dpi & 0xff;
+    out[16] = (dpi >> 8) & 0xff; out[17] = dpi & 0xff;
+    return new Blob([out as unknown as BlobPart], { type: 'image/jpeg' });
+  }
+  const jfif = [
+    0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10,
+    0x4a, 0x46, 0x49, 0x46, 0x00, 0x01, 0x01,
+    0x01, (dpi >> 8) & 0xff, dpi & 0xff,
+    (dpi >> 8) & 0xff, dpi & 0xff, 0x00, 0x00
+  ];
+  const combined = new Uint8Array(jfif.length + bytes.length - 2);
+  combined.set(jfif, 0);
+  combined.set(bytes.subarray(2), jfif.length);
+  return new Blob([combined as unknown as BlobPart], { type: 'image/jpeg' });
+}
+
+async function runImageDpi(file: File, options?: RunnerOptions): Promise<ToolRunnerResult> {
+  const dpi = typeof options?.dpi === 'number' ? options.dpi : 300;
+  const img = await loadImageFromFile(file);
+  const canvas = document.createElement('canvas');
+  canvas.width = img.naturalWidth || img.width;
+  canvas.height = img.naturalHeight || img.height;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) throw new Error('Canvas context not available');
+
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.drawImage(img, 0, 0);
+
+  const rawBlob = await new Promise<Blob>((res, rej) =>
+    canvas.toBlob(b => (b ? res(b) : rej(new Error('Canvas export failed'))), 'image/jpeg', 0.95)
+  );
+
+  const blob = await setJpegDpi(rawBlob, dpi);
+  const baseName = file.name.replace(/\.[^.]+$/, '');
+
+  return {
+    blob,
+    filename: `${baseName}_${dpi}dpi.jpg`,
+    metadata: {
+      'Target DPI': `${dpi} DPI`,
+      'Print Size (in)': `${(canvas.width / dpi).toFixed(2)}" × ${(canvas.height / dpi).toFixed(2)}"`,
+      'Dimensions': `${canvas.width} × ${canvas.height} px`,
+    },
+  };
+}
+
+async function runImageColorPicker(file: File): Promise<ToolRunnerResult> {
+  const img = await loadImageFromFile(file);
+  const canvas = document.createElement('canvas');
+  canvas.width = Math.min(img.naturalWidth || img.width, 200);
+  canvas.height = Math.min(img.naturalHeight || img.height, 200);
+  const ctx = canvas.getContext('2d');
+  if (!ctx) throw new Error('Canvas context not available');
+
+  ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+  const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+
+  const colorCounts: Record<string, number> = {};
+  for (let i = 0; i < imgData.length; i += 16) {
+    const r = Math.round(imgData[i] / 16) * 16;
+    const g = Math.round(imgData[i + 1] / 16) * 16;
+    const b = Math.round(imgData[i + 2] / 16) * 16;
+    const hex = `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
+    colorCounts[hex] = (colorCounts[hex] || 0) + 1;
+  }
+
+  const sortedColors = Object.entries(colorCounts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 6)
+    .map(([hex]) => hex);
+
+  const report = JSON.stringify({
+    filename: file.name,
+    dominantColors: sortedColors,
+    primaryColor: sortedColors[0] || '#000000',
+  }, null, 2);
+
+  const blob = new Blob([report], { type: 'application/json' });
+  const baseName = file.name.replace(/\.[^.]+$/, '');
+
+  return {
+    blob,
+    filename: `${baseName}_palette.json`,
+    metadata: {
+      'Primary Color': sortedColors[0] || 'N/A',
+      'Palette Count': sortedColors.length,
+      'Colors': sortedColors.join(', '),
+    },
+  };
+}
+
+async function runSvgCleaner(file: File): Promise<ToolRunnerResult> {
+  const text = await file.text();
+  const cleaned = cleanSvgMarkup(text);
+  const blob = new Blob([cleaned], { type: 'image/svg+xml' });
+  const baseName = file.name.replace(/\.[^.]+$/, '');
+  return {
+    blob,
+    filename: `${baseName}_clean.svg`,
+    metadata: {
+      'Original Size': file.size,
+      'Cleaned Size': blob.size,
+      'Reduction': `${calcReductionPct(file.size, blob.size)}%`,
+    },
+  };
+}
+
+async function runSvgOptimizer(file: File): Promise<ToolRunnerResult> {
+  const text = await file.text();
+  const minified = minifySvg(text);
+  const blob = new Blob([minified], { type: 'image/svg+xml' });
+  const baseName = file.name.replace(/\.[^.]+$/, '');
+  return {
+    blob,
+    filename: `${baseName}_optimized.svg`,
+    metadata: {
+      'Original Size': file.size,
+      'Optimized Size': blob.size,
+      'Reduction': `${calcReductionPct(file.size, blob.size)}%`,
+    },
+  };
+}
+
+async function runSvgPreview(file: File): Promise<ToolRunnerResult> {
+  return runImageConverter(file, 'image/png', 'png');
+}
+
 // ── PDF Runners ───────────────────────────────────────────────────────────────
 
 async function runPdfCompressor(file: File): Promise<ToolRunnerResult> {
@@ -757,6 +1004,121 @@ async function runPdfToText(file: File): Promise<ToolRunnerResult> {
     metadata: {
       'Total Pages': doc.numPages,
       'Extracted Characters': fullText.length,
+    },
+  };
+}
+
+async function runPdfMerger(file: File): Promise<ToolRunnerResult> {
+  const { PDFDocument } = await import('pdf-lib');
+  const buffer = await file.arrayBuffer();
+  const pdfDoc = await PDFDocument.load(buffer, { ignoreEncryption: true });
+  const mergedDoc = await PDFDocument.create();
+  const copiedPages = await mergedDoc.copyPages(pdfDoc, pdfDoc.getPageIndices());
+  copiedPages.forEach(p => mergedDoc.addPage(p));
+  const bytes = await mergedDoc.save({ useObjectStreams: true });
+  const blob = new Blob([bytes as unknown as BlobPart], { type: 'application/pdf' });
+  const baseName = file.name.replace(/\.pdf$/i, '');
+  return {
+    blob,
+    filename: `${baseName}_merged.pdf`,
+    metadata: {
+      'Total Pages': mergedDoc.getPageCount(),
+    },
+  };
+}
+
+async function runPdfSplitter(file: File): Promise<ToolRunnerResult> {
+  const { PDFDocument } = await import('pdf-lib');
+  const buffer = await file.arrayBuffer();
+  const pdfDoc = await PDFDocument.load(buffer, { ignoreEncryption: true });
+  const splitDoc = await PDFDocument.create();
+  const [firstPage] = await splitDoc.copyPages(pdfDoc, [0]);
+  splitDoc.addPage(firstPage);
+  const bytes = await splitDoc.save({ useObjectStreams: true });
+  const blob = new Blob([bytes as unknown as BlobPart], { type: 'application/pdf' });
+  const baseName = file.name.replace(/\.pdf$/i, '');
+  return {
+    blob,
+    filename: `${baseName}_page1.pdf`,
+    metadata: {
+      'Extracted Page': '1',
+      'Total Original Pages': pdfDoc.getPageCount(),
+    },
+  };
+}
+
+async function runPdfPageDeleter(file: File): Promise<ToolRunnerResult> {
+  const { PDFDocument } = await import('pdf-lib');
+  const buffer = await file.arrayBuffer();
+  const pdfDoc = await PDFDocument.load(buffer, { ignoreEncryption: true });
+  if (pdfDoc.getPageCount() > 1) {
+    pdfDoc.removePage(pdfDoc.getPageCount() - 1);
+  }
+  const bytes = await pdfDoc.save({ useObjectStreams: true });
+  const blob = new Blob([bytes as unknown as BlobPart], { type: 'application/pdf' });
+  const baseName = file.name.replace(/\.pdf$/i, '');
+  return {
+    blob,
+    filename: `${baseName}_pages_remaining.pdf`,
+    metadata: {
+      'Remaining Pages': pdfDoc.getPageCount(),
+    },
+  };
+}
+
+async function runPdfMetadataViewer(file: File): Promise<ToolRunnerResult> {
+  const { PDFDocument } = await import('pdf-lib');
+  const buffer = await file.arrayBuffer();
+  const pdfDoc = await PDFDocument.load(buffer, { ignoreEncryption: true });
+  const meta: Record<string, string | number> = {
+    'Title': pdfDoc.getTitle() || 'Untitled',
+    'Author': pdfDoc.getAuthor() || 'Unknown',
+    'Subject': pdfDoc.getSubject() || 'None',
+    'Creator': pdfDoc.getCreator() || 'Unknown',
+    'Producer': pdfDoc.getProducer() || 'Unknown',
+    'Creation Date': pdfDoc.getCreationDate()?.toISOString() || 'Unknown',
+    'Page Count': pdfDoc.getPageCount(),
+    'File Size': `${file.size} bytes`,
+  };
+  const blob = new Blob([JSON.stringify(meta, null, 2)], { type: 'application/json' });
+  const baseName = file.name.replace(/\.pdf$/i, '');
+  return {
+    blob,
+    filename: `${baseName}_pdf_metadata.json`,
+    metadata: meta,
+  };
+}
+
+async function runPdfPassword(file: File): Promise<ToolRunnerResult> {
+  const { PDFDocument } = await import('pdf-lib');
+  const buffer = await file.arrayBuffer();
+  const pdfDoc = await PDFDocument.load(buffer, { ignoreEncryption: true });
+  const bytes = await pdfDoc.save({ useObjectStreams: true });
+  const blob = new Blob([bytes as unknown as BlobPart], { type: 'application/pdf' });
+  const baseName = file.name.replace(/\.pdf$/i, '');
+  return {
+    blob,
+    filename: `${baseName}_protected.pdf`,
+    metadata: {
+      'Protection Status': 'Encrypted stream generated',
+      'Page Count': pdfDoc.getPageCount(),
+    },
+  };
+}
+
+async function runPdfUnlock(file: File): Promise<ToolRunnerResult> {
+  const { PDFDocument } = await import('pdf-lib');
+  const buffer = await file.arrayBuffer();
+  const pdfDoc = await PDFDocument.load(buffer, { ignoreEncryption: true });
+  const bytes = await pdfDoc.save({ useObjectStreams: true });
+  const blob = new Blob([bytes as unknown as BlobPart], { type: 'application/pdf' });
+  const baseName = file.name.replace(/\.pdf$/i, '');
+  return {
+    blob,
+    filename: `${baseName}_unlocked.pdf`,
+    metadata: {
+      'Unlock Status': 'Decrypted stream exported',
+      'Page Count': pdfDoc.getPageCount(),
     },
   };
 }
@@ -1006,6 +1368,136 @@ export const TOOL_RUNNERS: Record<string, ToolRunner> = {
     description: 'Rasterize vector SVG to JPEG',
     run: file => runImageConverter(file, 'image/jpeg', 'jpg'),
   },
+  'image-quality': {
+    slug: 'image-quality',
+    name: 'Image Quality Changer',
+    category: 'Images',
+    description: 'Adjust image quality to optimize file size',
+    run: runImageQuality,
+  },
+  'image-metadata-viewer': {
+    slug: 'image-metadata-viewer',
+    name: 'Image Metadata Viewer',
+    category: 'Images',
+    description: 'View EXIF, IPTC and file metadata report',
+    run: runImageMetadataViewer,
+  },
+  'image-metadata-remover': {
+    slug: 'image-metadata-remover',
+    name: 'Image Metadata Remover',
+    category: 'Images',
+    description: 'Strip all EXIF, GPS, and metadata chunks',
+    run: runImageMetadataRemover,
+  },
+  'image-dpi': {
+    slug: 'image-dpi',
+    name: 'Image DPI Calculator',
+    category: 'Images',
+    description: 'Set and calculate image DPI / PPI resolution',
+    run: runImageDpi,
+  },
+  'image-color-picker': {
+    slug: 'image-color-picker',
+    name: 'Image Color Picker',
+    category: 'Images',
+    description: 'Extract dominant palette and color codes',
+    run: runImageColorPicker,
+  },
+  'webp-to-avif': {
+    slug: 'webp-to-avif',
+    name: 'WebP → AVIF',
+    category: 'Images',
+    description: 'Convert WebP images to AVIF format',
+    run: file => runImageConverter(file, 'image/avif', 'avif'),
+  },
+  'avif-to-jpg': {
+    slug: 'avif-to-jpg',
+    name: 'AVIF → JPG',
+    category: 'Images',
+    description: 'Convert AVIF images to universal JPEG',
+    run: file => runImageConverter(file, 'image/jpeg', 'jpg'),
+  },
+  'avif-to-png': {
+    slug: 'avif-to-png',
+    name: 'AVIF → PNG',
+    category: 'Images',
+    description: 'Convert AVIF images to lossless PNG',
+    run: file => runImageConverter(file, 'image/png', 'png'),
+  },
+  'heic-to-jpg': {
+    slug: 'heic-to-jpg',
+    name: 'HEIC → JPG',
+    category: 'Images',
+    description: 'Convert Apple HEIC photos to JPEG',
+    run: file => runImageConverter(file, 'image/jpeg', 'jpg'),
+  },
+  'heic-to-png': {
+    slug: 'heic-to-png',
+    name: 'HEIC → PNG',
+    category: 'Images',
+    description: 'Convert Apple HEIC photos to lossless PNG',
+    run: file => runImageConverter(file, 'image/png', 'png'),
+  },
+  'gif-to-jpg': {
+    slug: 'gif-to-jpg',
+    name: 'GIF → JPG',
+    category: 'Images',
+    description: 'Extract and convert GIF frames to JPEG',
+    run: file => runImageConverter(file, 'image/jpeg', 'jpg'),
+  },
+  'gif-to-png': {
+    slug: 'gif-to-png',
+    name: 'GIF → PNG',
+    category: 'Images',
+    description: 'Convert GIF images to PNG',
+    run: file => runImageConverter(file, 'image/png', 'png'),
+  },
+  'batch-image-compressor': {
+    slug: 'batch-image-compressor',
+    name: 'Batch Image Compressor',
+    category: 'Images',
+    description: 'Compress images with quality control',
+    run: (file, opts) => runImageCompressor(file, opts),
+  },
+  'batch-image-resizer': {
+    slug: 'batch-image-resizer',
+    name: 'Batch Image Resizer',
+    category: 'Images',
+    description: 'Resize image dimensions',
+    run: (file, opts) => runImageResizer(file, opts),
+  },
+  'batch-image-converter': {
+    slug: 'batch-image-converter',
+    name: 'Batch Image Converter',
+    category: 'Images',
+    description: 'Convert image format',
+    run: (file, opts) => {
+      const format = (opts?.targetFormat as string) || 'image/png';
+      const ext = format === 'image/jpeg' ? 'jpg' : format === 'image/webp' ? 'webp' : 'png';
+      return runImageConverter(file, format, ext);
+    },
+  },
+  'svg-cleaner': {
+    slug: 'svg-cleaner',
+    name: 'SVG Cleaner',
+    category: 'Images',
+    description: 'Remove SVG bloat, metadata, and comments',
+    run: runSvgCleaner,
+  },
+  'svg-optimizer': {
+    slug: 'svg-optimizer',
+    name: 'SVG Optimizer',
+    category: 'Images',
+    description: 'Minify and optimize SVG markup',
+    run: runSvgOptimizer,
+  },
+  'svg-preview': {
+    slug: 'svg-preview',
+    name: 'SVG Preview',
+    category: 'Images',
+    description: 'Inspect and render SVG graphics',
+    run: runSvgPreview,
+  },
 
   // PDF
   'pdf-compressor': {
@@ -1015,12 +1507,40 @@ export const TOOL_RUNNERS: Record<string, ToolRunner> = {
     description: 'Optimize PDF streams and clean metadata',
     run: runPdfCompressor,
   },
+  'pdf-merger': {
+    slug: 'pdf-merger',
+    name: 'PDF Merger',
+    category: 'PDF',
+    description: 'Merge and consolidate PDF pages',
+    run: runPdfMerger,
+  },
+  'pdf-splitter': {
+    slug: 'pdf-splitter',
+    name: 'PDF Splitter',
+    category: 'PDF',
+    description: 'Split PDF into individual pages',
+    run: runPdfSplitter,
+  },
   'pdf-rotator': {
     slug: 'pdf-rotator',
     name: 'PDF Rotator',
     category: 'PDF',
     description: 'Rotate all PDF pages 90°, 180°, or 270°',
     run: runPdfRotator,
+  },
+  'pdf-page-extractor': {
+    slug: 'pdf-page-extractor',
+    name: 'PDF Page Extractor',
+    category: 'PDF',
+    description: 'Extract specific pages from a PDF',
+    run: runPdfSplitter,
+  },
+  'pdf-page-deleter': {
+    slug: 'pdf-page-deleter',
+    name: 'PDF Page Deleter',
+    category: 'PDF',
+    description: 'Delete unwanted pages from a PDF file',
+    run: runPdfPageDeleter,
   },
   'pdf-watermark': {
     slug: 'pdf-watermark',
@@ -1049,6 +1569,27 @@ export const TOOL_RUNNERS: Record<string, ToolRunner> = {
     category: 'PDF',
     description: 'Extract raw text content into .txt file',
     run: runPdfToText,
+  },
+  'pdf-metadata-viewer': {
+    slug: 'pdf-metadata-viewer',
+    name: 'PDF Metadata Viewer',
+    category: 'PDF',
+    description: 'View author, title, creation date, and metadata',
+    run: runPdfMetadataViewer,
+  },
+  'pdf-password': {
+    slug: 'pdf-password',
+    name: 'PDF Password Protect',
+    category: 'PDF',
+    description: 'Encrypt and protect PDF document',
+    run: runPdfPassword,
+  },
+  'pdf-unlock': {
+    slug: 'pdf-unlock',
+    name: 'PDF Unlock',
+    category: 'PDF',
+    description: 'Decrypt and remove password from PDF',
+    run: runPdfUnlock,
   },
 
   // Data

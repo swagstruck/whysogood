@@ -77,9 +77,9 @@ export function ToolConfigPanel({
     const opts: RunnerOptions = {};
     const slug = tool.slug;
 
-    if (slug === 'image-compressor') {
+    if (slug === 'image-compressor' || slug === 'batch-image-compressor' || slug === 'image-quality') {
       opts.quality = quality;
-    } else if (slug === 'image-resizer') {
+    } else if (slug === 'image-resizer' || slug === 'batch-image-resizer') {
       opts.width = width;
       opts.height = height;
       opts.lockRatio = lockRatio;
@@ -88,7 +88,7 @@ export function ToolConfigPanel({
       opts.angle = angle;
     } else if (slug === 'image-flipper') {
       opts.direction = direction;
-    } else if (slug === 'image-converter') {
+    } else if (slug === 'image-converter' || slug === 'batch-image-converter') {
       opts.targetFormat = targetFormat;
     } else if (slug === 'image-cropper') {
       opts.aspectRatio = cropRatio;
@@ -97,7 +97,7 @@ export function ToolConfigPanel({
     } else if (slug === 'image-watermark' || slug === 'pdf-watermark') {
       opts.text = watermarkText;
       opts.opacity = watermarkOpacity / 100;
-    } else if (slug === 'pdf-to-jpg' || slug === 'pdf-to-png') {
+    } else if (slug === 'pdf-to-jpg' || slug === 'pdf-to-png' || slug === 'image-dpi') {
       opts.dpi = dpi;
     }
 
@@ -159,8 +159,8 @@ export function ToolConfigPanel({
 
       {/* ── Inline Controls by Tool Type ────────────────────────────── */}
 
-      {/* Image Compressor */}
-      {tool.slug === 'image-compressor' && (
+      {/* Image Compressor / Quality Changer */}
+      {(tool.slug === 'image-compressor' || tool.slug === 'batch-image-compressor' || tool.slug === 'image-quality') && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: 'var(--ink)' }}>
             <span>Target Quality: <strong>{quality}%</strong></span>
@@ -177,8 +177,8 @@ export function ToolConfigPanel({
         </div>
       )}
 
-      {/* Image Resizer */}
-      {tool.slug === 'image-resizer' && (
+      {/* Image Resizer / Batch Resizer */}
+      {(tool.slug === 'image-resizer' || tool.slug === 'batch-image-resizer') && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -302,7 +302,7 @@ export function ToolConfigPanel({
       )}
 
       {/* Converter */}
-      {tool.slug === 'image-converter' && (
+      {(tool.slug === 'image-converter' || tool.slug === 'batch-image-converter') && (
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
           <span style={{ fontSize: 13, color: 'var(--ink-2)' }}>Target Format:</span>
           {[
@@ -317,6 +317,23 @@ export function ToolConfigPanel({
               style={{ height: 32, fontSize: 12 }}
             >
               {f.label}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Image DPI */}
+      {tool.slug === 'image-dpi' && (
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+          <span style={{ fontSize: 13, color: 'var(--ink-2)' }}>Target DPI:</span>
+          {[72, 96, 150, 300, 600].map(val => (
+            <button
+              key={val}
+              onClick={() => setDpi(val)}
+              className={`c-btn c-btn--sm ${dpi === val ? 'c-btn--primary' : 'c-btn--secondary'}`}
+              style={{ height: 32, fontSize: 12 }}
+            >
+              {val} DPI {val === 300 ? '(Print)' : val === 72 ? '(Screen)' : ''}
             </button>
           ))}
         </div>
