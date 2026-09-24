@@ -1,10 +1,9 @@
 'use client';
 import React, { useState, useRef } from 'react';
-import { Download, Archive, CheckCircle, FileImage, Trash2 } from 'lucide-react';
+import { Download, CheckCircle, FileImage, Trash2, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
-import { formatFileSize, calcReductionPct, downloadBlob, uid } from '@/lib/utils';
+import { formatFileSize, downloadBlob, uid } from '@/lib/utils';
 import { compressImage } from '@/lib/imageCompressor';
-import { createStreamingZip, type ArchiveFileEntry } from '@/lib/archiveUtils';
 
 interface ImageItem {
   id: string;
@@ -26,28 +25,9 @@ interface ImageItem {
 
 export default function ImageCompressorTool() {
   const [items, setItems] = useState<ImageItem[]>([]);
-  const [quality, setQuality] = useState(82);
-  const [isProcessing, setIsProcessing] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const handleFiles = (files: FileList | null) => {
-    if (!files) return;
-    const newItems: ImageItem[] = Array.from(files).map(file => {
-      const ext = file.name.split('.').pop()?.toLowerCase() || 'img';
-      return {
-        id: uid(),
-        file,
-        name: file.name,
-        originalSize: file.size,
-        format: ext,
-        previewUrl: URL.createObjectURL(file),
-        status: 'pending',
-      };
-    });
-    setItems(prev => [...prev, ...newItems]);
-  };
-
-  const compressSingle = async (item: ImageItem, qVal: number): Promise<ImageItem> => {
+  const compressSingle = async (item: ImageItem, qVal = 82): Promise<ImageItem> => {
     try {
       const result = await compressImage(item.file, {
         quality: qVal / 100,
@@ -81,52 +61,38 @@ export default function ImageCompressorTool() {
     }
   };
 
-  const processAll = async () => {
-    if (!items.length) return;
-    setIsProcessing(true);
+  const handleFiles = (files: FileList | null) => {
+    if (!files || !files.length) return;
+    const newItems: ImageItem[] = Array.from(files).map(file => {
+      const ext = file.name.split('.').pop()?.toLowerCase() || 'img';
+      return {
+        id: uid(),
+        file,
+        name: file.name,
+        originalSize: file.size,
+        format: ext,
+        previewUrl: URL.createObjectURL(file),
+        status: 'processing' as const,
+      };
+    });
 
-    const pending = items.filter(i => i.status !== 'done');
-    if (!pending.length) {
-      setIsProcessing(false);
-      return;
-    }
+    setItems(prev => [...prev, ...newItems]);
 
-    setItems(prev => prev.map(i => (i.status !== 'done' ? { ...i, status: 'processing' } : i)));
-
-    const concurrency = 2; // Strict concurrency throttling for mobile memory safety
+    // Concurrency-throttled auto-compression (2 concurrent tasks)
+    const concurrency = 2;
     let nextIndex = 0;
 
     const runWorker = async () => {
-      while (nextIndex < pending.length) {
-        const itemToProcess = pending[nextIndex++];
-        const updated = await compressSingle(itemToProcess, quality);
+      while (nextIndex < newItems.length) {
+        const itemToProcess = newItems[nextIndex++];
+        const updated = await compressSingle(itemToProcess);
         setItems(prev => prev.map(i => (i.id === updated.id ? updated : i)));
       }
     };
 
-    const workerPromises: Promise<void>[] = [];
-    const count = Math.min(concurrency, pending.length);
+    const count = Math.min(concurrency, newItems.length);
     for (let c = 0; c < count; c++) {
-      workerPromises.push(runWorker());
-    }
-
-    await Promise.all(workerPromises);
-    setIsProcessing(false);
-  };
-
-  const downloadAllZip = async () => {
-    const ready = items.filter(i => i.status === 'done' && i.compressedBlob);
-    if (!ready.length) return;
-
-    try {
-      const entries: ArchiveFileEntry[] = ready.map(item => ({
-        name: item.name,
-        data: item.compressedBlob!,
-      }));
-      const zipBlob = await createStreamingZip(entries);
-      downloadBlob(zipBlob, 'compressed_images.zip');
-    } catch (err) {
-      console.error('Failed to create ZIP archive:', err);
+      runWorker();
     }
   };
 
@@ -137,16 +103,6 @@ export default function ImageCompressorTool() {
       return prev.filter(i => i.id !== id);
     });
   };
-
-  const clearAll = () => {
-    items.forEach(i => { if (i.previewUrl) URL.revokeObjectURL(i.previewUrl); });
-    setItems([]);
-  };
-
-  const doneCount = items.filter(i => i.status === 'done').length;
-  const totalOriginal = items.reduce((acc, i) => acc + i.originalSize, 0);
-  const totalCompressed = items.reduce((acc, i) => acc + (i.compressedSize || i.originalSize), 0);
-  const totalSaved = Math.max(0, totalOriginal - totalCompressed);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
@@ -189,59 +145,7 @@ export default function ImageCompressorTool() {
         </p>
       </div>
 
-      {/* Controls */}
-      {items.length > 0 && (
-        <div className="card" style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 16 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
-            <div style={{ width: '100%', maxWidth: 360 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6, fontSize: 13, fontWeight: 600 }}>
-                <span>Quality</span>
-                <span style={{ color: 'var(--color-accent)' }}>{quality}%</span>
-              </div>
-              <input
-                type="range"
-                min={20}
-                max={95}
-                value={quality}
-                onChange={e => setQuality(Number(e.target.value))}
-                style={{ width: '100%', accentColor: 'var(--color-accent)' }}
-              />
-            </div>
-
-            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-              <Button onClick={processAll} loading={isProcessing}>
-                {isProcessing ? 'Compressing...' : 'Compress All'}
-              </Button>
-              {doneCount > 0 && (
-                <Button variant="secondary" onClick={downloadAllZip} icon={<Archive size={15} />}>
-                  Download ZIP ({doneCount})
-                </Button>
-              )}
-              <Button variant="ghost" onClick={clearAll}>
-                Clear
-              </Button>
-            </div>
-          </div>
-
-          {/* Batch Summary */}
-          {doneCount > 0 && (
-            <div style={{
-              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-              padding: '10px 14px', borderRadius: 'var(--radius-md)',
-              background: 'var(--color-surface2)', fontSize: 13,
-            }}>
-              <span><strong>{doneCount}</strong> of {items.length} files processed</span>
-              <span style={{ color: totalSaved > 0 ? 'var(--color-success)' : 'var(--color-muted)', fontWeight: 600 }}>
-                {totalSaved > 0
-                  ? `Saved ${formatFileSize(totalSaved)} (${calcReductionPct(totalOriginal, totalCompressed)}% smaller)`
-                  : 'Files are already optimal'}
-              </span>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Images List */}
+      {/* Output Cards */}
       {items.length > 0 && (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 16 }}>
           {items.map(item => (
@@ -270,12 +174,25 @@ export default function ImageCompressorTool() {
                 <button
                   onClick={() => removeItem(item.id)}
                   style={{ border: 'none', background: 'none', color: 'var(--color-faint)', cursor: 'pointer', padding: 4 }}
+                  title="Remove image"
                 >
                   <Trash2 size={16} />
                 </button>
               </div>
 
               {/* Status and Metrics */}
+              {item.status === 'processing' && (
+                <div style={{
+                  padding: '8px 10px', borderRadius: 'var(--radius-sm)',
+                  background: 'var(--color-surface2)', fontSize: 12, display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                }}>
+                  <span style={{ color: 'var(--color-accent)', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                    <RefreshCw size={13} style={{ animation: 'spin 1s linear infinite' }} />
+                    Compressing...
+                  </span>
+                </div>
+              )}
+
               {item.status === 'done' && (
                 <div style={{
                   padding: '8px 10px', borderRadius: 'var(--radius-sm)',
@@ -307,6 +224,7 @@ export default function ImageCompressorTool() {
                   variant="secondary"
                   onClick={() => downloadBlob(item.compressedBlob!, `compressed_${item.name}`)}
                   icon={<Download size={13} />}
+                  style={{ width: '100%', justifyContent: 'center' }}
                 >
                   Download
                 </Button>
