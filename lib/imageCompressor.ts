@@ -605,9 +605,10 @@ export async function compressImage(
             imgData.data.byteOffset + imgData.data.byteLength
           );
 
-          // Quality to palette color count mapping
-          // 8-bit palette: cnum = 256 yields 60-80% reduction
-          const cnum = quality >= 0.95 ? 0 : quality >= 0.65 ? 256 : quality >= 0.40 ? 128 : 64;
+          // Continuous smooth palette color count mapping from quality retention percentage
+          const cnum = quality >= 0.99
+            ? 0
+            : Math.max(8, Math.min(256, Math.round(Math.pow(quality, 1.6) * 256)));
 
           const quantizedBuf = UPNG.encode([rgbaBuf], targetW, targetH, cnum);
           let bestBuf = quantizedBuf;

@@ -21,35 +21,18 @@ interface ImageItem {
   compressionStatus?: 'compressed' | 'optimal' | 'fallback' | 'original';
   tierUsed?: 1 | 2 | 3;
   errorMessage?: string;
+  probedBaseSize?: number;
 }
 
 /**
- * Estimates the approximate compressed output size in real-time based on original size,
- * selected quality, and file format heuristics.
+ * Calculates accurate real-time estimated size following the quality retention curve.
  */
-function estimateCompressedSize(originalSize: number, quality: number, format: string): number {
-  if (originalSize <= 0) return 0;
-  const q = quality / 100;
-  let ratio: number;
-  const ext = format.toLowerCase();
-
-  if (ext.includes('png')) {
-    // UPNG 8-bit quantization typically achieves 25% to 45% of original photographic size
-    ratio = 0.20 + (q * 0.25);
-  } else if (ext.includes('svg')) {
-    // SVG minification achieves ~65-75% of original
-    ratio = 0.70;
-  } else if (ext.includes('webp')) {
-    ratio = Math.max(0.15, Math.pow(q, 1.5) * 0.85);
-  } else if (ext.includes('gif')) {
-    ratio = Math.max(0.40, q * 0.85);
-  } else {
-    // JPEG and general raster
-    ratio = Math.max(0.15, Math.pow(q, 1.6) * 0.90);
-  }
-
-  const estimated = Math.round(originalSize * Math.min(0.95, Math.max(0.08, ratio)));
-  return estimated;
+function getEstimatedSize(item: ImageItem, quality: number): number {
+  const base = item.probedBaseSize || Math.round(item.originalSize * 0.4);
+  // Scaling factor relative to 80% baseline
+  const factor = Math.pow(quality / 80, 1.35);
+  const estimated = Math.round(base * factor);
+  return Math.max(Math.round(item.originalSize * 0.005), Math.min(Math.round(item.originalSize * 0.98), estimated));
 }
 
 export default function ImageCompressorTool() {
@@ -63,6 +46,16 @@ export default function ImageCompressorTool() {
     if (!files || !files.length) return;
     const newItems: ImageItem[] = Array.from(files).map(file => {
       const ext = file.name.split('.').pop()?.toLowerCase() || 'img';
+      // Initial heuristic based on format and file size
+      let defaultRatio = 0.45;
+      if (ext === 'png') {
+        defaultRatio = file.size > 10 * 1024 * 1024 ? 0.015 : 0.25;
+      } else if (ext === 'svg') {
+        defaultRatio = 0.70;
+      } else if (ext === 'webp') {
+        defaultRatio = 0.40;
+      }
+
       return {
         id: uid(),
         file,
@@ -71,11 +64,26 @@ export default function ImageCompressorTool() {
         format: ext,
         previewUrl: URL.createObjectURL(file),
         status: 'pending' as const,
+        probedBaseSize: Math.round(file.size * defaultRatio),
       };
     });
 
     setItems(newItems);
     setHasCompressed(false);
+
+    // Fast background probe to calibrate real-time slider to the file's exact compression curve
+    newItems.forEach(async item => {
+      try {
+        const probeRes = await compressImage(item.file, { quality: 0.80 });
+        if (probeRes && probeRes.compressedSize > 0) {
+          setItems(prev =>
+            prev.map(i => (i.id === item.id ? { ...i, probedBaseSize: probeRes.compressedSize } : i))
+          );
+        }
+      } catch {
+        // Fallback safely to initial heuristic
+      }
+    });
   };
 
   const compressSingle = async (item: ImageItem, qVal: number): Promise<ImageItem> => {
@@ -163,7 +171,7 @@ export default function ImageCompressorTool() {
 
   const totalOriginal = items.reduce((acc, i) => acc + i.originalSize, 0);
   const totalApproxSize = items.reduce(
-    (acc, i) => acc + estimateCompressedSize(i.originalSize, quality, i.format),
+    (acc, i) => acc + getEstimatedSize(i, quality),
     0
   );
 
@@ -391,6 +399,17 @@ export default function ImageCompressorTool() {
                   Download
                 </Button>
               )}
+
+              {/* Re-adjust link */}
+              <button
+                onClick={() => setHasCompressed(false)}
+                style={{
+                  border: 'none', background: 'none', color: 'var(--color-accent)',
+                  fontSize: 12, cursor: 'pointer', textAlign: 'center', textDecoration: 'underline'
+                }}
+              >
+                Change quality or re-compress
+              </button>
             </div>
           ))}
         </div>
