@@ -97,7 +97,7 @@ export default function HomePage() {
       {/* ── Hero ──────────────────────────────────────────────────────── */}
       <section style={{ textAlign: 'center', padding: '72px 16px 48px' }}>
         <h1 style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)', fontWeight: 800, letterSpacing: '-0.04em', lineHeight: 1.15, margin: '0 0 16px', color: 'var(--ink)' }}>
-          100 Tools. Free. Private. Forever.
+          100+ Tools. Free and Private Forever.
         </h1>
         <p style={{ fontSize: 'clamp(1rem, 2vw, 1.15rem)', color: 'var(--ink-2)', margin: '0 auto 36px', maxWidth: 620, lineHeight: 1.6 }}>
           Drop your files, explore categories, or search below to start right away. Everything computes directly in your browser tab—no queues, no waiting, and zero data exposure.
