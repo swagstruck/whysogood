@@ -2,6 +2,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Stamp, Download } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { Select } from '@/components/ui/Select';
 import { FieldMessage } from '@/components/ui/FieldMessage';
 import { formatFileSize, downloadBlob } from '@/lib/utils';
 import { useToast } from '@/components/ui/ToastProvider';
@@ -171,16 +172,20 @@ export default function ImageWatermarkTool() {
                 <input type="color" value={color} onChange={e => setColor(e.target.value)} style={{ width: 44, height: 36, border: 'none', background: 'none', cursor: 'pointer' }} />
               </div>
               <div style={{ flex: 1 }}>
-                <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--color-muted)', marginBottom: 4 }}>Position</label>
-                <select value={position} onChange={e => setPosition(e.target.value as Position)}
-                  style={{ width: '100%', height: 36, padding: '0 10px', background: 'var(--color-surface2)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', color: 'var(--color-text)', fontSize: 13, outline: 'none' }}>
-                  <option value="center">Center</option>
-                  <option value="bottom-right">Bottom-Right</option>
-                  <option value="bottom-left">Bottom-Left</option>
-                  <option value="top-right">Top-Right</option>
-                  <option value="top-left">Top-Left</option>
-                  <option value="tiled">Tiled (Diagonal Pattern)</option>
-                </select>
+                <Select
+                  label="Position"
+                  selectSize="sm"
+                  value={position}
+                  onChange={e => setPosition(e.target.value as Position)}
+                  options={[
+                    { value: 'center', label: 'Center' },
+                    { value: 'bottom-right', label: 'Bottom-Right' },
+                    { value: 'bottom-left', label: 'Bottom-Left' },
+                    { value: 'top-right', label: 'Top-Right' },
+                    { value: 'top-left', label: 'Top-Left' },
+                    { value: 'tiled', label: 'Tiled (Diagonal Pattern)' },
+                  ]}
+                />
               </div>
             </div>
 

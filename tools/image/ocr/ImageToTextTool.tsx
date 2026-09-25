@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { formatFileSize, downloadBlob, copyToClipboard } from '@/lib/utils';
 import { useToast } from '@/components/ui/ToastProvider';
+import { Select } from '@/components/ui/Select';
 
 interface ExtractedLine {
   id: number;
@@ -313,31 +314,23 @@ export default function ImageToTextTool() {
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-              <select
+              <Select
+                selectSize="sm"
+                fullWidth={false}
                 value={selectedLanguage}
                 onChange={e => {
                   const newLang = e.target.value as 'eng' | 'spa' | 'fra' | 'deu';
                   setSelectedLanguage(newLang);
                   if (file && previewUrl) extractTextFromImage(file, previewUrl, newLang);
                 }}
-                className="c-select"
-                style={{
-                  height: 36,
-                  fontSize: 13,
-                  padding: '0 10px',
-                  borderRadius: 'var(--radius-md)',
-                  background: 'var(--bg-2)',
-                  border: '1px solid var(--border)',
-                  color: 'var(--ink)',
-                  outline: 'none',
-                  cursor: 'pointer',
-                }}
-              >
-                <option value="eng">Language: English</option>
-                <option value="spa">Language: Spanish</option>
-                <option value="fra">Language: French</option>
-                <option value="deu">Language: German</option>
-              </select>
+                options={[
+                  { value: 'eng', label: 'Language: English' },
+                  { value: 'spa', label: 'Language: Spanish' },
+                  { value: 'fra', label: 'Language: French' },
+                  { value: 'deu', label: 'Language: German' },
+                ]}
+                style={{ minWidth: 170 }}
+              />
 
               <button
                 onClick={() => previewUrl && extractTextFromImage(file, previewUrl, selectedLanguage)}

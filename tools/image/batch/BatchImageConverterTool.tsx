@@ -2,6 +2,7 @@
 import React, { useState, useRef } from 'react';
 import { RefreshCw, Download, Archive, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { Select } from '@/components/ui/Select';
 import { formatFileSize, downloadBlob, uid } from '@/lib/utils';
 import { useToast } from '@/components/ui/ToastProvider';
 import { createStreamingZip, type ArchiveFileEntry } from '@/lib/archiveUtils';
@@ -158,17 +159,14 @@ export default function BatchImageConverterTool() {
             <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--color-muted)' }}>Target:</span>
-                <select
+                <Select
+                  selectSize="sm"
+                  fullWidth={false}
                   value={targetFormat}
                   onChange={e => setTargetFormat(e.target.value)}
-                  style={{
-                    height: 32, padding: '0 10px', background: 'var(--color-surface2)',
-                    border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)',
-                    color: 'var(--color-text)', fontSize: 12, outline: 'none',
-                  }}
-                >
-                  {FORMATS.map(f => <option key={f.value} value={f.value}>{f.label}</option>)}
-                </select>
+                  options={FORMATS}
+                  style={{ minWidth: 140 }}
+                />
               </div>
 
               {targetFormat !== 'image/png' && (

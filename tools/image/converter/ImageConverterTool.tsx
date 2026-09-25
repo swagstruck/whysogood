@@ -2,6 +2,7 @@
 import React, { useState, useRef } from 'react';
 import { RefreshCw, Download, ArrowRight, Sliders, CheckCircle2, FileImage } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { Select } from '@/components/ui/Select';
 import { formatFileSize, downloadBlob } from '@/lib/utils';
 import { useToast } from '@/components/ui/ToastProvider';
 
@@ -366,34 +367,12 @@ export default function ImageConverterTool({ initialOutput }: ImageConverterTool
 
               {/* Output Format Selector */}
               <div>
-                <label style={{ display: 'block', fontSize: 13, fontWeight: 700, color: 'var(--color-text)', marginBottom: 8 }}>
-                  Choose Output Format
-                </label>
-                <div style={{ position: 'relative' }}>
-                  <select
-                    value={targetFormat}
-                    onChange={e => setTargetFormat(e.target.value)}
-                    style={{
-                      width: '100%',
-                      height: 44,
-                      padding: '0 14px',
-                      background: 'var(--color-surface2)',
-                      border: '1px solid var(--color-border)',
-                      borderRadius: 'var(--radius-md)',
-                      color: 'var(--color-text)',
-                      fontSize: 14,
-                      fontWeight: 600,
-                      outline: 'none',
-                      cursor: 'pointer',
-                    }}
-                  >
-                    {OUTPUT_FORMATS.map(fmt => (
-                      <option key={fmt.value} value={fmt.value}>
-                        {fmt.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                <Select
+                  label="Choose Output Format"
+                  value={targetFormat}
+                  onChange={e => setTargetFormat(e.target.value)}
+                  options={OUTPUT_FORMATS}
+                />
                 <div style={{ fontSize: 12, color: 'var(--color-muted)', marginTop: 6, display: 'flex', alignItems: 'center', gap: 6 }}>
                   <span>Conversion:</span>
                   <span style={{ fontWeight: 700, color: 'var(--color-text)' }}>

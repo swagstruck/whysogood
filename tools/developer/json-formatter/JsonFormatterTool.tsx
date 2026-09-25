@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { Copy, Download, Trash2, Check, AlertCircle, FileCode } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { Select } from '@/components/ui/Select';
 import { useToast } from '@/components/ui/ToastProvider';
 import { copyToClipboard, downloadBlob } from '@/lib/utils';
 
@@ -100,23 +101,18 @@ export default function JsonFormatterTool() {
           <Button variant="ghost" onClick={loadSample}>Sample</Button>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--color-muted)', marginLeft: 8 }}>
             <span>Indent:</span>
-            <select
+            <Select
+              selectSize="sm"
+              fullWidth={false}
               value={indent}
               onChange={e => setIndent(Number(e.target.value))}
-              style={{
-                background: 'var(--color-surface2)',
-                border: '1px solid var(--color-border)',
-                color: 'var(--color-text)',
-                borderRadius: 'var(--radius-sm)',
-                padding: '4px 8px',
-                fontSize: 13,
-                outline: 'none',
-              }}
-            >
-              <option value={2}>2 spaces</option>
-              <option value={4}>4 spaces</option>
-              <option value={1}>Tab</option>
-            </select>
+              options={[
+                { value: 2, label: '2 spaces' },
+                { value: 4, label: '4 spaces' },
+                { value: 1, label: 'Tab' },
+              ]}
+              style={{ width: 110 }}
+            />
           </div>
         </div>
 

@@ -2,6 +2,7 @@
 import React, { useState, useRef } from 'react';
 import { Download, RefreshCw, Lock, Unlock, Image as ImageIcon } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { Select } from '@/components/ui/Select';
 import { FieldMessage } from '@/components/ui/FieldMessage';
 import { formatFileSize, downloadBlob } from '@/lib/utils';
 import { useToast } from '@/components/ui/ToastProvider';
@@ -207,19 +208,18 @@ export default function ImageResizerTool() {
             </div>
 
             {/* Output Format */}
-            <div>
-              <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--color-muted)', marginBottom: 4 }}>Format</label>
-              <select
-                value={format}
-                onChange={e => setFormat(e.target.value as typeof format)}
-                style={{ width: '100%', height: 38, padding: '0 10px', background: 'var(--color-surface2)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', color: 'var(--color-text)', fontSize: 13, outline: 'none' }}
-              >
-                <option value="original">Keep Original</option>
-                <option value="image/jpeg">JPEG (.jpg)</option>
-                <option value="image/png">PNG (.png)</option>
-                <option value="image/webp">WebP (.webp)</option>
-              </select>
-            </div>
+            <Select
+              label="Format"
+              selectSize="sm"
+              value={format}
+              onChange={e => setFormat(e.target.value as typeof format)}
+              options={[
+                { value: 'original', label: 'Keep Original' },
+                { value: 'image/jpeg', label: 'JPEG (.jpg)' },
+                { value: 'image/png', label: 'PNG (.png)' },
+                { value: 'image/webp', label: 'WebP (.webp)' },
+              ]}
+            />
 
             {format !== 'image/png' && (
               <div>

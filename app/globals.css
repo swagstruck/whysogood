@@ -112,6 +112,50 @@ body {
   outline: none;
 }
 
+/* ── Global Select & Dropdown Styling ───────────────────────── */
+select:not([multiple]),
+.select-base {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-color: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 500;
+  height: 42px;
+  padding: 0 38px 0 14px;
+  cursor: pointer;
+  box-sizing: border-box;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23A1A1A1' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  background-size: 14px;
+  transition: border-color var(--transition-fast), background var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+select:not([multiple]):hover:not(:disabled),
+.select-base:hover:not(:disabled) {
+  border-color: var(--border-hover);
+  background-color: var(--bg-3);
+}
+
+select:not([multiple]):focus,
+.select-base:focus {
+  border-color: var(--brand);
+  outline: none;
+  box-shadow: 0 0 0 3px var(--brand-subtle);
+}
+
+[data-theme="light"] select:not([multiple]),
+html.light select:not([multiple]),
+[data-theme="light"] .select-base,
+html.light .select-base {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2364748B' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+}
+
 /* ── Field message (shadcn FormMessage pattern) ─────────────── */
 .field-message {
   display: flex;
