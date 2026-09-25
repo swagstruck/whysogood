@@ -43,6 +43,7 @@ function scoreMatch(tool: Tool, q: string): number {
 export function searchTools(query: string, limit = 8): SearchResult[] {
   if (!query.trim()) return [];
   return TOOLS_DEDUPED
+    .filter(tool => !tool.hidden)
     .map(tool => ({ tool, score: scoreMatch(tool, query) }))
     .filter(r => r.score > 0)
     .sort((a, b) => b.score - a.score || a.tool.name.localeCompare(b.tool.name))

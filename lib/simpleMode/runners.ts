@@ -1237,12 +1237,24 @@ export const TOOL_RUNNERS: Record<string, ToolRunner> = {
   },
   'image-converter': {
     slug: 'image-converter',
-    name: 'Image Converter',
+    name: 'Image Format Changer',
     category: 'Images',
-    description: 'Convert between PNG, JPG, and WebP',
+    description: 'Convert between JPG, PNG, WebP, AVIF, and BMP with auto-detected input',
     run: (file, opts) => {
       const format = (opts?.targetFormat as string) || 'image/png';
-      const ext = format === 'image/jpeg' ? 'jpg' : format === 'image/webp' ? 'webp' : 'png';
+      const ext = format === 'image/jpeg' ? 'jpg' : format === 'image/webp' ? 'webp' : format === 'image/avif' ? 'avif' : format === 'image/bmp' ? 'bmp' : 'png';
+      const rawQ = typeof opts?.quality === 'number' ? opts.quality : 90;
+      return runImageConverter(file, format, ext, rawQ / 100);
+    },
+  },
+  'image-format-changer': {
+    slug: 'image-format-changer',
+    name: 'Image Format Changer',
+    category: 'Images',
+    description: 'Convert between JPG, PNG, WebP, AVIF, and BMP with auto-detected input',
+    run: (file, opts) => {
+      const format = (opts?.targetFormat as string) || 'image/png';
+      const ext = format === 'image/jpeg' ? 'jpg' : format === 'image/webp' ? 'webp' : format === 'image/avif' ? 'avif' : format === 'image/bmp' ? 'bmp' : 'png';
       const rawQ = typeof opts?.quality === 'number' ? opts.quality : 90;
       return runImageConverter(file, format, ext, rawQ / 100);
     },

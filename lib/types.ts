@@ -28,6 +28,7 @@ export interface Tool {
   dataStorage: 'none';
   isNew?: boolean;
   isBeta?: boolean;
+  hidden?: boolean;
 }
 
 export type Theme = 'dark' | 'light' | 'system';

@@ -14,6 +14,7 @@ const TOOL_COMPONENTS: Record<string, React.LazyExoticComponent<React.ComponentT
   'image-rotator': lazy(() => import('@/tools/image/rotator/ImageRotatorTool')),
   'image-flipper': lazy(() => import('@/tools/image/flipper/ImageFlipperTool')),
   'image-converter': lazy(() => import('@/tools/image/converter/ImageConverterTool')),
+  'image-format-changer': lazy(() => import('@/tools/image/converter/ImageConverterTool')),
   'image-quality': lazy(() => import('@/tools/image/quality/ImageQualityTool')),
   'image-metadata-viewer': lazy(() => import('@/tools/image/metadata/ImageMetadataViewerTool')),
   'image-metadata-remover': lazy(() => import('@/tools/image/metadata/ImageMetadataRemoverTool')),

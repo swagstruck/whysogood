@@ -42,7 +42,7 @@ export function CategoryParallelExplorer() {
   const displayedTools = useMemo(() => {
     let list: Tool[] = [];
     if (selectedCategory === 'All') {
-      list = TOOLS_DEDUPED;
+      list = TOOLS_DEDUPED.filter(t => !t.hidden);
     } else {
       list = getToolsByCategory(selectedCategory);
     }

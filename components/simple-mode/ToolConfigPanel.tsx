@@ -88,7 +88,7 @@ export function ToolConfigPanel({
       opts.angle = angle;
     } else if (slug === 'image-flipper') {
       opts.direction = direction;
-    } else if (slug === 'image-converter' || slug === 'batch-image-converter') {
+    } else if (slug === 'image-converter' || slug === 'image-format-changer' || slug === 'batch-image-converter') {
       opts.targetFormat = targetFormat;
     } else if (slug === 'image-cropper') {
       opts.aspectRatio = cropRatio;
@@ -302,13 +302,15 @@ export function ToolConfigPanel({
       )}
 
       {/* Converter */}
-      {(tool.slug === 'image-converter' || tool.slug === 'batch-image-converter') && (
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+      {(tool.slug === 'image-converter' || tool.slug === 'image-format-changer' || tool.slug === 'batch-image-converter') && (
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
           <span style={{ fontSize: 13, color: 'var(--ink-2)' }}>Target Format:</span>
           {[
             { label: 'PNG (Lossless)', val: 'image/png' },
             { label: 'JPEG (Compact)', val: 'image/jpeg' },
             { label: 'WebP (Modern)', val: 'image/webp' },
+            { label: 'AVIF (Next-Gen)', val: 'image/avif' },
+            { label: 'BMP (Bitmap)', val: 'image/bmp' },
           ].map(f => (
             <button
               key={f.val}
