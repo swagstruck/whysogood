@@ -2,6 +2,10 @@ import type { ToolRunner, ToolRunnerResult, RunnerOptions, SimpleModeOutput } fr
 import { calcReductionPct } from '../utils';
 import { compressImage, stripJpegMetadata as safeStripJpegMetadata, minifySvgSync } from '../imageCompressor';
 import { createStreamingZip, type ArchiveFileEntry } from '../archiveUtils';
+import { formatHtml, formatCss, formatJs, formatSql } from '../developer/formatters';
+import { minifyHtml, minifyCss, minifyJson } from '../developer/minifiers';
+import { jsonToCsv, jsonToXml, xmlToJson, markdownToHtml } from '../developer/converters';
+import { validateJson } from '../developer/utilities';
 
 // ── Shared Helpers ────────────────────────────────────────────────────────────
 
@@ -1131,6 +1135,155 @@ async function runJsonFormatter(file: File): Promise<ToolRunnerResult> {
   };
 }
 
+async function runHtmlFormatter(file: File, options?: RunnerOptions): Promise<ToolRunnerResult> {
+  const text = await file.text();
+  const res = formatHtml(text, options as any);
+  const outBlob = new Blob([res.formatted], { type: 'text/html' });
+  const baseName = file.name.replace(/\.[^/.]+$/, '') || 'formatted';
+  return {
+    blob: outBlob,
+    filename: `${baseName}.html`,
+    metadata: { 'Original Size': file.size, 'Formatted Size': outBlob.size },
+  };
+}
+
+async function runCssFormatter(file: File, options?: RunnerOptions): Promise<ToolRunnerResult> {
+  const text = await file.text();
+  const res = formatCss(text, options as any);
+  const outBlob = new Blob([res.formatted], { type: 'text/css' });
+  const baseName = file.name.replace(/\.[^/.]+$/, '') || 'formatted';
+  return {
+    blob: outBlob,
+    filename: `${baseName}.css`,
+    metadata: { 'Original Size': file.size, 'Formatted Size': outBlob.size },
+  };
+}
+
+async function runJsFormatter(file: File, options?: RunnerOptions): Promise<ToolRunnerResult> {
+  const text = await file.text();
+  const res = formatJs(text, options as any);
+  const outBlob = new Blob([res.formatted], { type: 'application/javascript' });
+  const baseName = file.name.replace(/\.[^/.]+$/, '') || 'formatted';
+  return {
+    blob: outBlob,
+    filename: `${baseName}.js`,
+    metadata: { 'Original Size': file.size, 'Formatted Size': outBlob.size },
+  };
+}
+
+async function runSqlFormatter(file: File, options?: RunnerOptions): Promise<ToolRunnerResult> {
+  const text = await file.text();
+  const res = formatSql(text, options as any);
+  const outBlob = new Blob([res.formatted], { type: 'application/sql' });
+  const baseName = file.name.replace(/\.[^/.]+$/, '') || 'formatted';
+  return {
+    blob: outBlob,
+    filename: `${baseName}.sql`,
+    metadata: { 'Original Size': file.size, 'Formatted Size': outBlob.size },
+  };
+}
+
+async function runHtmlMinifier(file: File): Promise<ToolRunnerResult> {
+  const text = await file.text();
+  const res = minifyHtml(text);
+  const outBlob = new Blob([res.minified], { type: 'text/html' });
+  const baseName = file.name.replace(/\.[^/.]+$/, '') || 'minified';
+  return {
+    blob: outBlob,
+    filename: `${baseName}.min.html`,
+    metadata: { 'Original Size': file.size, 'Minified Size': outBlob.size, 'Reduction': `${res.reductionPercentage}%` },
+  };
+}
+
+async function runCssMinifier(file: File): Promise<ToolRunnerResult> {
+  const text = await file.text();
+  const res = minifyCss(text);
+  const outBlob = new Blob([res.minified], { type: 'text/css' });
+  const baseName = file.name.replace(/\.[^/.]+$/, '') || 'minified';
+  return {
+    blob: outBlob,
+    filename: `${baseName}.min.css`,
+    metadata: { 'Original Size': file.size, 'Minified Size': outBlob.size, 'Reduction': `${res.reductionPercentage}%` },
+  };
+}
+
+async function runJsonMinifier(file: File): Promise<ToolRunnerResult> {
+  const text = await file.text();
+  const res = minifyJson(text);
+  const outBlob = new Blob([res.minified], { type: 'application/json' });
+  const baseName = file.name.replace(/\.[^/.]+$/, '') || 'minified';
+  return {
+    blob: outBlob,
+    filename: `${baseName}.min.json`,
+    metadata: { 'Original Size': file.size, 'Minified Size': outBlob.size, 'Reduction': `${res.reductionPercentage}%` },
+  };
+}
+
+async function runJsonToCsv(file: File, options?: RunnerOptions): Promise<ToolRunnerResult> {
+  const text = await file.text();
+  const res = jsonToCsv(text, options as any);
+  if (res.error) throw new Error(res.error);
+  const outBlob = new Blob([res.output], { type: 'text/csv' });
+  const baseName = file.name.replace(/\.[^/.]+$/, '') || 'converted';
+  return {
+    blob: outBlob,
+    filename: `${baseName}.csv`,
+    metadata: { 'Original Size': file.size, 'CSV Size': outBlob.size },
+  };
+}
+
+async function runJsonToXml(file: File, options?: RunnerOptions): Promise<ToolRunnerResult> {
+  const text = await file.text();
+  const res = jsonToXml(text, options as any);
+  if (res.error) throw new Error(res.error);
+  const outBlob = new Blob([res.output], { type: 'application/xml' });
+  const baseName = file.name.replace(/\.[^/.]+$/, '') || 'converted';
+  return {
+    blob: outBlob,
+    filename: `${baseName}.xml`,
+    metadata: { 'Original Size': file.size, 'XML Size': outBlob.size },
+  };
+}
+
+async function runXmlToJson(file: File, options?: RunnerOptions): Promise<ToolRunnerResult> {
+  const text = await file.text();
+  const res = xmlToJson(text, options as any);
+  if (res.error) throw new Error(res.error);
+  const outBlob = new Blob([res.output], { type: 'application/json' });
+  const baseName = file.name.replace(/\.[^/.]+$/, '') || 'converted';
+  return {
+    blob: outBlob,
+    filename: `${baseName}.json`,
+    metadata: { 'Original Size': file.size, 'JSON Size': outBlob.size },
+  };
+}
+
+async function runMarkdownToHtml(file: File, options?: RunnerOptions): Promise<ToolRunnerResult> {
+  const text = await file.text();
+  const res = markdownToHtml(text, options as any);
+  if (res.error) throw new Error(res.error);
+  const outBlob = new Blob([res.html], { type: 'text/html' });
+  const baseName = file.name.replace(/\.[^/.]+$/, '') || 'converted';
+  return {
+    blob: outBlob,
+    filename: `${baseName}.html`,
+    metadata: { 'Original Size': file.size, 'HTML Size': outBlob.size },
+  };
+}
+
+async function runJsonValidator(file: File): Promise<ToolRunnerResult> {
+  const text = await file.text();
+  const res = validateJson(text);
+  if (!res.isValid) throw new Error(res.error?.message || 'Invalid JSON syntax');
+  const outBlob = new Blob([res.formatted || text], { type: 'application/json' });
+  const baseName = file.name.replace(/\.[^/.]+$/, '') || 'validated';
+  return {
+    blob: outBlob,
+    filename: `${baseName}.json`,
+    metadata: { 'Validation': 'Valid', 'Size': outBlob.size },
+  };
+}
+
 async function runWordCounter(file: File): Promise<ToolRunnerResult> {
   const text = await file.text();
   const words = text.trim() ? text.trim().split(/\s+/).length : 0;
@@ -1583,6 +1736,90 @@ export const TOOL_RUNNERS: Record<string, ToolRunner> = {
     category: 'Developer',
     description: 'Validate and pretty-print JSON',
     run: runJsonFormatter,
+  },
+  'html-formatter': {
+    slug: 'html-formatter',
+    name: 'HTML Formatter',
+    category: 'Developer',
+    description: 'Format and beautify HTML markup',
+    run: runHtmlFormatter,
+  },
+  'css-formatter': {
+    slug: 'css-formatter',
+    name: 'CSS Formatter',
+    category: 'Developer',
+    description: 'Format and beautify stylesheets',
+    run: runCssFormatter,
+  },
+  'js-formatter': {
+    slug: 'js-formatter',
+    name: 'JS Formatter',
+    category: 'Developer',
+    description: 'Format JavaScript and TypeScript code',
+    run: runJsFormatter,
+  },
+  'sql-formatter': {
+    slug: 'sql-formatter',
+    name: 'SQL Formatter',
+    category: 'Developer',
+    description: 'Beautify SQL database queries',
+    run: runSqlFormatter,
+  },
+  'html-minifier': {
+    slug: 'html-minifier',
+    name: 'HTML Minifier',
+    category: 'Developer',
+    description: 'Minify HTML markup and strip comments',
+    run: runHtmlMinifier,
+  },
+  'css-minifier': {
+    slug: 'css-minifier',
+    name: 'CSS Minifier',
+    category: 'Developer',
+    description: 'Minify CSS and compress declarations',
+    run: runCssMinifier,
+  },
+  'json-minifier': {
+    slug: 'json-minifier',
+    name: 'JSON Minifier',
+    category: 'Developer',
+    description: 'Compress JSON payload to minimal size',
+    run: runJsonMinifier,
+  },
+  'json-to-csv': {
+    slug: 'json-to-csv',
+    name: 'JSON → CSV',
+    category: 'Developer',
+    description: 'Convert JSON data arrays to CSV format',
+    run: runJsonToCsv,
+  },
+  'json-to-xml': {
+    slug: 'json-to-xml',
+    name: 'JSON → XML',
+    category: 'Developer',
+    description: 'Convert JSON documents to XML',
+    run: runJsonToXml,
+  },
+  'xml-to-json': {
+    slug: 'xml-to-json',
+    name: 'XML → JSON',
+    category: 'Developer',
+    description: 'Parse XML and convert to clean JSON',
+    run: runXmlToJson,
+  },
+  'markdown-to-html': {
+    slug: 'markdown-to-html',
+    name: 'Markdown → HTML',
+    category: 'Developer',
+    description: 'Convert Markdown to clean HTML markup',
+    run: runMarkdownToHtml,
+  },
+  'json-validator': {
+    slug: 'json-validator',
+    name: 'JSON Validator',
+    category: 'Developer',
+    description: 'Validate JSON syntax and structure',
+    run: runJsonValidator,
   },
 
   // Text
