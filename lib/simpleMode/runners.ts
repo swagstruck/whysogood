@@ -6,6 +6,15 @@ import { formatHtml, formatCss, formatJs, formatSql } from '../developer/formatt
 import { minifyHtml, minifyCss, minifyJson } from '../developer/minifiers';
 import { jsonToCsv, jsonToXml, xmlToJson, markdownToHtml } from '../developer/converters';
 import { validateJson } from '../developer/utilities';
+import {
+  cleanCsv,
+  deduplicateCsv,
+  extractColumns,
+  sortCsv,
+  yamlToJson,
+  jsonToYaml,
+  jsonToCsvData,
+} from '../data';
 
 // ── Shared Helpers ────────────────────────────────────────────────────────────
 
@@ -1113,6 +1122,158 @@ async function runCsvToJson(file: File): Promise<ToolRunnerResult> {
   };
 }
 
+async function runJsonToCsvData(file: File): Promise<ToolRunnerResult> {
+  const text = await file.text();
+  const res = jsonToCsvData(text, {
+    delimiter: ',',
+    flattenObjects: true,
+    includeHeaders: true,
+  });
+  if (res.error) {
+    throw new Error(`Failed to convert JSON to CSV: ${res.error.message}`);
+  }
+  const blob = new Blob([res.csv], { type: 'text/csv;charset=utf-8' });
+  const baseName = file.name.replace(/\.[^.]+$/, '');
+  return {
+    blob,
+    filename: `${baseName}.csv`,
+    metadata: {
+      'Total Rows': res.rowCount,
+      'Total Columns': res.columnCount,
+    },
+  };
+}
+
+async function runCsvCleaner(file: File): Promise<ToolRunnerResult> {
+  const text = await file.text();
+  const res = cleanCsv(text, {
+    trimWhitespace: true,
+    removeBlankRows: true,
+    repairUnevenRows: true,
+    normalizeLineBreaks: true,
+  });
+  if (res.error) {
+    throw new Error(`Failed to clean CSV: ${res.error.message}`);
+  }
+  const blob = new Blob([res.output], { type: 'text/csv;charset=utf-8' });
+  const baseName = file.name.replace(/\.[^.]+$/, '');
+  return {
+    blob,
+    filename: `${baseName}_cleaned.csv`,
+    metadata: {
+      'Rows Before': res.metrics.originalRowCount,
+      'Rows After': res.metrics.cleanedRowCount,
+      'Empty Rows Removed': res.metrics.blankRowsRemoved,
+      'Repaired Rows': res.metrics.unevenRowsRepaired,
+      'Fields Trimmed': res.metrics.fieldsTrimmed,
+    },
+  };
+}
+
+async function runCsvDeduplicator(file: File): Promise<ToolRunnerResult> {
+  const text = await file.text();
+  const res = deduplicateCsv(text, {
+    strategy: 'keep-first',
+    caseSensitive: true,
+  });
+  if (res.error) {
+    throw new Error(`Failed to deduplicate CSV: ${res.error.message}`);
+  }
+  const blob = new Blob([res.output], { type: 'text/csv;charset=utf-8' });
+  const baseName = file.name.replace(/\.[^.]+$/, '');
+  return {
+    blob,
+    filename: `${baseName}_deduped.csv`,
+    metadata: {
+      'Original Rows': res.metrics.originalRowCount,
+      'Unique Rows': res.metrics.uniqueRowCount,
+      'Duplicates Removed': res.metrics.duplicatesRemoved,
+      'Duplicate Rate': `${res.metrics.duplicatePercentage.toFixed(1)}%`,
+    },
+  };
+}
+
+async function runCsvColumnExtractor(file: File): Promise<ToolRunnerResult> {
+  const text = await file.text();
+  const res = extractColumns(text);
+  if (res.error) {
+    throw new Error(`Failed to extract columns: ${res.error.message}`);
+  }
+  const blob = new Blob([res.output], { type: 'text/csv;charset=utf-8' });
+  const baseName = file.name.replace(/\.[^.]+$/, '');
+  return {
+    blob,
+    filename: `${baseName}_extracted.csv`,
+    metadata: {
+      'Extracted Columns': res.columnsExtractedCount,
+      'Total Columns': res.totalColumnsCount,
+      'Total Rows': res.rows.length,
+    },
+  };
+}
+
+async function runCsvSorter(file: File): Promise<ToolRunnerResult> {
+  const text = await file.text();
+  const res = sortCsv(text, {
+    criteria: [{ columnIndex: 0, direction: 'asc', type: 'auto' }],
+  });
+  if (res.error) {
+    throw new Error(`Failed to sort CSV: ${res.error.message}`);
+  }
+  const blob = new Blob([res.output], { type: 'text/csv;charset=utf-8' });
+  const baseName = file.name.replace(/\.[^.]+$/, '');
+  return {
+    blob,
+    filename: `${baseName}_sorted.csv`,
+    metadata: {
+      'Sorted Rows': res.sortedRowCount,
+      'Sort Direction': 'Ascending (Column 1)',
+    },
+  };
+}
+
+async function runYamlToJson(file: File): Promise<ToolRunnerResult> {
+  const text = await file.text();
+  const res = yamlToJson(text, {
+    indent: 2,
+    minify: false,
+    sortKeys: false,
+  });
+  if (res.error) {
+    throw new Error(`Failed to convert YAML to JSON: ${res.error.message}`);
+  }
+  const blob = new Blob([res.json], { type: 'application/json' });
+  const baseName = file.name.replace(/\.[^.]+$/, '');
+  return {
+    blob,
+    filename: `${baseName}.json`,
+    metadata: {
+      'Documents Processed': res.docCount,
+    },
+  };
+}
+
+async function runJsonToYaml(file: File): Promise<ToolRunnerResult> {
+  const text = await file.text();
+  const res = jsonToYaml(text, {
+    indent: 2,
+    quoteStyle: 'as-needed',
+    sortKeys: false,
+  });
+  if (res.error) {
+    throw new Error(`Failed to convert JSON to YAML: ${res.error.message}`);
+  }
+  const blob = new Blob([res.yaml], { type: 'text/yaml;charset=utf-8' });
+  const baseName = file.name.replace(/\.[^.]+$/, '');
+  return {
+    blob,
+    filename: `${baseName}.yaml`,
+    metadata: {
+      'Output Format': 'YAML',
+    },
+  };
+}
+
 async function runJsonFormatter(file: File): Promise<ToolRunnerResult> {
   const text = await file.text();
   let parsed: unknown;
@@ -1727,6 +1888,55 @@ export const TOOL_RUNNERS: Record<string, ToolRunner> = {
     category: 'Data',
     description: 'Convert CSV spreadsheet to structured JSON',
     run: runCsvToJson,
+  },
+  'json-to-csv-data': {
+    slug: 'json-to-csv-data',
+    name: 'JSON → CSV',
+    category: 'Data',
+    description: 'Convert JSON data arrays to RFC 4180 CSV format',
+    run: runJsonToCsvData,
+  },
+  'csv-cleaner': {
+    slug: 'csv-cleaner',
+    name: 'CSV Cleaner',
+    category: 'Data',
+    description: 'Clean CSV files by trimming whitespace and fixing empty rows',
+    run: runCsvCleaner,
+  },
+  'csv-deduplicator': {
+    slug: 'csv-deduplicator',
+    name: 'CSV Deduplicator',
+    category: 'Data',
+    description: 'Remove duplicate rows from CSV files',
+    run: runCsvDeduplicator,
+  },
+  'csv-column-extractor': {
+    slug: 'csv-column-extractor',
+    name: 'CSV Column Extractor',
+    category: 'Data',
+    description: 'Extract specific columns from a CSV file',
+    run: runCsvColumnExtractor,
+  },
+  'csv-sorter': {
+    slug: 'csv-sorter',
+    name: 'CSV Sorter',
+    category: 'Data',
+    description: 'Sort CSV rows by column order',
+    run: runCsvSorter,
+  },
+  'yaml-to-json': {
+    slug: 'yaml-to-json',
+    name: 'YAML → JSON',
+    category: 'Data',
+    description: 'Convert YAML documents to structured JSON',
+    run: runYamlToJson,
+  },
+  'json-to-yaml': {
+    slug: 'json-to-yaml',
+    name: 'JSON → YAML',
+    category: 'Data',
+    description: 'Convert JSON documents to clean YAML',
+    run: runJsonToYaml,
   },
 
   // Developer

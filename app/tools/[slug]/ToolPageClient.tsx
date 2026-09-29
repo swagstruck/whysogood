@@ -86,8 +86,17 @@ const TOOL_COMPONENTS: Record<string, React.LazyExoticComponent<React.ComponentT
   'text-diff': lazy(() => import('@/tools/developer/text-diff/TextDiffTool')),
   'cron-generator': lazy(() => import('@/tools/developer/cron-generator/CronGeneratorTool')),
 
-  // ── Other Categories ─────────────────────────────────────────────────────
+  // ── Data ─────────────────────────────────────────────────────────────────
   'csv-to-json': lazy(() => import('@/tools/data/csv-to-json/CsvToJsonTool')),
+  'json-to-csv-data': lazy(() => import('@/tools/data/json-to-csv/JsonToCsvDataTool')),
+  'csv-cleaner': lazy(() => import('@/tools/data/csv-cleaner/CsvCleanerTool')),
+  'csv-deduplicator': lazy(() => import('@/tools/data/csv-deduplicator/CsvDeduplicatorTool')),
+  'csv-column-extractor': lazy(() => import('@/tools/data/csv-column-extractor/CsvColumnExtractorTool')),
+  'csv-sorter': lazy(() => import('@/tools/data/csv-sorter/CsvSorterTool')),
+  'yaml-to-json': lazy(() => import('@/tools/data/yaml-to-json/YamlToJsonTool')),
+  'json-to-yaml': lazy(() => import('@/tools/data/json-to-yaml/JsonToYamlTool')),
+
+  // ── Other Categories ─────────────────────────────────────────────────────
   'word-counter': lazy(() => import('@/tools/text/word-counter/WordCounterTool')),
   'character-counter': lazy(() => import('@/tools/text/character-counter/CharacterCounterTool')),
   'reading-time': lazy(() => import('@/tools/text/reading-time/ReadingTimeTool')),
