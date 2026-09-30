@@ -110,8 +110,22 @@ const TOOL_COMPONENTS: Record<string, React.LazyExoticComponent<React.ComponentT
   'slug-generator': lazy(() => import('@/tools/text/slug-generator/SlugGeneratorTool')),
   'lorem-ipsum': lazy(() => import('@/tools/text/lorem-ipsum/LoremIpsumTool')),
 
-  // ── Other Categories ─────────────────────────────────────────────────────
+  // ── Calculators ──────────────────────────────────────────────────────────
   'sip-calculator': lazy(() => import('@/tools/calculators/sip/SipCalculatorTool')),
+  'percentage-calculator': lazy(() => import('@/tools/calculators/percentage/PercentageCalculatorTool')),
+  'age-calculator': lazy(() => import('@/tools/calculators/age/AgeCalculatorTool')),
+  'bmi-calculator': lazy(() => import('@/tools/calculators/bmi/BmiCalculatorTool')),
+  'emi-calculator': lazy(() => import('@/tools/calculators/emi/EmiCalculatorTool')),
+  'loan-calculator': lazy(() => import('@/tools/calculators/loan/LoanCalculatorTool')),
+  'compound-interest': lazy(() => import('@/tools/calculators/compound-interest/CompoundInterestTool')),
+  'simple-interest': lazy(() => import('@/tools/calculators/simple-interest/SimpleInterestTool')),
+  'gst-calculator': lazy(() => import('@/tools/calculators/gst/GstCalculatorTool')),
+  'discount-calculator': lazy(() => import('@/tools/calculators/discount/DiscountCalculatorTool')),
+  'fd-calculator': lazy(() => import('@/tools/calculators/fd/FdCalculatorTool')),
+  'date-difference': lazy(() => import('@/tools/calculators/date-difference/DateDifferenceTool')),
+  'unit-converter': lazy(() => import('@/tools/calculators/unit-converter/UnitConverterTool')),
+
+  // ── Other Categories ─────────────────────────────────────────────────────
   'favicon-generator': lazy(() => import('@/tools/design/favicon-generator/FaviconGeneratorTool')),
   'base64-encoder': lazy(() => import('@/tools/security/base64-encoder/Base64EncoderTool')),
 };
