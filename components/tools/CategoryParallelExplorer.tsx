@@ -11,32 +11,6 @@ export function CategoryParallelExplorer() {
   const [selectedCategory, setSelectedCategory] = useState<Category | 'All'>('Images');
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Compute stats per category for the sidebar
-  const categoryStats = useMemo(() => {
-    const stats: Record<string, { total: number; active: number; stubs: number }> = {};
-    let totalAll = 0;
-    let activeAll = 0;
-
-    CATEGORIES.forEach(cat => {
-      const tools = getToolsByCategory(cat);
-      const activeCount = tools.filter(t => t.status === 'active').length;
-      stats[cat] = {
-        total: tools.length,
-        active: activeCount,
-        stubs: tools.length - activeCount,
-      };
-      totalAll += tools.length;
-      activeAll += activeCount;
-    });
-
-    stats['All'] = {
-      total: totalAll,
-      active: activeAll,
-      stubs: totalAll - activeAll,
-    };
-
-    return stats;
-  }, []);
 
   // Filter tools for current selection
   const displayedTools = useMemo(() => {
@@ -96,12 +70,9 @@ export function CategoryParallelExplorer() {
             overflowY: 'auto',
           }}
         >
-          <div style={{ padding: '6px 10px 10px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid var(--border)', marginBottom: 4 }}>
+          <div style={{ padding: '6px 10px 10px', display: 'flex', alignItems: 'center', borderBottom: '1px solid var(--border)', marginBottom: 4 }}>
             <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--ink-2)' }}>
               Categories
-            </span>
-            <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--ink-3)', background: 'var(--bg-2)', padding: '2px 6px', borderRadius: 'var(--radius-sm)' }}>
-              {CATEGORIES.length}
             </span>
           </div>
 
@@ -111,7 +82,6 @@ export function CategoryParallelExplorer() {
             style={{
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'space-between',
               padding: '9px 12px',
               borderRadius: 'var(--radius-md)',
               fontSize: 13,
@@ -148,9 +118,6 @@ export function CategoryParallelExplorer() {
               </div>
               <span>All Categories</span>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <span style={{ fontSize: 11, color: 'var(--ink-3)' }}>{categoryStats['All']?.total}</span>
-            </div>
           </button>
 
           {/* Individual Category Buttons */}
@@ -158,7 +125,6 @@ export function CategoryParallelExplorer() {
             const isSelected = selectedCategory === cat;
             const iconName = CATEGORY_ICONS[cat] || 'Zap';
             const IconEl = ((Icons as Record<string, unknown>)[iconName] || Icons.Zap) as React.ComponentType<{ size?: number; style?: React.CSSProperties }>;
-            const stats = categoryStats[cat];
 
             return (
               <button
@@ -167,7 +133,6 @@ export function CategoryParallelExplorer() {
                 style={{
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'space-between',
                   padding: '9px 12px',
                   borderRadius: 'var(--radius-md)',
                   fontSize: 13,
@@ -203,24 +168,6 @@ export function CategoryParallelExplorer() {
                     <IconEl size={14} />
                   </div>
                   <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{cat}</span>
-                </div>
-
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
-                  {stats.active > 0 && (
-                    <span style={{
-                      fontSize: 10,
-                      fontWeight: 700,
-                      color: 'var(--pos)',
-                      background: 'var(--pos-subtle)',
-                      padding: '1px 5px',
-                      borderRadius: 'var(--radius-sm)',
-                    }}>
-                      {stats.active} live
-                    </span>
-                  )}
-                  <span style={{ fontSize: 11, color: 'var(--ink-3)' }}>
-                    {stats.total}
-                  </span>
                 </div>
               </button>
             );
