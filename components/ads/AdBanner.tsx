@@ -55,7 +55,7 @@ export function AdBanner({
 }: AdBannerProps) {
   const adRef = useRef<HTMLModElement | null>(null);
   const isPushed = useRef(false);
-  const clientId = process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID;
+  const clientId = process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID || 'ca-pub-4317877277908124';
   const isConfigured = Boolean(clientId && !clientId.includes('XXXXXXXXXXXXXXXX'));
 
   useEffect(() => {

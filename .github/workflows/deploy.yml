@@ -51,7 +51,7 @@ jobs:
         env:
           NEXT_PUBLIC_BASE_PATH: ${{ steps.pages.outputs.base_path }}
           NEXT_PUBLIC_FEEDBACK_ENDPOINT: ${{ secrets.NEXT_PUBLIC_FEEDBACK_ENDPOINT }}
-          NEXT_PUBLIC_ADSENSE_CLIENT_ID: ${{ secrets.NEXT_PUBLIC_ADSENSE_CLIENT_ID }}
+          NEXT_PUBLIC_ADSENSE_CLIENT_ID: ${{ secrets.NEXT_PUBLIC_ADSENSE_CLIENT_ID || 'ca-pub-4317877277908124' }}
         run: npm run build
 
       - name: Upload artifact

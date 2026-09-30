@@ -10,7 +10,7 @@ interface GoogleAdSenseProps {
 }
 
 export function GoogleAdSense({ clientId }: GoogleAdSenseProps) {
-  const pId = clientId || process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID;
+  const pId = clientId || process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID || 'ca-pub-4317877277908124';
 
   // Do not load the external AdSense script if client ID is missing or set to placeholder
   if (!pId || pId.includes('XXXXXXXXXXXXXXXX')) {
