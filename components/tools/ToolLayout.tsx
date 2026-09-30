@@ -7,6 +7,7 @@ import { RelatedTools } from './RelatedTools';
 import { useSession } from '@/lib/session';
 import { CATEGORY_ICONS } from '@/lib/registry';
 import * as Icons from 'lucide-react';
+import { AdBanner } from '@/components/ads';
 
 interface ToolLayoutProps {
   tool: Tool;
@@ -71,6 +72,9 @@ export function ToolLayout({ tool, children }: ToolLayoutProps) {
 
       {/* Tool UI */}
       <div>{children}</div>
+
+      {/* Ad Unit */}
+      <AdBanner />
 
       {/* Related tools */}
       {tool.related.length > 0 && (

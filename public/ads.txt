@@ -1,0 +1,3 @@
+# Google AdSense Authorized Digital Sellers (ads.txt)
+# Replace pub-XXXXXXXXXXXXXXXX with your actual publisher ID (the digits from your ca-pub-XXXXXXXXXXXXXXXX)
+google.com, pub-XXXXXXXXXXXXXXXX, DIRECT, f08c47fec0942fa0

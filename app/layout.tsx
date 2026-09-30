@@ -6,11 +6,13 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { FeedbackBubble } from "@/components/layout/FeedbackBubble";
 
+import { GoogleAdSense } from "@/components/ads";
+
 export const metadata: Metadata = {
   title: { default: "whysogood — Free Online Tools", template: "%s | whysogood" },
   description: "100+ free, fast, private online tools. Image compressor, PDF tools, JSON formatter, calculators and more — all running in your browser. No uploads, no sign-up.",
   keywords: ["online tools", "image compressor", "pdf tools", "json formatter", "free tools", "privacy"],
-  metadataBase: new URL("https://whysogood.app"),
+  metadataBase: new URL("https://whysogood.space"),
   openGraph: {
     type: "website",
     siteName: "whysogood",
@@ -30,6 +32,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body>
+        <GoogleAdSense />
         <SessionProvider>
           <ToastProvider>
             <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
