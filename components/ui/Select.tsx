@@ -135,6 +135,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(function Select
             fontWeight: 500,
             color: 'var(--ink)',
             background: 'var(--bg-2)',
+            backgroundImage: 'none',
             border: `1px solid ${error ? 'var(--neg)' : 'var(--border)'}`,
             borderRadius: sizeConfig.borderRadius,
             outline: 'none',

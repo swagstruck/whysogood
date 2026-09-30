@@ -61,18 +61,18 @@ export function ToolCard({ tool, compact = false }: ToolCardProps) {
           <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginTop: 'auto' }}>
             {tool.formats.in.slice(0, 4).map(f => (
               <span key={f} style={{
-                fontSize: 10, fontWeight: 600, color: 'var(--ink-3)',
+                fontSize: 10, fontWeight: 600, color: 'var(--ink-2)',
                 background: 'var(--bg-2)', padding: '2px 6px',
                 borderRadius: 'var(--radius-sm)', textTransform: 'uppercase',
               }}>{f}</span>
             ))}
             {tool.formats.in.length > 4 && (
-              <span style={{ fontSize: 10, color: 'var(--ink-3)', padding: '2px 4px' }}>+{tool.formats.in.length - 4}</span>
+              <span style={{ fontSize: 10, color: 'var(--ink-2)', padding: '2px 4px' }}>+{tool.formats.in.length - 4}</span>
             )}
           </div>
         ) : (
           tool.status === 'stub' ? (
-            <span style={{ fontSize: 11, color: 'var(--ink-3)', marginTop: 'auto' }}>Coming soon</span>
+            <span style={{ fontSize: 11, color: 'var(--ink-2)', marginTop: 'auto' }}>Coming soon</span>
           ) : null
         )}
       </div>

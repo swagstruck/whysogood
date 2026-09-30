@@ -105,7 +105,7 @@ export default function Base64EncoderTool() {
               style={{
                 padding: '6px 14px', borderRadius: 'var(--radius-sm)', border: 'none',
                 background: mode === 'encode' ? 'var(--color-accent)' : 'transparent',
-                color: mode === 'encode' ? '#fff' : 'var(--color-muted)',
+                color: mode === 'encode' ? 'var(--ink-inverse)' : 'var(--color-muted)',
                 fontWeight: 600, fontSize: 13, cursor: 'pointer',
               }}
             >
@@ -119,7 +119,7 @@ export default function Base64EncoderTool() {
               style={{
                 padding: '6px 14px', borderRadius: 'var(--radius-sm)', border: 'none',
                 background: mode === 'decode' ? 'var(--color-accent)' : 'transparent',
-                color: mode === 'decode' ? '#fff' : 'var(--color-muted)',
+                color: mode === 'decode' ? 'var(--ink-inverse)' : 'var(--color-muted)',
                 fontWeight: 600, fontSize: 13, cursor: 'pointer',
               }}
             >

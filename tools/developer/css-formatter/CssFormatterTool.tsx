@@ -51,7 +51,7 @@ export default function CssFormatterTool() {
 
   const optionsToolbar = (
     <>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--ink-2, #A1A1A1)' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--ink-2)' }}>
         <span>Indent:</span>
         <Select
           selectSize="sm"
@@ -67,7 +67,7 @@ export default function CssFormatterTool() {
         />
       </div>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--ink-2, #A1A1A1)' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--ink-2)' }}>
         <span>Quotes:</span>
         <Select
           selectSize="sm"

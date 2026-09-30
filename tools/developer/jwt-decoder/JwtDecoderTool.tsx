@@ -68,9 +68,9 @@ export default function JwtDecoderTool() {
       {/* Input Token Box */}
       <div
         style={{
-          background: 'var(--bg-2, #18181B)',
-          border: '1px solid var(--border, #27272A)',
-          borderRadius: 12,
+          background: 'var(--bg-2)',
+          border: '1px solid var(--border)',
+          borderRadius: 'var(--radius-lg)',
           padding: 16,
           display: 'flex',
           flexDirection: 'column',
@@ -78,7 +78,7 @@ export default function JwtDecoderTool() {
         }}
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink, #FFFFFF)' }}>
+          <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink)' }}>
             Encoded JWT Token
           </span>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -100,11 +100,11 @@ export default function JwtDecoderTool() {
           rows={4}
           style={{
             width: '100%',
-            background: 'var(--bg, #09090B)',
-            border: '1px solid var(--border, #27272A)',
-            borderRadius: 8,
+            background: 'var(--bg)',
+            border: '1px solid var(--border)',
+            borderRadius: 'var(--radius-md)',
             padding: 12,
-            color: 'var(--ink, #FFFFFF)',
+            color: 'var(--ink)',
             fontSize: 13,
             fontFamily: 'var(--font-mono, monospace)',
             resize: 'vertical',
@@ -118,14 +118,14 @@ export default function JwtDecoderTool() {
       {result.error && (
         <div
           style={{
-            background: 'rgba(239, 68, 68, 0.1)',
-            border: '1px solid rgba(239, 68, 68, 0.25)',
-            borderRadius: 8,
+            background: 'var(--neg-subtle)',
+            border: '1px solid var(--border)',
+            borderRadius: 'var(--radius-md)',
             padding: '10px 14px',
             display: 'flex',
             alignItems: 'center',
             gap: 8,
-            color: '#F87171',
+            color: 'var(--neg)',
             fontSize: 13,
           }}
         >
@@ -140,15 +140,15 @@ export default function JwtDecoderTool() {
           <div
             style={{
               padding: '6px 14px',
-              borderRadius: 20,
+              borderRadius: 'var(--radius-full)',
               fontSize: 13,
               fontWeight: 600,
               display: 'flex',
               alignItems: 'center',
               gap: 6,
-              background: result.isExpired ? 'rgba(239, 68, 68, 0.15)' : 'rgba(34, 197, 94, 0.15)',
-              color: result.isExpired ? '#EF4444' : '#22C55E',
-              border: `1px solid ${result.isExpired ? '#EF444440' : '#22C55E40'}`,
+              background: result.isExpired ? 'var(--neg-subtle)' : 'var(--pos-subtle)',
+              color: result.isExpired ? 'var(--neg)' : 'var(--pos)',
+              border: `1px solid ${result.isExpired ? 'var(--neg)' : 'var(--pos)'}`,
             }}
           >
             {result.isExpired ? <ShieldAlert size={15} /> : <ShieldCheck size={15} />}
@@ -159,14 +159,14 @@ export default function JwtDecoderTool() {
             <div
               style={{
                 padding: '6px 14px',
-                borderRadius: 20,
+                borderRadius: 'var(--radius-full)',
                 fontSize: 13,
                 display: 'flex',
                 alignItems: 'center',
                 gap: 6,
-                background: 'var(--bg-2, #18181B)',
-                color: 'var(--ink-2, #A1A1AA)',
-                border: '1px solid var(--border, #27272A)',
+                background: 'var(--bg-2)',
+                color: 'var(--ink-2)',
+                border: '1px solid var(--border)',
               }}
             >
               <Clock size={15} />
@@ -178,14 +178,14 @@ export default function JwtDecoderTool() {
             <div
               style={{
                 padding: '6px 14px',
-                borderRadius: 20,
+                borderRadius: 'var(--radius-full)',
                 fontSize: 13,
                 display: 'flex',
                 alignItems: 'center',
                 gap: 6,
-                background: 'var(--bg-2, #18181B)',
-                color: 'var(--ink-2, #A1A1AA)',
-                border: '1px solid var(--border, #27272A)',
+                background: 'var(--bg-2)',
+                color: 'var(--ink-2)',
+                border: '1px solid var(--border)',
               }}
             >
               <span>Issued: {new Date(result.issuedAt).toLocaleString()}</span>
@@ -196,18 +196,19 @@ export default function JwtDecoderTool() {
 
       {/* Decoded Sections Split */}
       <div
+        className="tool-split-grid"
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 320px), 1fr))',
           gap: 16,
         }}
       >
         {/* Header Section */}
         <div
           style={{
-            background: 'var(--bg-2, #18181B)',
-            border: '1px solid var(--border, #27272A)',
-            borderRadius: 12,
+            background: 'var(--bg-2)',
+            border: '1px solid var(--border)',
+            borderRadius: 'var(--radius-lg)',
             padding: 16,
             display: 'flex',
             flexDirection: 'column',
@@ -215,7 +216,7 @@ export default function JwtDecoderTool() {
           }}
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ fontSize: 13, fontWeight: 700, color: '#F43F5E' }}>HEADER: ALGORITHM & TOKEN TYPE</span>
+            <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--neg)' }}>HEADER: ALGORITHM & TOKEN TYPE</span>
             <Button variant="ghost" size="sm" onClick={() => handleCopySection(result.header, 'Header')}>
               <Copy size={13} style={{ marginRight: 4 }} />
               Copy
@@ -223,11 +224,11 @@ export default function JwtDecoderTool() {
           </div>
           <pre
             style={{
-              background: 'var(--bg, #09090B)',
-              border: '1px solid var(--border, #27272A)',
-              borderRadius: 8,
+              background: 'var(--bg)',
+              border: '1px solid var(--border)',
+              borderRadius: 'var(--radius-md)',
               padding: 12,
-              color: '#FDA4AF',
+              color: 'var(--ink)',
               fontSize: 13,
               fontFamily: 'var(--font-mono, monospace)',
               overflowX: 'auto',
@@ -241,9 +242,9 @@ export default function JwtDecoderTool() {
         {/* Payload Section */}
         <div
           style={{
-            background: 'var(--bg-2, #18181B)',
-            border: '1px solid var(--border, #27272A)',
-            borderRadius: 12,
+            background: 'var(--bg-2)',
+            border: '1px solid var(--border)',
+            borderRadius: 'var(--radius-lg)',
             padding: 16,
             display: 'flex',
             flexDirection: 'column',
@@ -251,7 +252,7 @@ export default function JwtDecoderTool() {
           }}
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ fontSize: 13, fontWeight: 700, color: '#A855F7' }}>PAYLOAD: DATA / CLAIMS</span>
+            <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--brand)' }}>PAYLOAD: DATA / CLAIMS</span>
             <Button variant="ghost" size="sm" onClick={() => handleCopySection(result.payload, 'Payload')}>
               <Copy size={13} style={{ marginRight: 4 }} />
               Copy
@@ -259,11 +260,11 @@ export default function JwtDecoderTool() {
           </div>
           <pre
             style={{
-              background: 'var(--bg, #09090B)',
-              border: '1px solid var(--border, #27272A)',
-              borderRadius: 8,
+              background: 'var(--bg)',
+              border: '1px solid var(--border)',
+              borderRadius: 'var(--radius-md)',
               padding: 12,
-              color: '#D8B4FE',
+              color: 'var(--ink)',
               fontSize: 13,
               fontFamily: 'var(--font-mono, monospace)',
               overflowX: 'auto',
@@ -278,9 +279,9 @@ export default function JwtDecoderTool() {
       {/* Signature Section */}
       <div
         style={{
-          background: 'var(--bg-2, #18181B)',
-          border: '1px solid var(--border, #27272A)',
-          borderRadius: 12,
+          background: 'var(--bg-2)',
+          border: '1px solid var(--border)',
+          borderRadius: 'var(--radius-lg)',
           padding: 16,
           display: 'flex',
           flexDirection: 'column',
@@ -288,7 +289,7 @@ export default function JwtDecoderTool() {
         }}
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <span style={{ fontSize: 13, fontWeight: 700, color: '#06B6D4' }}>VERIFY SIGNATURE</span>
+          <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--pos)' }}>VERIFY SIGNATURE</span>
           <div style={{ display: 'flex', gap: 8 }}>
             <Button variant="ghost" size="sm" onClick={() => handleCopySection(result.signature, 'Signature')}>
               <Copy size={13} style={{ marginRight: 4 }} />
@@ -302,11 +303,11 @@ export default function JwtDecoderTool() {
         </div>
         <div
           style={{
-            background: 'var(--bg, #09090B)',
-            border: '1px solid var(--border, #27272A)',
-            borderRadius: 8,
+            background: 'var(--bg)',
+            border: '1px solid var(--border)',
+            borderRadius: 'var(--radius-md)',
             padding: 12,
-            color: '#67E8F9',
+            color: 'var(--ink)',
             fontSize: 13,
             fontFamily: 'var(--font-mono, monospace)',
             wordBreak: 'break-all',

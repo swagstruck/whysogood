@@ -88,9 +88,9 @@ export default function CronGeneratorTool() {
       {/* Expression Display Card */}
       <div
         style={{
-          background: 'var(--bg-2, #18181B)',
-          border: '1px solid var(--border, #27272A)',
-          borderRadius: 12,
+          background: 'var(--bg-2)',
+          border: '1px solid var(--border)',
+          borderRadius: 'var(--radius-lg)',
           padding: 20,
           display: 'flex',
           flexDirection: 'column',
@@ -99,10 +99,10 @@ export default function CronGeneratorTool() {
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
           <div>
-            <span style={{ fontSize: 12, textTransform: 'uppercase', color: 'var(--ink-2, #A1A1AA)', fontWeight: 700, letterSpacing: '0.05em' }}>
+            <span style={{ fontSize: 12, textTransform: 'uppercase', color: 'var(--ink-2)', fontWeight: 700, letterSpacing: '0.05em' }}>
               Generated Cron Expression
             </span>
-            <div style={{ fontSize: 28, fontWeight: 700, fontFamily: 'var(--font-mono, monospace)', color: 'var(--brand, #6060E8)', marginTop: 4 }}>
+            <div style={{ fontSize: 28, fontWeight: 700, fontFamily: 'var(--font-mono, monospace)', color: 'var(--brand)', marginTop: 4 }}>
               {expression}
             </div>
           </div>
@@ -118,18 +118,18 @@ export default function CronGeneratorTool() {
         {/* Human Readable Explanation */}
         <div
           style={{
-            background: 'var(--bg, #09090B)',
-            border: '1px solid var(--border, #27272A)',
-            borderRadius: 8,
+            background: 'var(--bg)',
+            border: '1px solid var(--border)',
+            borderRadius: 'var(--radius-md)',
             padding: '12px 16px',
             display: 'flex',
             alignItems: 'center',
             gap: 10,
-            color: 'var(--ink, #FFFFFF)',
+            color: 'var(--ink)',
             fontSize: 14,
           }}
         >
-          <Timer size={18} color="var(--brand, #6060E8)" />
+          <Timer size={18} color="var(--brand)" />
           <span style={{ fontWeight: 500 }}>{explanation}</span>
         </div>
       </div>
@@ -137,16 +137,16 @@ export default function CronGeneratorTool() {
       {/* Preset Selector */}
       <div
         style={{
-          background: 'var(--bg-2, #18181B)',
-          border: '1px solid var(--border, #27272A)',
-          borderRadius: 12,
+          background: 'var(--bg-2)',
+          border: '1px solid var(--border)',
+          borderRadius: 'var(--radius-lg)',
           padding: 16,
           display: 'flex',
           flexDirection: 'column',
           gap: 10,
         }}
       >
-        <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink, #FFFFFF)' }}>
+        <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink)' }}>
           Standard Presets
         </span>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
@@ -157,12 +157,12 @@ export default function CronGeneratorTool() {
               onClick={() => handleApplyPreset(p.value)}
               style={{
                 padding: '6px 12px',
-                borderRadius: 8,
+                borderRadius: 'var(--radius-md)',
                 fontSize: 12,
                 fontWeight: 500,
-                border: '1px solid var(--border, #27272A)',
-                background: expression === p.value ? 'var(--brand, #6060E8)' : 'var(--bg, #09090B)',
-                color: expression === p.value ? '#FFFFFF' : 'var(--ink, #E4E4E7)',
+                border: '1px solid var(--border)',
+                background: expression === p.value ? 'var(--brand)' : 'var(--bg)',
+                color: expression === p.value ? 'var(--ink-inverse)' : 'var(--ink)',
                 cursor: 'pointer',
               }}
             >
@@ -174,176 +174,177 @@ export default function CronGeneratorTool() {
 
       {/* 5-Field Visual Builder Grid */}
       <div
+        className="tool-split-grid"
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 140px), 1fr))',
           gap: 12,
         }}
       >
         <div
           style={{
-            background: 'var(--bg-2, #18181B)',
-            border: '1px solid var(--border, #27272A)',
-            borderRadius: 10,
+            background: 'var(--bg-2)',
+            border: '1px solid var(--border)',
+            borderRadius: 'var(--radius-md)',
             padding: 14,
             display: 'flex',
             flexDirection: 'column',
             gap: 8,
           }}
         >
-          <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--ink-2, #A1A1AA)' }}>Minute (0-59)</span>
+          <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--ink-2)' }}>Minute (0-59)</span>
           <input
             type="text"
             value={minute}
             onChange={(e) => setMinute(e.target.value)}
             placeholder="*"
             style={{
-              background: 'var(--bg, #09090B)',
-              border: '1px solid var(--border, #27272A)',
-              borderRadius: 6,
+              background: 'var(--bg)',
+              border: '1px solid var(--border)',
+              borderRadius: 'var(--radius-sm)',
               padding: '8px 10px',
-              color: 'var(--ink, #FFFFFF)',
+              color: 'var(--ink)',
               fontSize: 14,
               fontFamily: 'var(--font-mono, monospace)',
             }}
           />
-          <span style={{ fontSize: 11, color: 'var(--ink-2, #71717A)' }}>e.g. *, */15, 0,30</span>
+          <span style={{ fontSize: 11, color: 'var(--ink-3)' }}>e.g. *, */15, 0,30</span>
         </div>
 
         <div
           style={{
-            background: 'var(--bg-2, #18181B)',
-            border: '1px solid var(--border, #27272A)',
-            borderRadius: 10,
+            background: 'var(--bg-2)',
+            border: '1px solid var(--border)',
+            borderRadius: 'var(--radius-md)',
             padding: 14,
             display: 'flex',
             flexDirection: 'column',
             gap: 8,
           }}
         >
-          <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--ink-2, #A1A1AA)' }}>Hour (0-23)</span>
+          <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--ink-2)' }}>Hour (0-23)</span>
           <input
             type="text"
             value={hour}
             onChange={(e) => setHour(e.target.value)}
             placeholder="*"
             style={{
-              background: 'var(--bg, #09090B)',
-              border: '1px solid var(--border, #27272A)',
-              borderRadius: 6,
+              background: 'var(--bg)',
+              border: '1px solid var(--border)',
+              borderRadius: 'var(--radius-sm)',
               padding: '8px 10px',
-              color: 'var(--ink, #FFFFFF)',
+              color: 'var(--ink)',
               fontSize: 14,
               fontFamily: 'var(--font-mono, monospace)',
             }}
           />
-          <span style={{ fontSize: 11, color: 'var(--ink-2, #71717A)' }}>e.g. *, 0, 9-17, */2</span>
+          <span style={{ fontSize: 11, color: 'var(--ink-3)' }}>e.g. *, 0, 9-17, */2</span>
         </div>
 
         <div
           style={{
-            background: 'var(--bg-2, #18181B)',
-            border: '1px solid var(--border, #27272A)',
-            borderRadius: 10,
+            background: 'var(--bg-2)',
+            border: '1px solid var(--border)',
+            borderRadius: 'var(--radius-md)',
             padding: 14,
             display: 'flex',
             flexDirection: 'column',
             gap: 8,
           }}
         >
-          <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--ink-2, #A1A1AA)' }}>Day of Month (1-31)</span>
+          <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--ink-2)' }}>Day of Month (1-31)</span>
           <input
             type="text"
             value={dayOfMonth}
             onChange={(e) => setDayOfMonth(e.target.value)}
             placeholder="*"
             style={{
-              background: 'var(--bg, #09090B)',
-              border: '1px solid var(--border, #27272A)',
-              borderRadius: 6,
+              background: 'var(--bg)',
+              border: '1px solid var(--border)',
+              borderRadius: 'var(--radius-sm)',
               padding: '8px 10px',
-              color: 'var(--ink, #FFFFFF)',
+              color: 'var(--ink)',
               fontSize: 14,
               fontFamily: 'var(--font-mono, monospace)',
             }}
           />
-          <span style={{ fontSize: 11, color: 'var(--ink-2, #71717A)' }}>e.g. *, 1, 15, 1-15</span>
+          <span style={{ fontSize: 11, color: 'var(--ink-3)' }}>e.g. *, 1, 15, 1-15</span>
         </div>
 
         <div
           style={{
-            background: 'var(--bg-2, #18181B)',
-            border: '1px solid var(--border, #27272A)',
-            borderRadius: 10,
+            background: 'var(--bg-2)',
+            border: '1px solid var(--border)',
+            borderRadius: 'var(--radius-md)',
             padding: 14,
             display: 'flex',
             flexDirection: 'column',
             gap: 8,
           }}
         >
-          <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--ink-2, #A1A1AA)' }}>Month (1-12)</span>
+          <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--ink-2)' }}>Month (1-12)</span>
           <input
             type="text"
             value={month}
             onChange={(e) => setMonth(e.target.value)}
             placeholder="*"
             style={{
-              background: 'var(--bg, #09090B)',
-              border: '1px solid var(--border, #27272A)',
-              borderRadius: 6,
+              background: 'var(--bg)',
+              border: '1px solid var(--border)',
+              borderRadius: 'var(--radius-sm)',
               padding: '8px 10px',
-              color: 'var(--ink, #FFFFFF)',
+              color: 'var(--ink)',
               fontSize: 14,
               fontFamily: 'var(--font-mono, monospace)',
             }}
           />
-          <span style={{ fontSize: 11, color: 'var(--ink-2, #71717A)' }}>e.g. *, 1, 1-6, */3</span>
+          <span style={{ fontSize: 11, color: 'var(--ink-3)' }}>e.g. *, 1, 1-6, */3</span>
         </div>
 
         <div
           style={{
-            background: 'var(--bg-2, #18181B)',
-            border: '1px solid var(--border, #27272A)',
-            borderRadius: 10,
+            background: 'var(--bg-2)',
+            border: '1px solid var(--border)',
+            borderRadius: 'var(--radius-md)',
             padding: 14,
             display: 'flex',
             flexDirection: 'column',
             gap: 8,
           }}
         >
-          <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--ink-2, #A1A1AA)' }}>Day of Week (0-6)</span>
+          <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--ink-2)' }}>Day of Week (0-6)</span>
           <input
             type="text"
             value={dayOfWeek}
             onChange={(e) => setDayOfWeek(e.target.value)}
             placeholder="*"
             style={{
-              background: 'var(--bg, #09090B)',
-              border: '1px solid var(--border, #27272A)',
-              borderRadius: 6,
+              background: 'var(--bg)',
+              border: '1px solid var(--border)',
+              borderRadius: 'var(--radius-sm)',
               padding: '8px 10px',
-              color: 'var(--ink, #FFFFFF)',
+              color: 'var(--ink)',
               fontSize: 14,
               fontFamily: 'var(--font-mono, monospace)',
             }}
           />
-          <span style={{ fontSize: 11, color: 'var(--ink-2, #71717A)' }}>0=Sun, 1=Mon, 1-5=M-F</span>
+          <span style={{ fontSize: 11, color: 'var(--ink-3)' }}>0=Sun, 1=Mon, 1-5=M-F</span>
         </div>
       </div>
 
       {/* Next 5 Scheduled Executions */}
       <div
         style={{
-          background: 'var(--bg-2, #18181B)',
-          border: '1px solid var(--border, #27272A)',
-          borderRadius: 12,
+          background: 'var(--bg-2)',
+          border: '1px solid var(--border)',
+          borderRadius: 'var(--radius-lg)',
           padding: 16,
           display: 'flex',
           flexDirection: 'column',
           gap: 12,
         }}
       >
-        <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink, #FFFFFF)' }}>
+        <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink)' }}>
           Next 5 Scheduled Executions (Estimated)
         </span>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -354,17 +355,17 @@ export default function CronGeneratorTool() {
                 display: 'flex',
                 alignItems: 'center',
                 gap: 10,
-                background: 'var(--bg, #09090B)',
-                border: '1px solid var(--border, #27272A)',
-                borderRadius: 6,
+                background: 'var(--bg)',
+                border: '1px solid var(--border)',
+                borderRadius: 'var(--radius-sm)',
                 padding: '8px 12px',
                 fontSize: 13,
                 fontFamily: 'var(--font-mono, monospace)',
-                color: 'var(--ink, #E4E4E7)',
+                color: 'var(--ink)',
               }}
             >
-              <Calendar size={14} color="var(--brand, #6060E8)" />
-              <span style={{ color: 'var(--brand, #6060E8)', fontWeight: 600 }}>#{i + 1}</span>
+              <Calendar size={14} color="var(--brand)" />
+              <span style={{ color: 'var(--brand)', fontWeight: 600 }}>#{i + 1}</span>
               <span>{new Date(r).toUTCString()} ({new Date(r).toLocaleString()})</span>
             </div>
           ))}

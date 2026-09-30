@@ -46,10 +46,10 @@ export default function JsonToCsvDataTool() {
 
   const metricsBadge = (
     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-      <span style={{ fontSize: 12, padding: '3px 8px', borderRadius: 4, background: 'rgba(96, 96, 232, 0.15)', color: 'var(--brand, #6060E8)', fontWeight: 600 }}>
+      <span style={{ fontSize: 12, padding: '3px 8px', borderRadius: 'var(--radius-xs)', background: 'var(--brand-subtle)', color: 'var(--brand)', fontWeight: 600 }}>
         Rows: {result.rowCount.toLocaleString()}
       </span>
-      <span style={{ fontSize: 12, padding: '3px 8px', borderRadius: 4, background: 'rgba(34, 197, 94, 0.15)', color: '#22C55E', fontWeight: 600 }}>
+      <span style={{ fontSize: 12, padding: '3px 8px', borderRadius: 'var(--radius-xs)', background: 'var(--pos-subtle)', color: 'var(--pos)', fontWeight: 600 }}>
         Columns: {result.columnCount}
       </span>
     </div>
@@ -60,9 +60,9 @@ export default function JsonToCsvDataTool() {
       {/* Input Section */}
       <div
         style={{
-          background: 'var(--bg-2, #18181B)',
-          border: '1px solid var(--border, #27272A)',
-          borderRadius: 12,
+          background: 'var(--bg-2)',
+          border: '1px solid var(--border)',
+          borderRadius: 'var(--radius-lg)',
           padding: 18,
           display: 'flex',
           flexDirection: 'column',
@@ -70,7 +70,7 @@ export default function JsonToCsvDataTool() {
         }}
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
-          <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink, #FFFFFF)' }}>
+          <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink)' }}>
             Source JSON Data Array
           </span>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -92,11 +92,11 @@ export default function JsonToCsvDataTool() {
           rows={6}
           style={{
             width: '100%',
-            background: 'var(--bg, #09090B)',
-            border: '1px solid var(--border, #27272A)',
-            borderRadius: 8,
+            background: 'var(--bg)',
+            border: '1px solid var(--border)',
+            borderRadius: 'var(--radius-md)',
             padding: 12,
-            color: 'var(--ink, #FFFFFF)',
+            color: 'var(--ink)',
             fontSize: 13,
             fontFamily: 'var(--font-mono, monospace)',
             resize: 'vertical',
@@ -117,7 +117,7 @@ export default function JsonToCsvDataTool() {
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <span style={{ fontSize: 12, color: 'var(--ink-2, #A1A1AA)' }}>Delimiter:</span>
+              <span style={{ fontSize: 12, color: 'var(--ink-2)' }}>Delimiter:</span>
               <div style={{ width: 110 }}>
                 <Select
                   value={delimiter}
@@ -132,7 +132,7 @@ export default function JsonToCsvDataTool() {
               </div>
             </div>
 
-            <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--ink-2, #A1A1AA)', cursor: 'pointer' }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--ink-2)', cursor: 'pointer' }}>
               <input
                 type="checkbox"
                 checked={flattenObjects}
@@ -141,7 +141,7 @@ export default function JsonToCsvDataTool() {
               <span>Flatten Nested Objects (dot notation)</span>
             </label>
 
-            <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--ink-2, #A1A1AA)', cursor: 'pointer' }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--ink-2)', cursor: 'pointer' }}>
               <input
                 type="checkbox"
                 checked={includeHeaders}
@@ -157,14 +157,14 @@ export default function JsonToCsvDataTool() {
       {result.error && (
         <div
           style={{
-            background: 'rgba(239, 68, 68, 0.1)',
-            border: '1px solid rgba(239, 68, 68, 0.25)',
-            borderRadius: 8,
+            background: 'var(--neg-subtle)',
+            border: '1px solid var(--border)',
+            borderRadius: 'var(--radius-md)',
             padding: '10px 14px',
             display: 'flex',
             alignItems: 'center',
             gap: 8,
-            color: '#F87171',
+            color: 'var(--neg)',
             fontSize: 13,
           }}
         >

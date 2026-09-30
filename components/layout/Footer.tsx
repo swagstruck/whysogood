@@ -13,6 +13,7 @@ export function Footer() {
       { label: 'Text', href: '/text' },
     ]},
     { heading: 'More Tools', links: [
+      { label: 'Audio', href: '/audio' },
       { label: 'Calculators', href: '/calculators' },
       { label: 'Design', href: '/design' },
       { label: 'Generators', href: '/generators' },
@@ -34,13 +35,13 @@ export function Footer() {
     }}>
       <div style={{ maxWidth: 1280, margin: '0 auto' }}>
         {/* Top */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 40, marginBottom: 40 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 40, marginBottom: 40 }}>
           {/* Brand */}
-          <div style={{ gridColumn: '1 / -1', maxWidth: 300 }}>
+          <div style={{ maxWidth: 300 }}>
             <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 8, textDecoration: 'none', marginBottom: 12 }}>
               {/* brand-500 = decorative use for logos/icons per spec */}
               <div style={{ width: 24, height: 24, borderRadius: 'var(--radius-sm)', background: 'var(--brand-500)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Zap size={13} color="#fff" fill="#fff" />
+                <Zap size={13} color="var(--ink-inverse)" fill="var(--ink-inverse)" />
               </div>
               <span style={{ fontWeight: 700, fontSize: 16, color: 'var(--ink)' }}>whysogood</span>
             </Link>

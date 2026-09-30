@@ -89,8 +89,8 @@ export function Header() {
         <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 16px', height: 60, display: 'flex', alignItems: 'center', gap: 16 }}>
           {/* Logo — brand-500 is decorative per spec */}
           <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 8, textDecoration: 'none', flexShrink: 0 }}>
-            <div style={{ width: 28, height: 28, borderRadius: 'var(--radius-md)', background: 'var(--brand-500)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <Zap size={16} color="#fff" fill="#fff" />
+            <div style={{ width: 28, height: 28, borderRadius: 'var(--radius-sm)', background: 'var(--brand-500)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Zap size={16} color="var(--ink-inverse)" fill="var(--ink-inverse)" />
             </div>
             <span style={{ fontWeight: 700, fontSize: 18, color: 'var(--ink)', letterSpacing: '-0.02em' }}>
               whysogood
@@ -100,12 +100,13 @@ export function Header() {
           {/* Desktop search bar */}
           <button
             onClick={() => { setSearchOpen(true); setTimeout(() => inputRef.current?.focus(), 50); }}
+            className="desktop-search-btn"
             style={{
               flex: 1, maxWidth: 520, height: 38,
               background: 'var(--bg-2)',
               border: '1px solid var(--border)',
-              borderRadius: 'var(--radius-md)',
-              display: 'flex', alignItems: 'center', gap: 8, padding: '0 12px',
+              borderRadius: 'var(--radius-full)',
+              display: 'flex', alignItems: 'center', gap: 8, padding: '0 14px',
               cursor: 'text', color: 'var(--ink-3)', fontSize: 14,
               transition: 'border-color var(--transition-fast)',
             }}
@@ -114,7 +115,7 @@ export function Header() {
           >
             <Search size={15} />
             <span>Search tools&hellip;</span>
-            <span style={{ marginLeft: 'auto', fontSize: 11, background: 'var(--bg-3)', padding: '2px 6px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)' }}>/</span>
+            <span style={{ marginLeft: 'auto', fontSize: 11, color: 'var(--ink-2)', background: 'var(--bg-3)', padding: '2px 6px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)' }}>/</span>
           </button>
 
           {/* Desktop nav links */}
@@ -140,23 +141,24 @@ export function Header() {
             aria-label="Toggle Simple Mode"
             className="simple-mode-toggle-btn"
             style={{
-              height: 36,
+              height: 38,
+              minWidth: 38,
               borderRadius: 'var(--radius-full)',
               display: 'flex',
               alignItems: 'center',
               gap: 6,
-              padding: '0 12px',
+              padding: '0 14px',
               fontSize: 13,
               fontWeight: 600,
               cursor: 'pointer',
               flexShrink: 0,
               transition: 'all var(--transition-fast)',
               background: simpleMode ? 'var(--brand)' : 'var(--bg-2)',
-              color: simpleMode ? '#ffffff' : 'var(--ink)',
+              color: simpleMode ? 'var(--ink-inverse)' : 'var(--ink)',
               border: simpleMode ? '1px solid var(--brand)' : '1px solid var(--border)',
             }}
           >
-            <Sparkles size={14} style={{ color: simpleMode ? '#ffffff' : 'var(--brand)' }} />
+            <Sparkles size={14} style={{ color: simpleMode ? 'var(--ink-inverse)' : 'var(--brand)' }} />
             <span className="simple-mode-label">Simple Mode</span>
           </button>
 
@@ -165,7 +167,7 @@ export function Header() {
             onClick={nextTheme}
             title={`Current theme: ${theme}. Click to cycle.`}
             style={{
-              width: 36, height: 36, borderRadius: 'var(--radius-md)',
+              width: 38, height: 38, borderRadius: 'var(--radius-sm)',
               background: 'var(--bg-2)', border: '1px solid var(--border)',
               cursor: 'pointer', fontSize: 16, display: 'flex', alignItems: 'center', justifyContent: 'center',
               transition: 'background var(--transition-fast)',
@@ -179,7 +181,7 @@ export function Header() {
           <button
             onClick={() => setMobileOpen(o => !o)}
             style={{
-              width: 36, height: 36, borderRadius: 'var(--radius-md)',
+              width: 38, height: 38, borderRadius: 'var(--radius-sm)',
               background: 'var(--bg-2)', border: '1px solid var(--border)',
               cursor: 'pointer', display: 'none', alignItems: 'center', justifyContent: 'center',
               flexShrink: 0, color: 'var(--ink)',
@@ -191,37 +193,52 @@ export function Header() {
         </div>
       </header>
 
-      {/* ── Mobile nav drawer ──────────────────────────────────────── */}
+      {/* ── Mobile nav drawer with backdrop overlay & scrollability ──── */}
       {mobileOpen && (
-        <div style={{
-          position: 'fixed', top: 60, left: 0, right: 0, zIndex: 99,
-          background: 'var(--bg-1)',
-          borderBottom: '1px solid var(--border)',
-          padding: '12px 16px',
-          display: 'flex', flexDirection: 'column', gap: 4,
-        }}>
-          <button
-            onClick={() => { setMobileOpen(false); setSearchOpen(true); setTimeout(() => inputRef.current?.focus(), 50); }}
+        <>
+          <div
+            onClick={() => setMobileOpen(false)}
             style={{
-              display: 'flex', alignItems: 'center', gap: 8, padding: '10px 12px',
-              background: 'var(--bg-2)', border: '1px solid var(--border)',
-              borderRadius: 'var(--radius-md)', cursor: 'text',
-              color: 'var(--ink-3)', fontSize: 14, width: '100%',
+              position: 'fixed', inset: 0, top: 60, zIndex: 98,
+              background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(2px)',
             }}
-          >
-            <Search size={15} /> Search tools&hellip;
-          </button>
-          {CATEGORIES.map(cat => (
-            <Link key={cat} href={`/${cat.toLowerCase()}`}
-              onClick={() => setMobileOpen(false)}
+          />
+          <div style={{
+            position: 'fixed', top: 60, left: 0, right: 0, zIndex: 99,
+            maxHeight: 'calc(100vh - 60px)',
+            overflowY: 'auto',
+            boxShadow: '0 8px 30px rgba(0,0,0,0.3)',
+            background: 'var(--bg-1)',
+            borderBottom: '1px solid var(--border)',
+            padding: '12px 16px',
+            display: 'flex', flexDirection: 'column', gap: 4,
+          }}>
+            <button
+              onClick={() => { setMobileOpen(false); setSearchOpen(true); setTimeout(() => inputRef.current?.focus(), 50); }}
               style={{
-                padding: '10px 12px', borderRadius: 'var(--radius-md)',
-                fontSize: 14, fontWeight: 500, color: 'var(--ink-2)',
-                textDecoration: 'none', display: 'block',
+                display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px',
+                background: 'var(--bg-2)', border: '1px solid var(--border)',
+                borderRadius: 'var(--radius-full)', cursor: 'text',
+                color: 'var(--ink-3)', fontSize: 14, width: '100%',
               }}
-            >{cat}</Link>
-          ))}
-        </div>
+            >
+              <Search size={15} /> Search tools&hellip;
+            </button>
+            {CATEGORIES.map(cat => (
+              <Link key={cat} href={`/${cat.toLowerCase()}`}
+                onClick={() => setMobileOpen(false)}
+                style={{
+                  padding: '10px 12px', borderRadius: 'var(--radius-md)',
+                  fontSize: 14, fontWeight: 500, color: 'var(--ink-2)',
+                  textDecoration: 'none', display: 'block',
+                  transition: 'background var(--transition-fast), color var(--transition-fast)',
+                }}
+                onMouseEnter={e => { e.currentTarget.style.color = 'var(--ink)'; e.currentTarget.style.background = 'var(--bg-2)'; }}
+                onMouseLeave={e => { e.currentTarget.style.color = 'var(--ink-2)'; e.currentTarget.style.background = 'transparent'; }}
+              >{cat}</Link>
+            ))}
+          </div>
+        </>
       )}
 
       {/* ── Search overlay ─────────────────────────────────────────── */}
@@ -231,7 +248,7 @@ export function Header() {
             position: 'fixed',
             inset: 0,
             zIndex: 200,
-            background: 'rgba(0,0,0,0.7)',
+            background: 'var(--overlay-bg)',
             backdropFilter: 'blur(4px)',
             display: 'flex',
             alignItems: 'center',
@@ -264,7 +281,7 @@ export function Header() {
                   }}
                   autoFocus
                 />
-                <kbd style={{ fontSize: 11, color: 'var(--ink-3)', background: 'var(--bg-2)', padding: '2px 6px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)' }}>Esc</kbd>
+                <kbd style={{ fontSize: 11, color: 'var(--ink-2)', background: 'var(--bg-2)', padding: '2px 6px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)' }}>Esc</kbd>
               </div>
 
               {/* Results */}
@@ -283,7 +300,7 @@ export function Header() {
                         }}
                         onMouseEnter={() => setFocusedIdx(i)}
                       >
-                        <div style={{ width: 36, height: 36, borderRadius: 'var(--radius-md)', background: 'var(--brand-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        <div style={{ width: 36, height: 36, borderRadius: 'var(--radius-sm)', background: 'var(--brand-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                           <Search size={16} style={{ color: 'var(--brand)' }} />
                         </div>
                         <div style={{ flex: 1, minWidth: 0 }}>
@@ -316,11 +333,14 @@ export function Header() {
       <style>{`
         @media (max-width: 640px) {
           .simple-mode-label { display: none !important; }
-          .simple-mode-toggle-btn { padding: 0 !important; width: 36px !important; justify-content: center !important; border-radius: var(--radius-md) !important; }
+          .simple-mode-toggle-btn { padding: 0 !important; width: 38px !important; justify-content: center !important; border-radius: var(--radius-sm) !important; }
         }
-        @media (max-width: 768px) {
+        @media (max-width: 960px) {
           .desktop-nav { display: none !important; }
           .mobile-ham { display: flex !important; }
+        }
+        @media (max-width: 768px) {
+          .desktop-search-btn { display: none !important; }
         }
       `}</style>
     </>

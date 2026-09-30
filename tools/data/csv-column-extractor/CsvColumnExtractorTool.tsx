@@ -76,10 +76,10 @@ export default function CsvColumnExtractorTool() {
 
   const metricsBadge = (
     <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-      <span style={{ fontSize: 12, padding: '3px 8px', borderRadius: 4, background: 'rgba(96, 96, 232, 0.15)', color: 'var(--brand, #6060E8)', fontWeight: 600 }}>
+      <span style={{ fontSize: 12, padding: '3px 8px', borderRadius: 'var(--radius-xs)', background: 'var(--brand-subtle)', color: 'var(--brand)', fontWeight: 600 }}>
         Columns: {selectedCount} / {columnConfigs.length}
       </span>
-      <span style={{ fontSize: 12, padding: '3px 8px', borderRadius: 4, background: 'rgba(34, 197, 94, 0.15)', color: '#22C55E', fontWeight: 600 }}>
+      <span style={{ fontSize: 12, padding: '3px 8px', borderRadius: 'var(--radius-xs)', background: 'var(--pos-subtle)', color: 'var(--pos)', fontWeight: 600 }}>
         Rows: {extractedResult.rows.length.toLocaleString()}
       </span>
     </div>
@@ -90,9 +90,9 @@ export default function CsvColumnExtractorTool() {
       {/* Input Section */}
       <div
         style={{
-          background: 'var(--bg-2, #18181B)',
-          border: '1px solid var(--border, #27272A)',
-          borderRadius: 12,
+          background: 'var(--bg-2)',
+          border: '1px solid var(--border)',
+          borderRadius: 'var(--radius-lg)',
           padding: 18,
           display: 'flex',
           flexDirection: 'column',
@@ -100,7 +100,7 @@ export default function CsvColumnExtractorTool() {
         }}
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
-          <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink, #FFFFFF)' }}>
+          <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink)' }}>
             Source CSV / TSV Input
           </span>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -122,11 +122,11 @@ export default function CsvColumnExtractorTool() {
           rows={5}
           style={{
             width: '100%',
-            background: 'var(--bg, #09090B)',
-            border: '1px solid var(--border, #27272A)',
-            borderRadius: 8,
+            background: 'var(--bg)',
+            border: '1px solid var(--border)',
+            borderRadius: 'var(--radius-md)',
             padding: 12,
-            color: 'var(--ink, #FFFFFF)',
+            color: 'var(--ink)',
             fontSize: 13,
             fontFamily: 'var(--font-mono, monospace)',
             resize: 'vertical',
@@ -139,9 +139,9 @@ export default function CsvColumnExtractorTool() {
         {columnConfigs.length > 0 && (
           <div
             style={{
-              background: 'var(--bg, #09090B)',
-              border: '1px solid var(--border, #27272A)',
-              borderRadius: 8,
+              background: 'var(--bg)',
+              border: '1px solid var(--border)',
+              borderRadius: 'var(--radius-md)',
               padding: 14,
               display: 'flex',
               flexDirection: 'column',
@@ -150,8 +150,8 @@ export default function CsvColumnExtractorTool() {
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <Columns size={16} color="var(--brand, #6060E8)" />
-                <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink, #FFFFFF)' }}>
+                <Columns size={16} color="var(--brand)" />
+                <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink)' }}>
                   Select Columns to Extract:
                 </span>
               </div>
@@ -183,7 +183,7 @@ export default function CsvColumnExtractorTool() {
             <div
               style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+                gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 200px), 1fr))',
                 gap: 8,
               }}
             >
@@ -194,9 +194,9 @@ export default function CsvColumnExtractorTool() {
                     display: 'flex',
                     alignItems: 'center',
                     gap: 8,
-                    background: col.selected ? 'rgba(96, 96, 232, 0.12)' : 'var(--bg-2, #18181B)',
-                    border: `1px solid ${col.selected ? 'var(--brand, #6060E8)' : 'var(--border, #27272A)'}`,
-                    borderRadius: 6,
+                    background: col.selected ? 'var(--brand-subtle)' : 'var(--bg-2)',
+                    border: `1px solid ${col.selected ? 'var(--brand)' : 'var(--border)'}`,
+                    borderRadius: 'var(--radius-sm)',
                     padding: '8px 10px',
                     cursor: 'pointer',
                   }}
@@ -207,11 +207,11 @@ export default function CsvColumnExtractorTool() {
                     onChange={() => toggleSelectColumn(idx)}
                   />
                   <div style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-                    <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink, #FFFFFF)', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
+                    <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink)', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
                       {col.originalName}
                     </span>
                     {col.sampleValue && (
-                      <span style={{ fontSize: 11, color: 'var(--ink-2, #71717A)', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
+                      <span style={{ fontSize: 11, color: 'var(--ink-3)', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
                         e.g. {col.sampleValue}
                       </span>
                     )}

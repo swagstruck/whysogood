@@ -385,7 +385,7 @@ export default function ImageCompressorTool() {
               {/* Single Centered Download Button */}
               {item.compressedBlob && (
                 <Button
-                  variant="secondary"
+                  variant="primary"
                   onClick={() => downloadBlob(item.compressedBlob!, `compressed_${item.name}`)}
                   icon={<Download size={15} />}
                   style={{

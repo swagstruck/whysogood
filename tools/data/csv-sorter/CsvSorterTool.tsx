@@ -73,10 +73,10 @@ export default function CsvSorterTool() {
 
   const metricsBadge = (
     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-      <span style={{ fontSize: 12, padding: '3px 8px', borderRadius: 4, background: 'rgba(96, 96, 232, 0.15)', color: 'var(--brand, #6060E8)', fontWeight: 600 }}>
+      <span style={{ fontSize: 12, padding: '3px 8px', borderRadius: 'var(--radius-xs)', background: 'var(--brand-subtle)', color: 'var(--brand)', fontWeight: 600 }}>
         Rows Sorted: {sortResult.sortedRowCount.toLocaleString()}
       </span>
-      <span style={{ fontSize: 12, padding: '3px 8px', borderRadius: 4, background: 'rgba(34, 197, 94, 0.15)', color: '#22C55E', fontWeight: 600 }}>
+      <span style={{ fontSize: 12, padding: '3px 8px', borderRadius: 'var(--radius-xs)', background: 'var(--pos-subtle)', color: 'var(--pos)', fontWeight: 600 }}>
         Sort Rules: {criteria.length}
       </span>
     </div>
@@ -87,9 +87,9 @@ export default function CsvSorterTool() {
       {/* Input Section */}
       <div
         style={{
-          background: 'var(--bg-2, #18181B)',
-          border: '1px solid var(--border, #27272A)',
-          borderRadius: 12,
+          background: 'var(--bg-2)',
+          border: '1px solid var(--border)',
+          borderRadius: 'var(--radius-lg)',
           padding: 18,
           display: 'flex',
           flexDirection: 'column',
@@ -97,7 +97,7 @@ export default function CsvSorterTool() {
         }}
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
-          <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink, #FFFFFF)' }}>
+          <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink)' }}>
             Source CSV / TSV Input
           </span>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -119,11 +119,11 @@ export default function CsvSorterTool() {
           rows={5}
           style={{
             width: '100%',
-            background: 'var(--bg, #09090B)',
-            border: '1px solid var(--border, #27272A)',
-            borderRadius: 8,
+            background: 'var(--bg)',
+            border: '1px solid var(--border)',
+            borderRadius: 'var(--radius-md)',
             padding: 12,
-            color: 'var(--ink, #FFFFFF)',
+            color: 'var(--ink)',
             fontSize: 13,
             fontFamily: 'var(--font-mono, monospace)',
             resize: 'vertical',
@@ -135,9 +135,9 @@ export default function CsvSorterTool() {
         {/* Multi-Column Sort Builder */}
         <div
           style={{
-            background: 'var(--bg, #09090B)',
-            border: '1px solid var(--border, #27272A)',
-            borderRadius: 8,
+            background: 'var(--bg)',
+            border: '1px solid var(--border)',
+            borderRadius: 'var(--radius-md)',
             padding: 14,
             display: 'flex',
             flexDirection: 'column',
@@ -146,8 +146,8 @@ export default function CsvSorterTool() {
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <ArrowUpDown size={16} color="var(--brand, #6060E8)" />
-              <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink, #FFFFFF)' }}>
+              <ArrowUpDown size={16} color="var(--brand)" />
+              <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink)' }}>
                 Sort Criteria Hierarchy
               </span>
             </div>
@@ -180,14 +180,14 @@ export default function CsvSorterTool() {
                   display: 'flex',
                   alignItems: 'center',
                   gap: 12,
-                  background: 'var(--bg-2, #18181B)',
-                  border: '1px solid var(--border, #27272A)',
-                  borderRadius: 6,
+                  background: 'var(--bg-2)',
+                  border: '1px solid var(--border)',
+                  borderRadius: 'var(--radius-sm)',
                   padding: '8px 12px',
                   flexWrap: 'wrap',
                 }}
               >
-                <span style={{ fontSize: 12, color: 'var(--brand, #6060E8)', fontWeight: 600, minWidth: 60 }}>
+                <span style={{ fontSize: 12, color: 'var(--brand)', fontWeight: 600, minWidth: 60 }}>
                   {idx === 0 ? 'Sort by:' : 'Then by:'}
                 </span>
 

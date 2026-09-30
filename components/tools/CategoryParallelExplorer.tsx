@@ -70,7 +70,7 @@ export function CategoryParallelExplorer() {
             overflowY: 'auto',
           }}
         >
-          <div style={{ padding: '6px 10px 10px', display: 'flex', alignItems: 'center', borderBottom: '1px solid var(--border)', marginBottom: 4 }}>
+          <div className="parallel-sidebar-header" style={{ padding: '6px 10px 10px', display: 'flex', alignItems: 'center', borderBottom: '1px solid var(--border)', marginBottom: 4 }}>
             <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--ink-2)' }}>
               Categories
             </span>
@@ -204,14 +204,14 @@ export function CategoryParallelExplorer() {
 
             {/* Search within category — Flat, no separator line */}
             <div style={{ position: 'relative' }}>
-              <Search size={15} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--ink-3)', pointerEvents: 'none' }} />
+              <Search size={15} style={{ position: 'absolute', left: 15, top: '50%', transform: 'translateY(-50%)', color: 'var(--ink-2)', pointerEvents: 'none' }} />
               <input
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
                 placeholder={`Search ${selectedCategory === 'All' ? 'all' : selectedCategory.toLowerCase()} tools…`}
                 className="input-base"
                 style={{
-                  width: '100%', height: 38, paddingLeft: 36, paddingRight: 12,
+                  width: '100%', height: 38, paddingLeft: 40, paddingRight: 14,
                   fontSize: 13, boxSizing: 'border-box',
                 }}
               />
@@ -314,6 +314,13 @@ export function CategoryParallelExplorer() {
             padding: 10px !important;
             gap: 6px !important;
             white-space: nowrap !important;
+          }
+          .parallel-sidebar-header {
+            display: none !important;
+          }
+          .parallel-sidebar button {
+            width: auto !important;
+            flex-shrink: 0 !important;
           }
         }
       `}</style>

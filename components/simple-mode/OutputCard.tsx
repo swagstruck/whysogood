@@ -74,18 +74,18 @@ export function OutputCard({ output, onDownload, onUseAsInput, onRemove }: Outpu
             />
           ) : isPdf ? (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
-              <FileText size={28} style={{ color: '#ef4444' }} />
-              <span style={{ fontSize: 9, fontWeight: 700, color: 'var(--ink-3)' }}>PDF</span>
+              <FileText size={28} style={{ color: 'var(--neg)' }} />
+              <span style={{ fontSize: 9, fontWeight: 700, color: 'var(--ink-2)' }}>PDF</span>
             </div>
           ) : isData ? (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
               <Code2 size={28} style={{ color: 'var(--brand)' }} />
-              <span style={{ fontSize: 9, fontWeight: 700, color: 'var(--ink-3)' }}>DATA</span>
+              <span style={{ fontSize: 9, fontWeight: 700, color: 'var(--ink-2)' }}>DATA</span>
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
               <FileText size={28} style={{ color: 'var(--ink-2)' }} />
-              <span style={{ fontSize: 9, fontWeight: 700, color: 'var(--ink-3)' }}>DOC</span>
+              <span style={{ fontSize: 9, fontWeight: 700, color: 'var(--ink-2)' }}>DOC</span>
             </div>
           )}
         </div>
@@ -195,28 +195,32 @@ export function OutputCard({ output, onDownload, onUseAsInput, onRemove }: Outpu
             display: 'flex',
             alignItems: 'center',
             gap: 6,
-            flex: '1 1 150px',
+            flex: '1 1 140px',
             justifyContent: 'center',
             fontSize: 12,
-            height: 32,
+            minHeight: 36,
+            height: 'auto',
+            padding: '6px 12px',
           }}
           title="Load this output as active workbench input for subsequent tools"
         >
           <RefreshCw size={13} />
-          <span>Use as input for next tool</span>
+          <span>Use as Next Input</span>
         </button>
 
         <button
           onClick={() => onRemove(output.id)}
           className="c-btn c-btn--ghost c-btn--sm"
           style={{
-            width: 32,
-            height: 32,
+            width: 36,
+            minWidth: 36,
+            height: 36,
             padding: 0,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            color: 'var(--ink-3)',
+            color: 'var(--ink-2)',
+            borderRadius: 'var(--radius-sm)',
           }}
           title="Remove output"
           aria-label="Remove output"

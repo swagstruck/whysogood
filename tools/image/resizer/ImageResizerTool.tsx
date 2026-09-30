@@ -139,7 +139,7 @@ export default function ImageResizerTool() {
           <p style={{ fontSize: 13, color: 'var(--color-muted)', margin: 0 }}>PNG, JPG, WebP, AVIF, BMP, GIF &bull; 100% Client-side</p>
         </div>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 20 }}>
+        <div className="tool-split-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 320px), 1fr))', gap: 20 }}>
           {/* Controls */}
           <div className="card" style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 18 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

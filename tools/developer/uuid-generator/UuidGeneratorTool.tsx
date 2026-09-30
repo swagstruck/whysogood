@@ -61,9 +61,9 @@ export default function UuidGeneratorTool() {
       {/* Configuration Toolbar */}
       <div
         style={{
-          background: 'var(--bg-2, #18181B)',
-          border: '1px solid var(--border, #27272A)',
-          borderRadius: 12,
+          background: 'var(--bg-2)',
+          border: '1px solid var(--border)',
+          borderRadius: 'var(--radius-lg)',
           padding: 16,
           display: 'flex',
           flexWrap: 'wrap',
@@ -75,7 +75,7 @@ export default function UuidGeneratorTool() {
         <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
           {/* Version Selector */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-            <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--ink-2, #A1A1AA)' }}>Algorithm / Format</span>
+            <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--ink-2)' }}>Algorithm / Format</span>
             <div style={{ width: 140 }}>
               <Select
                 value={version}
@@ -91,7 +91,7 @@ export default function UuidGeneratorTool() {
 
           {/* Count Slider */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-            <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--ink-2, #A1A1AA)' }}>Quantity: {count}</span>
+            <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--ink-2)' }}>Quantity: {count}</span>
             <input
               type="range"
               min={1}
@@ -104,7 +104,7 @@ export default function UuidGeneratorTool() {
 
           {/* Toggles */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 16 }}>
-            <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--ink-2, #A1A1AA)', cursor: 'pointer' }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--ink-2)', cursor: 'pointer' }}>
               <input
                 type="checkbox"
                 checked={uppercase}
@@ -112,7 +112,7 @@ export default function UuidGeneratorTool() {
               />
               <span>Uppercase</span>
             </label>
-            <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--ink-2, #A1A1AA)', cursor: 'pointer' }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--ink-2)', cursor: 'pointer' }}>
               <input
                 type="checkbox"
                 checked={noHyphens}
@@ -143,9 +143,9 @@ export default function UuidGeneratorTool() {
       {/* Output Display */}
       <div
         style={{
-          background: 'var(--bg-2, #18181B)',
-          border: '1px solid var(--border, #27272A)',
-          borderRadius: 12,
+          background: 'var(--bg-2)',
+          border: '1px solid var(--border)',
+          borderRadius: 'var(--radius-lg)',
           padding: 16,
           display: 'flex',
           flexDirection: 'column',
@@ -153,7 +153,7 @@ export default function UuidGeneratorTool() {
         }}
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink, #FFFFFF)' }}>
+          <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink)' }}>
             Generated Identifiers ({generatedIds.length})
           </span>
         </div>
@@ -164,11 +164,11 @@ export default function UuidGeneratorTool() {
           rows={Math.min(Math.max(count, 5), 18)}
           style={{
             width: '100%',
-            background: 'var(--bg, #09090B)',
-            border: '1px solid var(--border, #27272A)',
-            borderRadius: 8,
+            background: 'var(--bg)',
+            border: '1px solid var(--border)',
+            borderRadius: 'var(--radius-md)',
             padding: 14,
-            color: 'var(--brand, #6060E8)',
+            color: 'var(--brand)',
             fontSize: 14,
             fontFamily: 'var(--font-mono, monospace)',
             lineHeight: 1.8,

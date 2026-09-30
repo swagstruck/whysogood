@@ -83,9 +83,9 @@ export default function HashGeneratorTool() {
       {/* Input Text Card */}
       <div
         style={{
-          background: 'var(--bg-2, #18181B)',
-          border: '1px solid var(--border, #27272A)',
-          borderRadius: 12,
+          background: 'var(--bg-2)',
+          border: '1px solid var(--border)',
+          borderRadius: 'var(--radius-lg)',
           padding: 18,
           display: 'flex',
           flexDirection: 'column',
@@ -93,7 +93,7 @@ export default function HashGeneratorTool() {
         }}
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink, #FFFFFF)' }}>
+          <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink)' }}>
             Input Text Payload
           </span>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -111,11 +111,11 @@ export default function HashGeneratorTool() {
           rows={4}
           style={{
             width: '100%',
-            background: 'var(--bg, #09090B)',
-            border: '1px solid var(--border, #27272A)',
-            borderRadius: 8,
+            background: 'var(--bg)',
+            border: '1px solid var(--border)',
+            borderRadius: 'var(--radius-md)',
             padding: 12,
-            color: 'var(--ink, #FFFFFF)',
+            color: 'var(--ink)',
             fontSize: 13,
             fontFamily: 'var(--font-mono, monospace)',
             resize: 'vertical',
@@ -126,7 +126,7 @@ export default function HashGeneratorTool() {
         {/* Options */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-            <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--ink-2, #A1A1AA)', cursor: 'pointer' }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--ink-2)', cursor: 'pointer' }}>
               <input
                 type="checkbox"
                 checked={isHmac}
@@ -134,7 +134,7 @@ export default function HashGeneratorTool() {
               />
               <span>Enable HMAC Key</span>
             </label>
-            <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--ink-2, #A1A1AA)', cursor: 'pointer' }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--ink-2)', cursor: 'pointer' }}>
               <input
                 type="checkbox"
                 checked={uppercase}
@@ -153,7 +153,7 @@ export default function HashGeneratorTool() {
         {/* HMAC Key Input */}
         {isHmac && (
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <Key size={16} color="var(--brand, #6060E8)" />
+            <Key size={16} color="var(--brand)" />
             <input
               type="text"
               value={hmacKey}
@@ -161,11 +161,11 @@ export default function HashGeneratorTool() {
               placeholder="Enter secret HMAC key..."
               style={{
                 flex: 1,
-                background: 'var(--bg, #09090B)',
-                border: '1px solid var(--border, #27272A)',
-                borderRadius: 6,
+                background: 'var(--bg)',
+                border: '1px solid var(--border)',
+                borderRadius: 'var(--radius-sm)',
                 padding: '8px 12px',
-                color: 'var(--ink, #FFFFFF)',
+                color: 'var(--ink)',
                 fontSize: 13,
                 fontFamily: 'var(--font-mono, monospace)',
               }}
@@ -185,9 +185,9 @@ export default function HashGeneratorTool() {
           <div
             key={item.name}
             style={{
-              background: 'var(--bg-2, #18181B)',
-              border: '1px solid var(--border, #27272A)',
-              borderRadius: 12,
+              background: 'var(--bg-2)',
+              border: '1px solid var(--border)',
+              borderRadius: 'var(--radius-lg)',
               padding: 16,
               display: 'flex',
               flexDirection: 'column',
@@ -196,11 +196,11 @@ export default function HashGeneratorTool() {
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <Shield size={16} color="var(--brand, #6060E8)" />
-                <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--ink, #FFFFFF)' }}>
+                <Shield size={16} color="var(--brand)" />
+                <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--ink)' }}>
                   {item.name} {isHmac ? 'HMAC' : ''}
                 </span>
-                <span style={{ fontSize: 11, color: 'var(--ink-2, #71717A)' }}>
+                <span style={{ fontSize: 11, color: 'var(--ink-3)' }}>
                   ({item.length})
                 </span>
               </div>
@@ -213,13 +213,13 @@ export default function HashGeneratorTool() {
 
             <div
               style={{
-                background: 'var(--bg, #09090B)',
-                border: '1px solid var(--border, #27272A)',
-                borderRadius: 6,
+                background: 'var(--bg)',
+                border: '1px solid var(--border)',
+                borderRadius: 'var(--radius-sm)',
                 padding: '10px 12px',
                 fontFamily: 'var(--font-mono, monospace)',
                 fontSize: 13,
-                color: 'var(--brand, #6060E8)',
+                color: 'var(--brand)',
                 wordBreak: 'break-all',
               }}
             >

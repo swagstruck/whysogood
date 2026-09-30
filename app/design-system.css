@@ -25,6 +25,10 @@
   --warn-500: #f59e0b;
   --info-500: #3b82f6;
 
+  /* Contrast inverse & overlays */
+  --ink-inverse: #ffffff;
+  --overlay-bg:  rgba(0, 0, 0, 0.7);
+
   /* ── Radius Tokens ─────────────────────────────── */
   /* Radius — capped under 48px for cards and inner containers, full pill for buttons/badges */
   --radius-xs:   4px;

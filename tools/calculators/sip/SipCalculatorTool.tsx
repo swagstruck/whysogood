@@ -71,7 +71,7 @@ export default function SipCalculatorTool() {
   ) => (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-        <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--color-text)' }}>{label}</span>
+        <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--ink)' }}>{label}</span>
         <input
           type="number"
           value={rawVal}
@@ -93,7 +93,8 @@ export default function SipCalculatorTool() {
           className={`input-base${errMsg ? ' input-base--error' : ''}`}
           aria-invalid={errMsg ? 'true' : undefined}
           style={{
-            width: 110, height: 32, padding: '0 8px', fontSize: 14,
+            width: 110, height: 32, padding: '0 12px', fontSize: 14,
+            borderRadius: 'var(--radius-md)',
             boxSizing: 'border-box', textAlign: 'right',
           }}
         />
@@ -105,9 +106,9 @@ export default function SipCalculatorTool() {
           setValue(v);
           setRaw(String(v));
         }}
-        style={{ width: '100%', accentColor: 'var(--color-accent)' }}
+        style={{ width: '100%', accentColor: 'var(--brand)' }}
       />
-      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'var(--color-faint)', marginTop: 2 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'var(--ink-2)', marginTop: 2 }}>
         <span>{suffix === '%' ? `${min}%` : `₹${min.toLocaleString('en-IN')}`}</span>
         <span>{suffix === '%' ? `${max}%` : `₹${max.toLocaleString('en-IN')}`}</span>
       </div>
@@ -117,9 +118,12 @@ export default function SipCalculatorTool() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 20 }}>
+      <div
+        className="tool-split-grid"
+        style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))', gap: 20 }}
+      >
         {/* Controls Card */}
-        <div className="card" style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 24 }}>
+        <div className="c-card" style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 24 }}>
           {sliderRow('Monthly Investment', monthlyInvestment, miRaw, setMiRaw, setMonthlyInvestment, 500, 100000, 500, 'mi', miErr, formatCurrency(monthlyInvestment), '₹')}
           {sliderRow('Expected Return Rate (p.a.)', expectedReturnRate, rrRaw, setRrRaw, setExpectedReturnRate, 1, 30, 0.5, 'rr', rrErr, `${expectedReturnRate}%`, '%')}
           {sliderRow('Time Period (years)', tenureYears, tyRaw, setTyRaw, setTenureYears, 1, 35, 1, 'ty', tyErr, `${tenureYears} yr`, 'yr')}
@@ -130,10 +134,10 @@ export default function SipCalculatorTool() {
         </div>
 
         {/* Results Card */}
-        <div className="card" style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 20, justifyContent: 'center' }}>
+        <div className="c-card" style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 20, justifyContent: 'center' }}>
           <div>
-            <span style={{ fontSize: 13, color: 'var(--color-muted)', fontWeight: 500 }}>Total Maturity Value</span>
-            <div style={{ fontSize: 'clamp(1.75rem, 4vw, 2.5rem)', fontWeight: 800, color: 'var(--color-text)', letterSpacing: '-0.02em', marginTop: 4 }}>
+            <span style={{ fontSize: 13, color: 'var(--ink-2)', fontWeight: 500 }}>Total Maturity Value</span>
+            <div style={{ fontSize: 'clamp(1.75rem, 4vw, 2.5rem)', fontWeight: 800, color: 'var(--ink)', letterSpacing: '-0.02em', marginTop: 4 }}>
               {formatCurrency(maturityAmount)}
             </div>
           </div>

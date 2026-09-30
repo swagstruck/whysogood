@@ -159,8 +159,8 @@ export function SimpleModeDropzone({
                 style={{
                   fontSize: 10,
                   fontWeight: 700,
-                  color: 'var(--ink-3)',
-                  background: 'var(--bg-2)',
+                  color: 'var(--ink-2)',
+                  background: 'var(--bg-3)',
                   padding: '2px 6px',
                   borderRadius: 'var(--radius-sm)',
                   border: '1px solid var(--border)',
@@ -305,8 +305,8 @@ export function SimpleModeDropzone({
             style={{
               fontSize: 11,
               fontWeight: 600,
-              color: 'var(--ink-3)',
-              background: 'var(--bg-2)',
+              color: 'var(--ink-2)',
+              background: 'var(--bg-3)',
               padding: '3px 8px',
               borderRadius: 'var(--radius-sm)',
               border: '1px solid var(--border)',

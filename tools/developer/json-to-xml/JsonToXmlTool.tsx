@@ -53,7 +53,7 @@ export default function JsonToXmlTool() {
 
   const optionsToolbar = (
     <>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--ink-2, #A1A1A1)' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--ink-2)' }}>
         <span>Root Tag:</span>
         <input
           type="text"
@@ -63,17 +63,17 @@ export default function JsonToXmlTool() {
           style={{
             width: 80,
             padding: '4px 8px',
-            background: 'var(--bg-2, #1C1C1C)',
-            border: '1px solid var(--border, #2A2A2A)',
-            borderRadius: '6px',
-            color: 'var(--ink, #FAFAFA)',
+            background: 'var(--bg-2)',
+            border: '1px solid var(--border)',
+            borderRadius: 'var(--radius-sm)',
+            color: 'var(--ink)',
             fontSize: 12,
             fontFamily: 'var(--font-mono, monospace)',
           }}
         />
       </div>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--ink-2, #A1A1A1)' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--ink-2)' }}>
         <span>Item Tag:</span>
         <input
           type="text"
@@ -83,17 +83,17 @@ export default function JsonToXmlTool() {
           style={{
             width: 80,
             padding: '4px 8px',
-            background: 'var(--bg-2, #1C1C1C)',
-            border: '1px solid var(--border, #2A2A2A)',
-            borderRadius: '6px',
-            color: 'var(--ink, #FAFAFA)',
+            background: 'var(--bg-2)',
+            border: '1px solid var(--border)',
+            borderRadius: 'var(--radius-sm)',
+            color: 'var(--ink)',
             fontSize: 12,
             fontFamily: 'var(--font-mono, monospace)',
           }}
         />
       </div>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--ink-2, #A1A1A1)' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--ink-2)' }}>
         <label style={{ display: 'flex', alignItems: 'center', gap: 5, cursor: 'pointer' }}>
           <input
             type="checkbox"

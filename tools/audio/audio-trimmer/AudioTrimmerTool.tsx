@@ -46,35 +46,62 @@ export default function AudioTrimmerTool() {
   };
 
   return (
-    <div className="flex flex-col gap-6 max-w-2xl mx-auto">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 24, maxWidth: 680, margin: '0 auto' }}>
       <AudioDropzone onFile={handleFile} accept="audio/mpeg,audio/wav,audio/ogg" label="Drop audio file (MP3/WAV/OGG) here" />
       {file && buffer && (
-        <div className="card p-4 flex flex-col gap-4">
-          <h3 className="font-semibold text-lg">{file?.name}</h3>
-          <p className="text-sm" style={{ color: 'var(--color-muted)' }}>Duration: {buffer.duration.toFixed(2)}s</p>
-          <div className="h-4 bg-surface2 rounded relative overflow-hidden" style={{ background: 'var(--color-surface2)' }}>
-            <div className="absolute h-full rounded" style={{ left: `${(startTime / buffer.duration) * 100}%`, right: `${100 - (endTime / buffer.duration) * 100}%`, backgroundColor: 'var(--color-accent)' }}></div>
+        <div className="c-card" style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <h3 style={{ fontSize: 16, fontWeight: 600, color: 'var(--ink)', margin: 0 }}>{file?.name}</h3>
+          <p style={{ fontSize: 13, color: 'var(--ink-2)', margin: 0 }}>Duration: {buffer.duration.toFixed(2)}s</p>
+          <div style={{ height: 8, background: 'var(--bg-3)', borderRadius: 'var(--radius-full)', position: 'relative', overflow: 'hidden' }}>
+            <div style={{ position: 'absolute', top: 0, bottom: 0, borderRadius: 'var(--radius-full)', left: `${(startTime / buffer.duration) * 100}%`, right: `${100 - (endTime / buffer.duration) * 100}%`, background: 'var(--brand)' }} />
           </div>
-          <div className="flex gap-4">
-            <div className="flex-1 flex flex-col gap-2">
-              <label className="text-sm">Start Time (s)</label>
-              <input type="number" value={startTime} onChange={(e) => setStartTime(Number(e.target.value))} min={0} max={endTime} step={0.1} className="p-2 rounded border" style={{ borderColor: 'var(--color-border)', background: 'transparent' }} />
+          <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+            <div style={{ flex: '1 1 200px', display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <label style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink)' }}>Start Time (s)</label>
+              <input
+                type="number"
+                value={startTime}
+                onChange={(e) => setStartTime(Number(e.target.value))}
+                min={0}
+                max={endTime}
+                step={0.1}
+                className="input-base"
+                style={{ height: 40, padding: '0 12px', borderRadius: 'var(--radius-md)', width: '100%', boxSizing: 'border-box' }}
+              />
             </div>
-            <div className="flex-1 flex flex-col gap-2">
-              <label className="text-sm">End Time (s)</label>
-              <input type="number" value={endTime} onChange={(e) => setEndTime(Number(e.target.value))} min={startTime} max={buffer.duration} step={0.1} className="p-2 rounded border" style={{ borderColor: 'var(--color-border)', background: 'transparent' }} />
+            <div style={{ flex: '1 1 200px', display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <label style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink)' }}>End Time (s)</label>
+              <input
+                type="number"
+                value={endTime}
+                onChange={(e) => setEndTime(Number(e.target.value))}
+                min={startTime}
+                max={buffer.duration}
+                step={0.1}
+                className="input-base"
+                style={{ height: 40, padding: '0 12px', borderRadius: 'var(--radius-md)', width: '100%', boxSizing: 'border-box' }}
+              />
             </div>
           </div>
-          <button onClick={handleTrim} disabled={processing} className="px-4 py-2 rounded font-medium" style={{ backgroundColor: 'var(--color-accent)', color: 'white' }}>
+          <button
+            onClick={handleTrim}
+            disabled={processing}
+            className="c-btn c-btn--primary"
+            style={{ width: '100%', height: 42 }}
+          >
             {processing ? 'Processing...' : 'Trim'}
           </button>
         </div>
       )}
       {outputUrl && (
-        <div className="card p-4 flex flex-col gap-4">
-          <h3 className="font-semibold text-lg">Output</h3>
-          <audio controls src={outputUrl} className="w-full" />
-          <button onClick={() => downloadBlob(outputBlob!, 'trimmed.wav')} className="px-4 py-2 rounded font-medium bg-black text-white dark:bg-white dark:text-black">
+        <div className="c-card" style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <h3 style={{ fontSize: 16, fontWeight: 600, color: 'var(--ink)', margin: 0 }}>Output</h3>
+          <audio controls src={outputUrl} style={{ width: '100%' }} />
+          <button
+            onClick={() => downloadBlob(outputBlob!, 'trimmed.wav')}
+            className="c-btn c-btn--primary"
+            style={{ width: '100%', height: 42 }}
+          >
             Download WAV
           </button>
         </div>

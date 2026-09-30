@@ -179,7 +179,7 @@ export function DeveloperSplitPane({
         right: 0,
         bottom: 0,
         zIndex: 9999,
-        background: 'var(--bg, #0A0A0A)',
+        background: 'var(--bg)',
         padding: '20px 24px',
         display: 'flex',
         flexDirection: 'column',
@@ -197,7 +197,7 @@ export function DeveloperSplitPane({
     <div style={containerStyle}>
       {/* Top Action Toolbar */}
       <div
-        className="card"
+        className="c-card"
         style={{
           padding: '12px 16px',
           display: 'flex',
@@ -205,9 +205,9 @@ export function DeveloperSplitPane({
           gap: 12,
           alignItems: 'center',
           justifyContent: 'space-between',
-          background: 'var(--bg-1, #141414)',
-          border: '1px solid var(--border, #2A2A2A)',
-          borderRadius: 'var(--radius-md, 14px)',
+          background: 'var(--bg-1)',
+          border: '1px solid var(--border)',
+          borderRadius: 'var(--radius-md)',
         }}
       >
         {/* Left Action Buttons & Custom Controls */}
@@ -244,8 +244,8 @@ export function DeveloperSplitPane({
             onClick={() => setSyncScroll(!syncScroll)}
             icon={<ArrowRightLeft size={14} />}
             style={{
-              color: syncScroll ? 'var(--brand, #6060e8)' : 'var(--ink-2, #A1A1A1)',
-              background: syncScroll ? 'rgba(96, 96, 232, 0.12)' : 'transparent',
+              color: syncScroll ? 'var(--brand)' : 'var(--ink-2)',
+              background: syncScroll ? 'var(--brand-subtle)' : 'transparent',
             }}
             title="Toggle Synchronized Scrolling"
           >
@@ -306,28 +306,28 @@ export function DeveloperSplitPane({
             flexWrap: 'wrap',
             gap: 12,
             padding: '12px 18px',
-            background: 'var(--bg-2, #1C1C1C)',
-            border: '1px solid var(--border, #2A2A2A)',
-            borderRadius: 'var(--radius-md, 14px)',
+            background: 'var(--bg-2)',
+            border: '1px solid var(--border)',
+            borderRadius: 'var(--radius-md)',
             fontSize: 13,
-            color: 'var(--ink, #FAFAFA)',
+            color: 'var(--ink)',
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <Zap size={15} style={{ color: 'var(--brand, #6060e8)' }} />
+              <Zap size={15} style={{ color: 'var(--brand)' }} />
               <span style={{ fontWeight: 600 }}>Compression Metrics:</span>
             </div>
             <div>
-              <span style={{ color: 'var(--ink-2, #A1A1A1)' }}>Original: </span>
+              <span style={{ color: 'var(--ink-2)' }}>Original: </span>
               <strong>{formatFileSize(metrics.originalSize)}</strong>
             </div>
             <div>
-              <span style={{ color: 'var(--ink-2, #A1A1A1)' }}>Minified: </span>
+              <span style={{ color: 'var(--ink-2)' }}>Minified: </span>
               <strong>{formatFileSize(metrics.minifiedSize)}</strong>
             </div>
             <div>
-              <span style={{ color: 'var(--ink-2, #A1A1A1)' }}>Saved: </span>
+              <span style={{ color: 'var(--ink-2)' }}>Saved: </span>
               <strong>{formatFileSize(metrics.bytesSaved)}</strong>
             </div>
           </div>
@@ -335,9 +335,9 @@ export function DeveloperSplitPane({
           <div
             style={{
               padding: '4px 10px',
-              borderRadius: '9999px',
-              background: metrics.reductionPercentage > 0 ? 'rgba(34, 197, 94, 0.15)' : 'rgba(161, 161, 161, 0.15)',
-              color: metrics.reductionPercentage > 0 ? 'var(--pos, #22c55e)' : 'var(--ink-2, #A1A1A1)',
+              borderRadius: 'var(--radius-full)',
+              background: metrics.reductionPercentage > 0 ? 'var(--pos-subtle)' : 'var(--bg-3)',
+              color: metrics.reductionPercentage > 0 ? 'var(--pos)' : 'var(--ink-2)',
               fontWeight: 700,
               fontSize: 12,
             }}
@@ -352,10 +352,10 @@ export function DeveloperSplitPane({
         <div
           style={{
             padding: '12px 16px',
-            borderRadius: 'var(--radius-md, 14px)',
-            background: 'rgba(239, 68, 68, 0.12)',
-            border: '1px solid rgba(239, 68, 68, 0.3)',
-            color: 'var(--neg, #ef4444)',
+            borderRadius: 'var(--radius-md)',
+            background: 'var(--neg-subtle)',
+            border: '1px solid var(--neg)',
+            color: 'var(--neg)',
             fontSize: 13,
             display: 'flex',
             alignItems: 'center',
@@ -377,42 +377,43 @@ export function DeveloperSplitPane({
 
       {/* Editor Grid: Side-by-side or stacked on mobile */}
       <div
+        className="tool-split-grid"
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 340px), 1fr))',
           gap: 16,
           flex: isFullScreen ? 1 : 'unset',
         }}
       >
         {/* Input Pane */}
         <div
-          className="card"
+          className="c-card"
           style={{
             display: 'flex',
             flexDirection: 'column',
             overflow: 'hidden',
-            background: 'var(--bg-1, #141414)',
-            border: '1px solid var(--border, #2A2A2A)',
-            borderRadius: 'var(--radius-md, 14px)',
+            background: 'var(--bg-1)',
+            border: '1px solid var(--border)',
+            borderRadius: 'var(--radius-md)',
             height: isFullScreen ? 'calc(100vh - 180px)' : 480,
           }}
         >
           <div
             style={{
               padding: '10px 16px',
-              borderBottom: '1px solid var(--border, #2A2A2A)',
+              borderBottom: '1px solid var(--border)',
               fontSize: 12,
               fontWeight: 700,
-              color: 'var(--ink-2, #A1A1A1)',
+              color: 'var(--ink-2)',
               textTransform: 'uppercase',
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
-              background: 'var(--bg-2, #1C1C1C)',
+              background: 'var(--bg-2)',
             }}
           >
             <span>{inputLabel}</span>
-            <div style={{ display: 'flex', gap: 10, fontSize: 11, color: 'var(--ink-3, #666)' }}>
+            <div style={{ display: 'flex', gap: 10, fontSize: 11, color: 'var(--ink-3)' }}>
               <span>{inputLines} lines</span>
               <span>{inputValue.length} chars</span>
             </div>
@@ -433,8 +434,8 @@ export function DeveloperSplitPane({
               background: 'transparent',
               border: 'none',
               outline: 'none',
-              color: 'var(--ink, #FAFAFA)',
-              fontFamily: 'var(--font-mono, monospace)',
+              color: 'var(--ink)',
+              fontFamily: 'var(--font-mono)',
               fontSize: 13,
               lineHeight: 1.6,
               resize: 'none',
@@ -446,33 +447,33 @@ export function DeveloperSplitPane({
 
         {/* Output Pane */}
         <div
-          className="card"
+          className="c-card"
           style={{
             display: 'flex',
             flexDirection: 'column',
             overflow: 'hidden',
-            background: 'var(--bg-1, #141414)',
-            border: '1px solid var(--border, #2A2A2A)',
-            borderRadius: 'var(--radius-md, 14px)',
+            background: 'var(--bg-1)',
+            border: '1px solid var(--border)',
+            borderRadius: 'var(--radius-md)',
             height: isFullScreen ? 'calc(100vh - 180px)' : 480,
           }}
         >
           <div
             style={{
               padding: '10px 16px',
-              borderBottom: '1px solid var(--border, #2A2A2A)',
+              borderBottom: '1px solid var(--border)',
               fontSize: 12,
               fontWeight: 700,
-              color: 'var(--ink-2, #A1A1A1)',
+              color: 'var(--ink-2)',
               textTransform: 'uppercase',
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
-              background: 'var(--bg-2, #1C1C1C)',
+              background: 'var(--bg-2)',
             }}
           >
             <span>{outputLabel}</span>
-            <div style={{ display: 'flex', gap: 10, fontSize: 11, color: 'var(--brand, #6060e8)' }}>
+            <div style={{ display: 'flex', gap: 10, fontSize: 11, color: 'var(--brand)' }}>
               <span>{outputLines} lines</span>
               <span>{outputValue.length} chars</span>
             </div>
@@ -504,8 +505,8 @@ export function DeveloperSplitPane({
                 background: 'transparent',
                 border: 'none',
                 outline: 'none',
-                color: 'var(--ink, #FAFAFA)',
-                fontFamily: 'var(--font-mono, monospace)',
+                color: 'var(--ink)',
+                fontFamily: 'var(--font-mono)',
                 fontSize: 13,
                 lineHeight: 1.6,
                 resize: 'none',

@@ -49,6 +49,8 @@ export function ToolSelector({
           paddingBottom: 8,
           marginBottom: 16,
           scrollbarWidth: 'none',
+          WebkitMaskImage: 'linear-gradient(to right, black 88%, transparent 100%)',
+          maskImage: 'linear-gradient(to right, black 88%, transparent 100%)',
         }}
       >
         {CATEGORIES.map(cat => {
@@ -64,7 +66,7 @@ export function ToolSelector({
                 fontSize: 13,
                 fontWeight: isSelected ? 700 : 500,
                 background: isSelected ? 'var(--brand)' : 'var(--bg-2)',
-                color: isSelected ? '#ffffff' : 'var(--ink-2)',
+                color: isSelected ? 'var(--ink-inverse)' : 'var(--ink-2)',
                 border: isSelected ? '1px solid var(--brand)' : '1px solid var(--border)',
                 cursor: 'pointer',
                 whiteSpace: 'nowrap',

@@ -6,10 +6,10 @@ import { Search, ArrowRight } from 'lucide-react';
 import { getPopularTools } from '@/lib/registry';
 import { searchTools } from '@/lib/search';
 import type { Tool } from '@/lib/types';
+import { ToolCard } from '@/components/tools/ToolCard';
 import { CategoryParallelExplorer } from '@/components/tools/CategoryParallelExplorer';
 import { useSession } from '@/lib/session';
 import { SimpleModeWorkbench } from '@/components/simple-mode';
-import * as Icons from 'lucide-react';
 
 const QUICK_ACTIONS = [
   { label: 'Compress Image', slug: 'image-compressor' },
@@ -22,39 +22,12 @@ const QUICK_ACTIONS = [
   { label: 'Favicon', slug: 'favicon-generator' },
 ];
 
-function ToolCardSmall({ tool }: { tool: Tool }) {
-  const IconEl = ((Icons as Record<string, unknown>)[tool.icon] || Icons.Zap) as React.ComponentType<{ size?: number; style?: React.CSSProperties }>;
-  return (
-    <Link href={`/tools/${tool.slug}`} style={{ textDecoration: 'none' }}>
-      <div className="c-card c-card--hover" style={{ padding: 20, height: '100%', display: 'flex', flexDirection: 'column', gap: 10, cursor: 'pointer' }}>
-        {/* brand-500 for decorative icon */}
-        <div style={{ width: 40, height: 40, borderRadius: 'var(--radius-lg)', background: 'var(--brand-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-          <IconEl size={20} style={{ color: 'var(--brand-500)' }} />
-        </div>
-        <div>
-          <div style={{ fontWeight: 600, fontSize: 14, color: 'var(--ink)', marginBottom: 4 }}>{tool.name}</div>
-          <div style={{ fontSize: 12, color: 'var(--ink-2)', lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{tool.description}</div>
-        </div>
-        {tool.formats?.in?.length ? (
-          <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginTop: 'auto' }}>
-            {tool.formats.in.slice(0, 3).map(f => (
-              <span key={f} style={{ fontSize: 10, fontWeight: 600, color: 'var(--ink-3)', background: 'var(--bg-2)', padding: '2px 6px', borderRadius: 'var(--radius-sm)', textTransform: 'uppercase' }}>{f}</span>
-            ))}
-          </div>
-        ) : null}
-        {tool.status === 'stub' && (
-          <span style={{ fontSize: 10, color: 'var(--ink-3)', marginTop: 'auto' }}>Coming soon</span>
-        )}
-      </div>
-    </Link>
-  );
-}
-
 export default function HomePage() {
   const { simpleMode } = useSession();
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<ReturnType<typeof searchTools>>([]);
-  const [dragging, setDragging] = useState(false);
+  const [dragDepth, setDragDepth] = useState(0);
+  const dragging = dragDepth > 0;
   const router = useRouter();
   const popularTools = getPopularTools(9);
 
@@ -67,10 +40,12 @@ export default function HomePage() {
     setResults(q.trim() ? searchTools(q, 8) : []);
   };
 
-  const handleDragOver = (e: React.DragEvent) => { e.preventDefault(); setDragging(true); };
-  const handleDragLeave = () => setDragging(false);
+  const handleDragEnter = (e: React.DragEvent) => { e.preventDefault(); setDragDepth(d => d + 1); };
+  const handleDragOver = (e: React.DragEvent) => { e.preventDefault(); };
+  const handleDragLeave = (e: React.DragEvent) => { e.preventDefault(); setDragDepth(d => Math.max(0, d - 1)); };
   const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault(); setDragging(false);
+    e.preventDefault();
+    setDragDepth(0);
     const file = e.dataTransfer.files[0];
     if (!file) return;
     const mime = file.type;
@@ -84,6 +59,7 @@ export default function HomePage() {
 
   return (
     <div
+      onDragEnter={handleDragEnter}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
@@ -106,17 +82,17 @@ export default function HomePage() {
         {/* Search box */}
         <div style={{ position: 'relative', maxWidth: 580, margin: '0 auto 24px' }}>
           <div style={{ position: 'relative' }}>
-            <Search size={18} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: 'var(--ink-2)', pointerEvents: 'none' }} />
+            <Search size={18} style={{ position: 'absolute', left: 20, top: '50%', transform: 'translateY(-50%)', color: 'var(--ink-2)', pointerEvents: 'none' }} />
             <input
               value={query}
               onChange={e => handleSearch(e.target.value)}
               onKeyDown={e => { if (e.key === 'Enter' && query.trim()) router.push(`/search?q=${encodeURIComponent(query.trim())}`); }}
               placeholder="Search tools…"
               style={{
-                width: '100%', height: 56, paddingLeft: 48, paddingRight: 16,
+                width: '100%', height: 56, paddingLeft: 52, paddingRight: 20,
                 fontSize: 16, background: 'var(--bg-1)',
                 border: '1px solid var(--border)',
-                borderRadius: 'var(--radius-lg)', color: 'var(--ink)',
+                borderRadius: 'var(--radius-full)', color: 'var(--ink)',
                 fontFamily: 'var(--font-sans)', outline: 'none',
                 transition: 'border-color var(--transition-fast)',
                 boxSizing: 'border-box',
@@ -186,7 +162,7 @@ export default function HomePage() {
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 16 }}>
           {popularTools.map(tool => (
-            <ToolCardSmall key={tool.slug} tool={tool} />
+            <ToolCard key={tool.slug} tool={tool} />
           ))}
         </div>
       </section>

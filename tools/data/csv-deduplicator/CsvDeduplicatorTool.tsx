@@ -66,10 +66,10 @@ export default function CsvDeduplicatorTool() {
 
   const metricsBadge = (
     <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-      <span style={{ fontSize: 12, padding: '3px 8px', borderRadius: 4, background: 'rgba(34, 197, 94, 0.15)', color: '#22C55E', fontWeight: 600 }}>
+      <span style={{ fontSize: 12, padding: '3px 8px', borderRadius: 'var(--radius-xs)', background: 'var(--pos-subtle)', color: 'var(--pos)', fontWeight: 600 }}>
         Unique: {dedupResult.metrics.uniqueRowCount.toLocaleString()}
       </span>
-      <span style={{ fontSize: 12, padding: '3px 8px', borderRadius: 4, background: 'rgba(239, 68, 68, 0.15)', color: '#EF4444', fontWeight: 600 }}>
+      <span style={{ fontSize: 12, padding: '3px 8px', borderRadius: 'var(--radius-xs)', background: 'var(--neg-subtle)', color: 'var(--neg)', fontWeight: 600 }}>
         Duplicates Removed: {dedupResult.metrics.duplicatesRemoved.toLocaleString()} ({dedupResult.metrics.duplicatePercentage}%)
       </span>
     </div>
@@ -80,9 +80,9 @@ export default function CsvDeduplicatorTool() {
       {/* Input Section */}
       <div
         style={{
-          background: 'var(--bg-2, #18181B)',
-          border: '1px solid var(--border, #27272A)',
-          borderRadius: 12,
+          background: 'var(--bg-2)',
+          border: '1px solid var(--border)',
+          borderRadius: 'var(--radius-lg)',
           padding: 18,
           display: 'flex',
           flexDirection: 'column',
@@ -90,7 +90,7 @@ export default function CsvDeduplicatorTool() {
         }}
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
-          <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink, #FFFFFF)' }}>
+          <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink)' }}>
             Source CSV / TSV Input
           </span>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -112,11 +112,11 @@ export default function CsvDeduplicatorTool() {
           rows={6}
           style={{
             width: '100%',
-            background: 'var(--bg, #09090B)',
-            border: '1px solid var(--border, #27272A)',
-            borderRadius: 8,
+            background: 'var(--bg)',
+            border: '1px solid var(--border)',
+            borderRadius: 'var(--radius-md)',
             padding: 12,
-            color: 'var(--ink, #FFFFFF)',
+            color: 'var(--ink)',
             fontSize: 13,
             fontFamily: 'var(--font-mono, monospace)',
             resize: 'vertical',
@@ -130,7 +130,7 @@ export default function CsvDeduplicatorTool() {
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <span style={{ fontSize: 12, color: 'var(--ink-2, #A1A1AA)' }}>Scope:</span>
+                <span style={{ fontSize: 12, color: 'var(--ink-2)' }}>Scope:</span>
                 <div style={{ width: 150 }}>
                   <Select
                     value={dedupeMode}
@@ -144,7 +144,7 @@ export default function CsvDeduplicatorTool() {
               </div>
 
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <span style={{ fontSize: 12, color: 'var(--ink-2, #A1A1AA)' }}>Keep:</span>
+                <span style={{ fontSize: 12, color: 'var(--ink-2)' }}>Keep:</span>
                 <div style={{ width: 140 }}>
                   <Select
                     value={strategy}
@@ -157,7 +157,7 @@ export default function CsvDeduplicatorTool() {
                 </div>
               </div>
 
-              <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--ink-2, #A1A1AA)', cursor: 'pointer' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--ink-2)', cursor: 'pointer' }}>
                 <input
                   type="checkbox"
                   checked={caseSensitive}
@@ -166,7 +166,7 @@ export default function CsvDeduplicatorTool() {
                 <span>Case Sensitive</span>
               </label>
 
-              <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--ink-2, #A1A1AA)', cursor: 'pointer' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--ink-2)', cursor: 'pointer' }}>
                 <input
                   type="checkbox"
                   checked={trimBeforeCompare}
@@ -190,16 +190,16 @@ export default function CsvDeduplicatorTool() {
           {dedupeMode === 'selected-columns' && parsedHeaders.length > 0 && (
             <div
               style={{
-                background: 'var(--bg, #09090B)',
-                border: '1px solid var(--border, #27272A)',
-                borderRadius: 8,
+                background: 'var(--bg)',
+                border: '1px solid var(--border)',
+                borderRadius: 'var(--radius-md)',
                 padding: 12,
                 display: 'flex',
                 flexDirection: 'column',
                 gap: 8,
               }}
             >
-              <span style={{ fontSize: 12, color: 'var(--ink-2, #A1A1AA)', fontWeight: 600 }}>
+              <span style={{ fontSize: 12, color: 'var(--ink-2)', fontWeight: 600 }}>
                 Select Primary Key Columns for Duplicate Detection:
               </span>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
@@ -216,9 +216,9 @@ export default function CsvDeduplicatorTool() {
                         fontSize: 12,
                         fontWeight: 600,
                         border: '1px solid',
-                        borderColor: isChecked ? 'var(--brand, #6060E8)' : 'var(--border, #27272A)',
-                        background: isChecked ? 'var(--brand, #6060E8)' : 'transparent',
-                        color: isChecked ? '#FFFFFF' : 'var(--ink-2, #A1A1AA)',
+                        borderColor: isChecked ? 'var(--brand)' : 'var(--border)',
+                        background: isChecked ? 'var(--brand)' : 'transparent',
+                        color: isChecked ? 'var(--ink-inverse)' : 'var(--ink-2)',
                         cursor: 'pointer',
                       }}
                     >

@@ -119,9 +119,9 @@ export function DataTablePreview({
   return (
     <div
       style={{
-        background: 'var(--bg-2, #18181B)',
-        border: '1px solid var(--border, #27272A)',
-        borderRadius: 12,
+        background: 'var(--bg-2)',
+        border: '1px solid var(--border)',
+        borderRadius: 'var(--radius-lg)',
         padding: 18,
         display: 'flex',
         flexDirection: 'column',
@@ -139,7 +139,7 @@ export function DataTablePreview({
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-          <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--ink, #FFFFFF)' }}>
+          <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--ink)' }}>
             {title}
           </span>
           {metricsBadge}
@@ -148,10 +148,10 @@ export function DataTablePreview({
           <div
             style={{
               display: 'flex',
-              background: 'var(--bg, #09090B)',
-              borderRadius: 8,
+              background: 'var(--bg)',
+              borderRadius: 'var(--radius-md)',
               padding: 2,
-              border: '1px solid var(--border, #27272A)',
+              border: '1px solid var(--border)',
             }}
           >
             <button
@@ -162,13 +162,13 @@ export function DataTablePreview({
                 alignItems: 'center',
                 gap: 6,
                 padding: '4px 10px',
-                borderRadius: 6,
+                borderRadius: '6px',
                 border: 'none',
                 fontSize: 12,
                 fontWeight: 600,
                 cursor: 'pointer',
-                background: viewMode === 'table' ? 'var(--brand, #6060E8)' : 'transparent',
-                color: viewMode === 'table' ? '#FFFFFF' : 'var(--ink-2, #A1A1AA)',
+                background: viewMode === 'table' ? 'var(--brand)' : 'transparent',
+                color: viewMode === 'table' ? 'var(--ink-inverse)' : 'var(--ink-2)',
                 transition: 'all 0.15s ease',
               }}
             >
@@ -183,13 +183,13 @@ export function DataTablePreview({
                 alignItems: 'center',
                 gap: 6,
                 padding: '4px 10px',
-                borderRadius: 6,
+                borderRadius: '6px',
                 border: 'none',
                 fontSize: 12,
                 fontWeight: 600,
                 cursor: 'pointer',
-                background: viewMode === 'raw' ? 'var(--brand, #6060E8)' : 'transparent',
-                color: viewMode === 'raw' ? '#FFFFFF' : 'var(--ink-2, #A1A1AA)',
+                background: viewMode === 'raw' ? 'var(--brand)' : 'transparent',
+                color: viewMode === 'raw' ? 'var(--ink-inverse)' : 'var(--ink-2)',
                 transition: 'all 0.15s ease',
               }}
             >
@@ -230,14 +230,15 @@ export function DataTablePreview({
                 display: 'flex',
                 alignItems: 'center',
                 gap: 8,
-                background: 'var(--bg, #09090B)',
-                border: '1px solid var(--border, #27272A)',
-                borderRadius: 8,
+                background: 'var(--bg)',
+                border: '1px solid var(--border)',
+                borderRadius: 'var(--radius-md)',
                 padding: '6px 10px',
-                minWidth: 220,
+                minWidth: 'min(100%, 220px)',
+                flex: 1,
               }}
             >
-              <Search size={14} color="var(--ink-2, #A1A1AA)" />
+              <Search size={14} color="var(--ink-2)" />
               <input
                 type="text"
                 value={searchTerm}
@@ -249,7 +250,7 @@ export function DataTablePreview({
                 style={{
                   background: 'transparent',
                   border: 'none',
-                  color: 'var(--ink, #FFFFFF)',
+                  color: 'var(--ink)',
                   fontSize: 13,
                   outline: 'none',
                   width: '100%',
@@ -258,7 +259,7 @@ export function DataTablePreview({
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span style={{ fontSize: 12, color: 'var(--ink-2, #A1A1AA)' }}>Page Size:</span>
+              <span style={{ fontSize: 12, color: 'var(--ink-2)' }}>Page Size:</span>
               <div style={{ width: 90 }}>
                 <Select
                   value={String(pageSize)}
@@ -281,16 +282,16 @@ export function DataTablePreview({
           {/* Tabular Grid */}
           <div
             style={{
-              background: 'var(--bg, #09090B)',
-              border: '1px solid var(--border, #27272A)',
-              borderRadius: 8,
+              background: 'var(--bg)',
+              border: '1px solid var(--border)',
+              borderRadius: 'var(--radius-md)',
               overflowX: 'auto',
               maxHeight: 460,
               overflowY: 'auto',
             }}
           >
             {rows.length === 0 ? (
-              <div style={{ padding: 32, textAlign: 'center', color: 'var(--ink-2, #A1A1AA)', fontSize: 13 }}>
+              <div style={{ padding: 32, textAlign: 'center', color: 'var(--ink-2)', fontSize: 13 }}>
                 No rows to display. Load or process data to preview table.
               </div>
             ) : (
@@ -304,8 +305,8 @@ export function DataTablePreview({
                 }}
               >
                 <thead>
-                  <tr style={{ background: 'var(--bg-2, #18181B)', borderBottom: '1px solid var(--border, #27272A)' }}>
-                    <th style={{ padding: '8px 12px', width: 44, color: 'var(--ink-2, #71717A)', textAlign: 'center' }}>
+                  <tr style={{ background: 'var(--bg-2)', borderBottom: '1px solid var(--border)' }}>
+                    <th style={{ padding: '8px 12px', width: 44, color: 'var(--ink-3)', textAlign: 'center' }}>
                       #
                     </th>
                     {headers.map((header, colIdx) => (
@@ -314,24 +315,24 @@ export function DataTablePreview({
                         onClick={() => handleSort(colIdx)}
                         style={{
                           padding: '8px 12px',
-                          color: 'var(--ink, #FFFFFF)',
+                          color: 'var(--ink)',
                           fontWeight: 600,
                           cursor: 'pointer',
                           userSelect: 'none',
                           whiteSpace: 'nowrap',
-                          borderRight: '1px solid rgba(255, 255, 255, 0.05)',
+                          borderRight: '1px solid var(--border)',
                         }}
                       >
                         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                           <span>{header || `Column ${colIdx + 1}`}</span>
                           {sortCol === colIdx ? (
                             sortDir === 'asc' ? (
-                              <ArrowUp size={12} color="var(--brand, #6060E8)" />
+                              <ArrowUp size={12} color="var(--brand)" />
                             ) : (
-                              <ArrowDown size={12} color="var(--brand, #6060E8)" />
+                              <ArrowDown size={12} color="var(--brand)" />
                             )
                           ) : (
-                            <ArrowUpDown size={11} color="var(--ink-2, #71717A)" />
+                            <ArrowUpDown size={11} color="var(--ink-3)" />
                           )}
                         </div>
                       </th>
@@ -343,11 +344,11 @@ export function DataTablePreview({
                     <tr
                       key={rowIdx}
                       style={{
-                        borderBottom: '1px solid rgba(255, 255, 255, 0.03)',
-                        background: rowIdx % 2 === 0 ? 'transparent' : 'rgba(255, 255, 255, 0.015)',
+                        borderBottom: '1px solid var(--border)',
+                        background: rowIdx % 2 === 0 ? 'transparent' : 'var(--bg-2)',
                       }}
                     >
-                      <td style={{ padding: '6px 12px', color: 'var(--ink-2, #71717A)', textAlign: 'center' }}>
+                      <td style={{ padding: '6px 12px', color: 'var(--ink-3)', textAlign: 'center' }}>
                         {startIndex + rowIdx + 1}
                       </td>
                       {headers.map((_, colIdx) => (
@@ -355,12 +356,12 @@ export function DataTablePreview({
                           key={colIdx}
                           style={{
                             padding: '6px 12px',
-                            color: 'var(--ink, #E4E4E7)',
+                            color: 'var(--ink)',
                             whiteSpace: 'nowrap',
                             maxWidth: 320,
                             overflow: 'hidden',
                             textOverflow: 'ellipsis',
-                            borderRight: '1px solid rgba(255, 255, 255, 0.03)',
+                            borderRight: '1px solid var(--border)',
                           }}
                         >
                           {row[colIdx] ?? ''}
@@ -383,7 +384,7 @@ export function DataTablePreview({
                 flexWrap: 'wrap',
                 gap: 8,
                 fontSize: 12,
-                color: 'var(--ink-2, #A1A1AA)',
+                color: 'var(--ink-2)',
               }}
             >
               <span>
@@ -410,7 +411,7 @@ export function DataTablePreview({
                 >
                   <ChevronLeft size={14} />
                 </Button>
-                <span style={{ padding: '0 8px', fontWeight: 600, color: 'var(--ink, #FFFFFF)' }}>
+                <span style={{ padding: '0 8px', fontWeight: 600, color: 'var(--ink)' }}>
                   {pageIndex} / {totalPages}
                 </span>
                 <Button
@@ -443,11 +444,11 @@ export function DataTablePreview({
           rows={16}
           style={{
             width: '100%',
-            background: 'var(--bg, #09090B)',
-            border: '1px solid var(--border, #27272A)',
-            borderRadius: 8,
+            background: 'var(--bg)',
+            border: '1px solid var(--border)',
+            borderRadius: 'var(--radius-md)',
             padding: 12,
-            color: 'var(--ink, #FFFFFF)',
+            color: 'var(--ink)',
             fontSize: 13,
             fontFamily: 'var(--font-mono, monospace)',
             lineHeight: 1.5,

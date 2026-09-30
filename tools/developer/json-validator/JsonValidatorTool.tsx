@@ -77,9 +77,9 @@ export default function JsonValidatorTool() {
       {/* Top Toolbar */}
       <div
         style={{
-          background: 'var(--bg-2, #18181B)',
-          border: '1px solid var(--border, #27272A)',
-          borderRadius: 12,
+          background: 'var(--bg-2)',
+          border: '1px solid var(--border)',
+          borderRadius: 'var(--radius-lg)',
           padding: 14,
           display: 'flex',
           justifyContent: 'space-between',
@@ -127,14 +127,14 @@ export default function JsonValidatorTool() {
       {validationResult.isValid ? (
         <div
           style={{
-            background: 'rgba(34, 197, 94, 0.12)',
-            border: '1px solid rgba(34, 197, 94, 0.25)',
-            borderRadius: 8,
+            background: 'var(--pos-subtle)',
+            border: '1px solid var(--pos)',
+            borderRadius: 'var(--radius-md)',
             padding: '12px 16px',
             display: 'flex',
             alignItems: 'center',
             gap: 10,
-            color: '#22C55E',
+            color: 'var(--pos)',
             fontSize: 14,
             fontWeight: 600,
           }}
@@ -145,14 +145,14 @@ export default function JsonValidatorTool() {
       ) : (
         <div
           style={{
-            background: 'rgba(239, 68, 68, 0.12)',
-            border: '1px solid rgba(239, 68, 68, 0.25)',
-            borderRadius: 8,
+            background: 'var(--neg-subtle)',
+            border: '1px solid var(--neg)',
+            borderRadius: 'var(--radius-md)',
             padding: '12px 16px',
             display: 'flex',
             flexDirection: 'column',
             gap: 6,
-            color: '#EF4444',
+            color: 'var(--neg)',
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 600, fontSize: 14 }}>
@@ -162,12 +162,12 @@ export default function JsonValidatorTool() {
               {validationResult.error && ` at Line ${validationResult.error.line}, Column ${validationResult.error.column}`}
             </span>
           </div>
-          <div style={{ fontSize: 13, color: '#F87171' }}>
+          <div style={{ fontSize: 13, color: 'var(--neg)' }}>
             {validationResult.error?.message}
           </div>
           {validationResult.fixSuggestion && (
-            <div style={{ fontSize: 12, color: 'var(--ink-2, #A1A1AA)', marginTop: 4, display: 'flex', alignItems: 'center', gap: 6 }}>
-              <span style={{ fontWeight: 600, color: 'var(--brand, #6060E8)' }}>Suggestion:</span>
+            <div style={{ fontSize: 12, color: 'var(--ink-2)', marginTop: 4, display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span style={{ fontWeight: 600, color: 'var(--brand)' }}>Suggestion:</span>
               <span>{validationResult.fixSuggestion}</span>
             </div>
           )}
@@ -177,16 +177,16 @@ export default function JsonValidatorTool() {
       {/* Main Editor Textarea */}
       <div
         style={{
-          background: 'var(--bg-2, #18181B)',
-          border: '1px solid var(--border, #27272A)',
-          borderRadius: 12,
+          background: 'var(--bg-2)',
+          border: '1px solid var(--border)',
+          borderRadius: 'var(--radius-lg)',
           padding: 16,
           display: 'flex',
           flexDirection: 'column',
           gap: 10,
         }}
       >
-        <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink, #FFFFFF)' }}>
+        <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink)' }}>
           JSON Payload
         </span>
 
@@ -197,11 +197,11 @@ export default function JsonValidatorTool() {
           rows={16}
           style={{
             width: '100%',
-            background: 'var(--bg, #09090B)',
-            border: `1px solid ${validationResult.isValid ? 'var(--border, #27272A)' : 'rgba(239, 68, 68, 0.4)'}`,
-            borderRadius: 8,
+            background: 'var(--bg)',
+            border: `1px solid ${validationResult.isValid ? 'var(--border)' : 'var(--neg)'}`,
+            borderRadius: 'var(--radius-md)',
             padding: 14,
-            color: 'var(--ink, #FFFFFF)',
+            color: 'var(--ink)',
             fontSize: 13,
             fontFamily: 'var(--font-mono, monospace)',
             lineHeight: 1.6,

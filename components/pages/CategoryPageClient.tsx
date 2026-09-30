@@ -1,46 +1,14 @@
 'use client';
 import React, { useState, useMemo } from 'react';
 import Link from 'next/link';
-import { Search, ArrowLeft, Sparkles } from 'lucide-react';
+import { Search, ArrowLeft } from 'lucide-react';
 import * as Icons from 'lucide-react';
 import { getToolsByCategory, CATEGORY_ICONS, CATEGORY_DESCRIPTIONS } from '@/lib/registry';
-import type { Category, Tool } from '@/lib/types';
+import type { Category } from '@/lib/types';
+import { ToolCard } from '@/components/tools/ToolCard';
 
 interface Props {
   category: Category;
-}
-
-function ToolCard({ tool }: { tool: Tool }) {
-  const IconEl = ((Icons as Record<string, unknown>)[tool.icon] || Icons.Zap) as React.ComponentType<{ size?: number; style?: React.CSSProperties }>;
-  return (
-    <Link href={`/tools/${tool.slug}`} style={{ textDecoration: 'none' }}>
-      <div className="c-card c-card--hover" style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 10, height: '100%', cursor: 'pointer' }}>
-        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
-          <div style={{ width: 40, height: 40, borderRadius: 'var(--radius-lg)', background: 'var(--brand-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <IconEl size={20} style={{ color: 'var(--brand-500)' }} />
-          </div>
-          {tool.isBeta && (
-            <span className="c-badge c-badge--warn" style={{ fontSize: 10, padding: '3px 8px', display: 'flex', alignItems: 'center', gap: 3 }}>
-              <Sparkles size={9} />
-              Beta
-            </span>
-          )}
-        </div>
-        <div>
-          <div style={{ fontWeight: 600, fontSize: 14, color: 'var(--ink)', marginBottom: 4 }}>{tool.name}</div>
-          <div style={{ fontSize: 12, color: 'var(--ink-2)', lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{tool.description}</div>
-        </div>
-        {tool.formats?.in?.length ? (
-          <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginTop: 'auto' }}>
-            {tool.formats.in.slice(0, 4).map(f => (
-              <span key={f} style={{ fontSize: 10, fontWeight: 600, color: 'var(--ink-3)', background: 'var(--bg-2)', padding: '2px 6px', borderRadius: 'var(--radius-sm)', textTransform: 'uppercase' }}>{f}</span>
-            ))}
-          </div>
-        ) : null}
-        {tool.status === 'stub' && <span style={{ fontSize: 11, color: 'var(--ink-3)', marginTop: 'auto' }}>Coming soon</span>}
-      </div>
-    </Link>
-  );
 }
 
 export function CategoryPageClient({ category }: Props) {
@@ -65,7 +33,11 @@ export function CategoryPageClient({ category }: Props) {
   return (
     <div style={{ maxWidth: 1280, margin: '0 auto', padding: '32px 16px 80px' }}>
       {/* Back */}
-      <Link href="/" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--ink-2)', textDecoration: 'none', marginBottom: 28 }}
+      <Link href="/" style={{
+        display: 'inline-flex', alignItems: 'center', gap: 6,
+        fontSize: 13, color: 'var(--ink-2)', textDecoration: 'none', marginBottom: 28,
+        transition: 'color var(--transition-fast)',
+      }}
         onMouseEnter={e => e.currentTarget.style.color = 'var(--ink)'}
         onMouseLeave={e => e.currentTarget.style.color = 'var(--ink-2)'}
       >
@@ -87,13 +59,13 @@ export function CategoryPageClient({ category }: Props) {
 
       {/* Search within category */}
       <div style={{ position: 'relative', marginBottom: 32, maxWidth: 440 }}>
-        <Search size={16} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--ink-3)', pointerEvents: 'none' }} />
+        <Search size={16} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: 'var(--ink-2)', pointerEvents: 'none' }} />
         <input
           value={query}
           onChange={e => setQuery(e.target.value)}
           placeholder={`Search ${category.toLowerCase()} tools…`}
           className="input-base"
-          style={{ width: '100%', height: 40, paddingLeft: 38, paddingRight: 12, fontSize: 14, boxSizing: 'border-box' }}
+          style={{ width: '100%', height: 40, paddingLeft: 42, paddingRight: 16, fontSize: 14, boxSizing: 'border-box' }}
         />
       </div>
 
@@ -104,7 +76,7 @@ export function CategoryPageClient({ category }: Props) {
             <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--pos)', display: 'inline-block' }} />
             Available Now
           </h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 14 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 16 }}>
             {active.map(t => <ToolCard key={t.slug} tool={t} />)}
           </div>
         </div>
@@ -114,10 +86,10 @@ export function CategoryPageClient({ category }: Props) {
       {stubs.length > 0 && (
         <div>
           <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--ink)', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--ink-3)', display: 'inline-block' }} />
+            <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--ink-2)', display: 'inline-block' }} />
             Coming Soon
           </h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 14 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 16 }}>
             {stubs.map(t => <ToolCard key={t.slug} tool={t} />)}
           </div>
         </div>

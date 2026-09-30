@@ -107,14 +107,14 @@ export default function JsonToCsvTool() {
         icon={<ArrowRightLeft size={14} />}
         title="Swap conversion direction"
         style={{
-          color: 'var(--brand, #6060e8)',
-          background: 'rgba(96, 96, 232, 0.12)',
+          color: 'var(--brand)',
+          background: 'var(--brand-subtle)',
         }}
       >
         {isJsonToCsv ? 'JSON → CSV' : 'CSV → JSON'}
       </Button>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--ink-2, #A1A1A1)' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--ink-2)' }}>
         <span>Delimiter:</span>
         <Select
           selectSize="sm"
@@ -131,7 +131,7 @@ export default function JsonToCsvTool() {
         />
       </div>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--ink-2, #A1A1A1)' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--ink-2)' }}>
         <label style={{ display: 'flex', alignItems: 'center', gap: 5, cursor: 'pointer' }}>
           <input
             type="checkbox"
@@ -144,7 +144,7 @@ export default function JsonToCsvTool() {
 
       {isJsonToCsv && (
         <>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--ink-2, #A1A1A1)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--ink-2)' }}>
             <label style={{ display: 'flex', alignItems: 'center', gap: 5, cursor: 'pointer' }}>
               <input
                 type="checkbox"
@@ -155,7 +155,7 @@ export default function JsonToCsvTool() {
             </label>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--ink-2, #A1A1A1)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--ink-2)' }}>
             <span>Quotes:</span>
             <Select
               selectSize="sm"

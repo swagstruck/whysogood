@@ -289,14 +289,18 @@ export default function PdfMergerTool() {
                 </div>
 
                 {/* Reorder & Delete buttons */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                   <button
                     type="button"
                     disabled={idx === 0}
                     onClick={() => moveFile(idx, 'up')}
                     title="Move Up"
                     style={{
-                      padding: 6,
+                      width: 36,
+                      height: 36,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
                       background: 'var(--bg-2)',
                       border: '1px solid var(--border)',
                       borderRadius: 'var(--radius-sm)',
@@ -304,7 +308,7 @@ export default function PdfMergerTool() {
                       cursor: idx === 0 ? 'not-allowed' : 'pointer',
                     }}
                   >
-                    <ArrowUp size={14} />
+                    <ArrowUp size={15} />
                   </button>
 
                   <button
@@ -313,7 +317,11 @@ export default function PdfMergerTool() {
                     onClick={() => moveFile(idx, 'down')}
                     title="Move Down"
                     style={{
-                      padding: 6,
+                      width: 36,
+                      height: 36,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
                       background: 'var(--bg-2)',
                       border: '1px solid var(--border)',
                       borderRadius: 'var(--radius-sm)',
@@ -321,7 +329,7 @@ export default function PdfMergerTool() {
                       cursor: idx === files.length - 1 ? 'not-allowed' : 'pointer',
                     }}
                   >
-                    <ArrowDown size={14} />
+                    <ArrowDown size={15} />
                   </button>
 
                   <button
@@ -329,7 +337,11 @@ export default function PdfMergerTool() {
                     onClick={() => removeFile(item.id)}
                     title="Remove File"
                     style={{
-                      padding: 6,
+                      width: 36,
+                      height: 36,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
                       background: 'var(--bg-2)',
                       border: '1px solid var(--border)',
                       borderRadius: 'var(--radius-sm)',
@@ -338,7 +350,7 @@ export default function PdfMergerTool() {
                       marginLeft: 4,
                     }}
                   >
-                    <Trash2 size={14} />
+                    <Trash2 size={15} />
                   </button>
                 </div>
               </div>

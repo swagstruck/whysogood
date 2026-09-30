@@ -115,8 +115,8 @@ export function FeedbackBubble() {
         onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--brand)'; }}
       >
         {open
-          ? <X     size={20} color="#fff" strokeWidth={2.5} />
-          : <MessageSquare size={20} color="#fff" strokeWidth={2} />
+          ? <X     size={20} color="var(--ink-inverse)" strokeWidth={2.5} />
+          : <MessageSquare size={20} color="var(--ink-inverse)" strokeWidth={2} />
         }
       </button>
 
@@ -320,7 +320,7 @@ export function FeedbackBubble() {
                   width: '100%', padding: '11px', borderRadius: 'var(--radius-md)',
                   border: 'none', cursor: canSubmit ? 'pointer' : 'not-allowed',
                   background: canSubmit ? 'var(--brand)' : 'var(--bg-3)',
-                  color: canSubmit ? '#fff' : 'var(--ink-3)',
+                  color: canSubmit ? 'var(--ink-inverse)' : 'var(--ink-3)',
                   fontFamily: 'var(--font-sans)', fontSize: 14, fontWeight: 600,
                   display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
                   transition: 'background 200ms ease, color 200ms ease',
@@ -332,7 +332,7 @@ export function FeedbackBubble() {
                   <>
                     <div className="animate-spin" style={{
                       width: 14, height: 14, borderRadius: '50%',
-                      border: '2px solid rgba(255,255,255,0.3)', borderTopColor: '#fff',
+                      border: '2px solid rgba(255,255,255,0.3)', borderTopColor: 'var(--ink-inverse)',
                     }} />
                     Sending…
                   </>

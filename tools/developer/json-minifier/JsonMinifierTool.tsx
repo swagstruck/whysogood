@@ -69,7 +69,7 @@ export default function JsonMinifierTool() {
         alignItems: 'center',
         gap: 6,
         fontSize: 13,
-        color: 'var(--ink-2, #A1A1A1)',
+        color: 'var(--ink-2)',
         cursor: 'pointer',
         userSelect: 'none',
       }}
@@ -78,7 +78,7 @@ export default function JsonMinifierTool() {
         type="checkbox"
         checked={sortKeys}
         onChange={(e) => setSortKeys(e.target.checked)}
-        style={{ cursor: 'pointer', accentColor: 'var(--brand, #6060e8)' }}
+        style={{ cursor: 'pointer', accentColor: 'var(--brand)' }}
       />
       <span>Sort Keys</span>
     </label>

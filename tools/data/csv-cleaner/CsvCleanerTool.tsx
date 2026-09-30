@@ -50,16 +50,16 @@ export default function CsvCleanerTool() {
 
   const metricsBadge = (
     <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-      <span style={{ fontSize: 12, padding: '3px 8px', borderRadius: 4, background: 'rgba(96, 96, 232, 0.15)', color: 'var(--brand, #6060E8)', fontWeight: 600 }}>
+      <span style={{ fontSize: 12, padding: '3px 8px', borderRadius: 'var(--radius-xs)', background: 'var(--brand-subtle)', color: 'var(--brand)', fontWeight: 600 }}>
         Rows: {cleanResult.metrics.cleanedRowCount.toLocaleString()}
       </span>
       {cleanResult.metrics.blankRowsRemoved > 0 && (
-        <span style={{ fontSize: 12, padding: '3px 8px', borderRadius: 4, background: 'rgba(239, 68, 68, 0.15)', color: '#EF4444', fontWeight: 600 }}>
+        <span style={{ fontSize: 12, padding: '3px 8px', borderRadius: 'var(--radius-xs)', background: 'var(--neg-subtle)', color: 'var(--neg)', fontWeight: 600 }}>
           Blank rows removed: {cleanResult.metrics.blankRowsRemoved}
         </span>
       )}
       {cleanResult.metrics.fieldsTrimmed > 0 && (
-        <span style={{ fontSize: 12, padding: '3px 8px', borderRadius: 4, background: 'rgba(34, 197, 94, 0.15)', color: '#22C55E', fontWeight: 600 }}>
+        <span style={{ fontSize: 12, padding: '3px 8px', borderRadius: 'var(--radius-xs)', background: 'var(--pos-subtle)', color: 'var(--pos)', fontWeight: 600 }}>
           Fields trimmed: {cleanResult.metrics.fieldsTrimmed}
         </span>
       )}
@@ -71,9 +71,9 @@ export default function CsvCleanerTool() {
       {/* Input & Cleaning Controls */}
       <div
         style={{
-          background: 'var(--bg-2, #18181B)',
-          border: '1px solid var(--border, #27272A)',
-          borderRadius: 12,
+          background: 'var(--bg-2)',
+          border: '1px solid var(--border)',
+          borderRadius: 'var(--radius-lg)',
           padding: 18,
           display: 'flex',
           flexDirection: 'column',
@@ -81,7 +81,7 @@ export default function CsvCleanerTool() {
         }}
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
-          <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink, #FFFFFF)' }}>
+          <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink)' }}>
             Source CSV / TSV Input
           </span>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -103,11 +103,11 @@ export default function CsvCleanerTool() {
           rows={6}
           style={{
             width: '100%',
-            background: 'var(--bg, #09090B)',
-            border: '1px solid var(--border, #27272A)',
-            borderRadius: 8,
+            background: 'var(--bg)',
+            border: '1px solid var(--border)',
+            borderRadius: 'var(--radius-md)',
             padding: 12,
-            color: 'var(--ink, #FFFFFF)',
+            color: 'var(--ink)',
             fontSize: 13,
             fontFamily: 'var(--font-mono, monospace)',
             resize: 'vertical',
@@ -128,7 +128,7 @@ export default function CsvCleanerTool() {
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
-            <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--ink-2, #A1A1AA)', cursor: 'pointer' }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--ink-2)', cursor: 'pointer' }}>
               <input
                 type="checkbox"
                 checked={trimWhitespace}
@@ -137,7 +137,7 @@ export default function CsvCleanerTool() {
               <span>Trim Cell Spaces</span>
             </label>
 
-            <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--ink-2, #A1A1AA)', cursor: 'pointer' }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--ink-2)', cursor: 'pointer' }}>
               <input
                 type="checkbox"
                 checked={removeBlankRows}
@@ -146,7 +146,7 @@ export default function CsvCleanerTool() {
               <span>Remove Blank Rows</span>
             </label>
 
-            <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--ink-2, #A1A1AA)', cursor: 'pointer' }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--ink-2)', cursor: 'pointer' }}>
               <input
                 type="checkbox"
                 checked={repairUnevenRows}
@@ -155,7 +155,7 @@ export default function CsvCleanerTool() {
               <span>Repair Uneven Columns</span>
             </label>
 
-            <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--ink-2, #A1A1AA)', cursor: 'pointer' }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--ink-2)', cursor: 'pointer' }}>
               <input
                 type="checkbox"
                 checked={normalizeLineBreaks}
@@ -166,7 +166,7 @@ export default function CsvCleanerTool() {
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{ fontSize: 12, color: 'var(--ink-2, #A1A1AA)' }}>Output Delimiter:</span>
+            <span style={{ fontSize: 12, color: 'var(--ink-2)' }}>Output Delimiter:</span>
             <div style={{ width: 110 }}>
               <Select
                 value={outputDelimiter}
@@ -187,14 +187,14 @@ export default function CsvCleanerTool() {
       {cleanResult.error && (
         <div
           style={{
-            background: 'rgba(239, 68, 68, 0.1)',
-            border: '1px solid rgba(239, 68, 68, 0.25)',
-            borderRadius: 8,
+            background: 'var(--neg-subtle)',
+            border: '1px solid var(--border)',
+            borderRadius: 'var(--radius-md)',
             padding: '10px 14px',
             display: 'flex',
             alignItems: 'center',
             gap: 8,
-            color: '#F87171',
+            color: 'var(--neg)',
             fontSize: 13,
           }}
         >

@@ -91,10 +91,11 @@ export default function RegexTesterTool() {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
       {/* Pattern Bar */}
       <div
+        className="c-card"
         style={{
-          background: 'var(--bg-2, #18181B)',
-          border: '1px solid var(--border, #27272A)',
-          borderRadius: 12,
+          background: 'var(--bg-2)',
+          border: '1px solid var(--border)',
+          borderRadius: 'var(--radius-md)',
           padding: 16,
           display: 'flex',
           flexDirection: 'column',
@@ -102,7 +103,7 @@ export default function RegexTesterTool() {
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
-          <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink, #FFFFFF)' }}>
+          <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink)' }}>
             Regular Expression Pattern
           </span>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -115,14 +116,14 @@ export default function RegexTesterTool() {
                   onClick={() => toggleFlag(f)}
                   style={{
                     padding: '3px 8px',
-                    borderRadius: 6,
+                    borderRadius: 'var(--radius-xs)',
                     fontSize: 12,
                     fontWeight: 700,
-                    fontFamily: 'var(--font-mono, monospace)',
+                    fontFamily: 'var(--font-mono)',
                     border: '1px solid',
-                    borderColor: active ? 'var(--brand, #6060E8)' : 'var(--border, #27272A)',
-                    background: active ? 'var(--brand, #6060E8)' : 'var(--bg, #09090B)',
-                    color: active ? '#FFFFFF' : 'var(--ink-2, #A1A1AA)',
+                    borderColor: active ? 'var(--brand)' : 'var(--border)',
+                    background: active ? 'var(--brand)' : 'var(--bg)',
+                    color: active ? 'var(--ink-inverse)' : 'var(--ink-2)',
                     cursor: 'pointer',
                   }}
                   title={`Flag ${f}`}
@@ -135,7 +136,7 @@ export default function RegexTesterTool() {
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ fontSize: 18, color: 'var(--ink-2, #A1A1AA)', fontFamily: 'var(--font-mono, monospace)' }}>/</span>
+          <span style={{ fontSize: 18, color: 'var(--ink-2)', fontFamily: 'var(--font-mono)' }}>/</span>
           <input
             type="text"
             value={pattern}
@@ -143,22 +144,22 @@ export default function RegexTesterTool() {
             placeholder="Enter regex pattern (e.g. \b[a-z0-9]+)"
             style={{
               flex: 1,
-              background: 'var(--bg, #09090B)',
-              border: '1px solid var(--border, #27272A)',
-              borderRadius: 8,
+              background: 'var(--bg)',
+              border: '1px solid var(--border)',
+              borderRadius: 'var(--radius-sm)',
               padding: '10px 14px',
-              color: 'var(--ink, #FFFFFF)',
+              color: 'var(--ink)',
               fontSize: 14,
-              fontFamily: 'var(--font-mono, monospace)',
+              fontFamily: 'var(--font-mono)',
               outline: 'none',
             }}
           />
-          <span style={{ fontSize: 18, color: 'var(--ink-2, #A1A1AA)', fontFamily: 'var(--font-mono, monospace)' }}>/{flags}</span>
+          <span style={{ fontSize: 18, color: 'var(--ink-2)', fontFamily: 'var(--font-mono)' }}>/{flags}</span>
         </div>
 
         {/* Replacement Toggle */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 4 }}>
-          <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--ink-2, #A1A1AA)', cursor: 'pointer' }}>
+          <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--ink-2)', cursor: 'pointer' }}>
             <input
               type="checkbox"
               checked={enableReplace}
@@ -175,13 +176,13 @@ export default function RegexTesterTool() {
             onChange={(e) => setReplacePattern(e.target.value)}
             placeholder="Replacement string (e.g. $1, [REDACTED])"
             style={{
-              background: 'var(--bg, #09090B)',
-              border: '1px solid var(--border, #27272A)',
-              borderRadius: 8,
+              background: 'var(--bg)',
+              border: '1px solid var(--border)',
+              borderRadius: 'var(--radius-sm)',
               padding: '8px 12px',
-              color: 'var(--ink, #FFFFFF)',
+              color: 'var(--ink)',
               fontSize: 13,
-              fontFamily: 'var(--font-mono, monospace)',
+              fontFamily: 'var(--font-mono)',
             }}
           />
         )}
@@ -217,13 +218,13 @@ export default function RegexTesterTool() {
         <div
           style={{
             background: 'rgba(239, 68, 68, 0.1)',
-            border: '1px solid rgba(239, 68, 68, 0.25)',
-            borderRadius: 8,
+            border: '1px solid var(--neg)',
+            borderRadius: 'var(--radius-sm)',
             padding: '10px 14px',
             display: 'flex',
             alignItems: 'center',
             gap: 8,
-            color: '#F87171',
+            color: 'var(--neg)',
             fontSize: 13,
           }}
         >
@@ -234,18 +235,20 @@ export default function RegexTesterTool() {
 
       {/* Split Views: Input Text & Matches/Output */}
       <div
+        className="tool-split-grid"
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 320px), 1fr))',
           gap: 16,
         }}
       >
         {/* Test Text Pane */}
         <div
+          className="c-card"
           style={{
-            background: 'var(--bg-2, #18181B)',
-            border: '1px solid var(--border, #27272A)',
-            borderRadius: 12,
+            background: 'var(--bg-1)',
+            border: '1px solid var(--border)',
+            borderRadius: 'var(--radius-md)',
             padding: 16,
             display: 'flex',
             flexDirection: 'column',
@@ -253,8 +256,8 @@ export default function RegexTesterTool() {
           }}
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink, #FFFFFF)' }}>Test String</span>
-            <span style={{ fontSize: 12, color: 'var(--ink-2, #A1A1AA)' }}>{text.length} chars</span>
+            <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink)' }}>Test String</span>
+            <span style={{ fontSize: 12, color: 'var(--ink-2)' }}>{text.length} chars</span>
           </div>
           <textarea
             value={text}
@@ -263,26 +266,28 @@ export default function RegexTesterTool() {
             rows={12}
             style={{
               width: '100%',
-              background: 'var(--bg, #09090B)',
-              border: '1px solid var(--border, #27272A)',
-              borderRadius: 8,
+              background: 'var(--bg)',
+              border: '1px solid var(--border)',
+              borderRadius: 'var(--radius-sm)',
               padding: 12,
-              color: 'var(--ink, #FFFFFF)',
+              color: 'var(--ink)',
               fontSize: 13,
-              fontFamily: 'var(--font-mono, monospace)',
+              fontFamily: 'var(--font-mono)',
               resize: 'vertical',
               lineHeight: 1.5,
               outline: 'none',
+              boxSizing: 'border-box',
             }}
           />
         </div>
 
         {/* Results Pane */}
         <div
+          className="c-card"
           style={{
-            background: 'var(--bg-2, #18181B)',
-            border: '1px solid var(--border, #27272A)',
-            borderRadius: 12,
+            background: 'var(--bg-1)',
+            border: '1px solid var(--border)',
+            borderRadius: 'var(--radius-md)',
             padding: 16,
             display: 'flex',
             flexDirection: 'column',
@@ -290,11 +295,11 @@ export default function RegexTesterTool() {
           }}
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink, #FFFFFF)' }}>
+            <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink)' }}>
               {enableReplace ? 'Replaced Output' : `Matches (${result.matches.length})`}
             </span>
             {result.executionTimeMs !== undefined && (
-              <span style={{ fontSize: 12, color: 'var(--ink-2, #A1A1AA)' }}>
+              <span style={{ fontSize: 12, color: 'var(--ink-2)' }}>
                 {result.executionTimeMs}ms
               </span>
             )}
@@ -307,24 +312,25 @@ export default function RegexTesterTool() {
               rows={12}
               style={{
                 width: '100%',
-                background: 'var(--bg, #09090B)',
-                border: '1px solid var(--border, #27272A)',
-                borderRadius: 8,
+                background: 'var(--bg)',
+                border: '1px solid var(--border)',
+                borderRadius: 'var(--radius-sm)',
                 padding: 12,
-                color: 'var(--ink, #FFFFFF)',
+                color: 'var(--ink)',
                 fontSize: 13,
-                fontFamily: 'var(--font-mono, monospace)',
+                fontFamily: 'var(--font-mono)',
                 resize: 'vertical',
                 lineHeight: 1.5,
                 outline: 'none',
+                boxSizing: 'border-box',
               }}
             />
           ) : (
             <div
               style={{
-                background: 'var(--bg, #09090B)',
-                border: '1px solid var(--border, #27272A)',
-                borderRadius: 8,
+                background: 'var(--bg)',
+                border: '1px solid var(--border)',
+                borderRadius: 'var(--radius-sm)',
                 padding: 12,
                 height: 280,
                 overflowY: 'auto',
@@ -334,7 +340,7 @@ export default function RegexTesterTool() {
               }}
             >
               {result.matches.length === 0 ? (
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--ink-2, #A1A1AA)', fontSize: 13 }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--ink-2)', fontSize: 13 }}>
                   No matches found for current pattern.
                 </div>
               ) : (
@@ -342,26 +348,26 @@ export default function RegexTesterTool() {
                   <div
                     key={idx}
                     style={{
-                      background: 'var(--bg-2, #18181B)',
-                      border: '1px solid var(--border, #27272A)',
-                      borderRadius: 6,
+                      background: 'var(--bg-2)',
+                      border: '1px solid var(--border)',
+                      borderRadius: 'var(--radius-xs)',
                       padding: '8px 10px',
                       display: 'flex',
                       flexDirection: 'column',
                       gap: 4,
                       fontSize: 12,
-                      fontFamily: 'var(--font-mono, monospace)',
+                      fontFamily: 'var(--font-mono)',
                     }}
                   >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--brand, #6060E8)', fontWeight: 600 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--brand)', fontWeight: 600 }}>
                       <span>Match #{idx + 1}</span>
-                      <span style={{ color: 'var(--ink-2, #A1A1AA)', fontWeight: 400 }}>index: {m.index}</span>
+                      <span style={{ color: 'var(--ink-2)', fontWeight: 400 }}>index: {m.index}</span>
                     </div>
-                    <div style={{ color: 'var(--ink, #FFFFFF)', background: 'rgba(96, 96, 232, 0.1)', padding: '4px 6px', borderRadius: 4, wordBreak: 'break-all' }}>
+                    <div style={{ color: 'var(--ink)', background: 'var(--brand-subtle)', padding: '4px 6px', borderRadius: 'var(--radius-xs)', wordBreak: 'break-all' }}>
                       {m.match}
                     </div>
                     {m.captures && m.captures.length > 0 && (
-                      <div style={{ color: 'var(--ink-2, #A1A1AA)', fontSize: 11, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                      <div style={{ color: 'var(--ink-2)', fontSize: 11, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                         {m.captures.map((c, cIdx) => (
                           <span key={cIdx}>Group {cIdx + 1}: &quot;{c}&quot;</span>
                         ))}

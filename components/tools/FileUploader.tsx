@@ -119,19 +119,19 @@ export function FileUploader({
         }}>
           {errors.length > 0
             ? <AlertCircle size={22} style={{ color: 'var(--color-error)' }} />
-            : <Upload size={22} style={{ color: isOver ? '#fff' : 'var(--color-muted)' }} />
+            : <Upload size={22} style={{ color: isOver ? 'var(--ink-inverse)' : 'var(--ink-2)' }} />
           }
         </div>
-        <p style={{ fontSize: 15, fontWeight: 600, color: errors.length > 0 ? 'var(--color-error)' : 'var(--color-text)', margin: '0 0 6px' }}>
+        <p style={{ fontSize: 15, fontWeight: 600, color: errors.length > 0 ? 'var(--neg)' : 'var(--ink)', margin: '0 0 6px' }}>
           {isOver ? 'Release to upload' : errors.length > 0 ? 'Upload failed — try again' : label}
         </p>
-        <p style={{ fontSize: 12, color: 'var(--color-faint)', margin: '0 0 12px' }}>
+        <p style={{ fontSize: 12, color: 'var(--ink-2)', margin: '0 0 12px' }}>
           or click to browse &mdash; max {maxSizeMB} MB {multiple ? 'per file' : ''}
         </p>
         {formats.length > 0 && (
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', justifyContent: 'center' }}>
             {formats.map(f => (
-              <span key={f} style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-faint)', background: 'var(--color-surface2)', padding: '2px 8px', borderRadius: 'var(--radius-sm)', textTransform: 'uppercase' }}>
+              <span key={f} style={{ fontSize: 11, fontWeight: 600, color: 'var(--ink-2)', background: 'var(--bg-3)', padding: '2px 8px', borderRadius: 'var(--radius-sm)', textTransform: 'uppercase' }}>
                 {f}
               </span>
             ))}

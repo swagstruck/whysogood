@@ -26,6 +26,7 @@
 html {
   color-scheme: dark;
   scroll-behavior: smooth;
+  overflow-x: hidden;
 }
 [data-theme="light"] { color-scheme: light; }
 /* Backward compat for old class-based theme switching */
@@ -38,6 +39,7 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   min-height: 100vh;
+  overflow-x: hidden;
 }
 
 /* ── Custom scrollbar ────────────────────────────────────────── */
@@ -112,9 +114,14 @@ body {
   outline: none;
 }
 
+textarea.input-base,
+.textarea-base {
+  border-radius: var(--radius-md) !important;
+}
+
 /* ── Global Select & Dropdown Styling ───────────────────────── */
-select:not([multiple]),
-.select-base {
+select:not([multiple]):not(.c-select),
+.select-base:not(.c-select) {
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
@@ -136,23 +143,35 @@ select:not([multiple]),
   transition: border-color var(--transition-fast), background var(--transition-fast), box-shadow var(--transition-fast);
 }
 
-select:not([multiple]):hover:not(:disabled),
-.select-base:hover:not(:disabled) {
+select:not([multiple]):not(.c-select):hover:not(:disabled),
+.select-base:not(.c-select):hover:not(:disabled) {
   border-color: var(--border-hover);
   background-color: var(--bg-3);
 }
 
-select:not([multiple]):focus,
-.select-base:focus {
+select:not([multiple]):not(.c-select):focus,
+.select-base:not(.c-select):focus {
   border-color: var(--brand);
   outline: none;
   box-shadow: 0 0 0 3px var(--brand-subtle);
 }
 
-[data-theme="light"] select:not([multiple]),
-html.light select:not([multiple]),
-[data-theme="light"] .select-base,
-html.light .select-base {
+/* Ensure .c-select has no background chevron */
+.c-select {
+  background-image: none !important;
+}
+
+/* Responsive grid collapsing for tool split panes */
+@media (max-width: 640px) {
+  .tool-split-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+[data-theme="light"] select:not([multiple]):not(.c-select),
+html.light select:not([multiple]):not(.c-select),
+[data-theme="light"] .select-base:not(.c-select),
+html.light .select-base:not(.c-select) {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2364748B' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
 }
 

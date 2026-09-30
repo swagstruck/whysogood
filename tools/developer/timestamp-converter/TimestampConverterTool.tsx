@@ -58,9 +58,9 @@ export default function TimestampConverterTool() {
       {/* Live Clock Card */}
       <div
         style={{
-          background: 'var(--bg-2, #18181B)',
-          border: '1px solid var(--border, #27272A)',
-          borderRadius: 12,
+          background: 'var(--bg-2)',
+          border: '1px solid var(--border)',
+          borderRadius: 'var(--radius-lg)',
           padding: 18,
           display: 'flex',
           justifyContent: 'space-between',
@@ -74,9 +74,9 @@ export default function TimestampConverterTool() {
             style={{
               width: 44,
               height: 44,
-              borderRadius: 10,
-              background: 'rgba(96, 96, 232, 0.15)',
-              color: 'var(--brand, #6060E8)',
+              borderRadius: 'var(--radius-md)',
+              background: 'var(--brand-subtle)',
+              color: 'var(--brand)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -85,11 +85,11 @@ export default function TimestampConverterTool() {
             <Clock size={22} />
           </div>
           <div>
-            <div style={{ fontSize: 12, color: 'var(--ink-2, #A1A1AA)', fontWeight: 600, textTransform: 'uppercase' }}>
+            <div style={{ fontSize: 12, color: 'var(--ink-2)', fontWeight: 600, textTransform: 'uppercase' }}>
               Current Epoch Time
             </div>
-            <div style={{ fontSize: 22, fontWeight: 700, fontFamily: 'var(--font-mono, monospace)', color: 'var(--ink, #FFFFFF)' }}>
-              {Math.floor(currentNow / 1000)} <span style={{ fontSize: 13, color: 'var(--ink-2, #A1A1AA)', fontWeight: 400 }}>seconds</span>
+            <div style={{ fontSize: 22, fontWeight: 700, fontFamily: 'var(--font-mono, monospace)', color: 'var(--ink)' }}>
+              {Math.floor(currentNow / 1000)} <span style={{ fontSize: 13, color: 'var(--ink-2)', fontWeight: 400 }}>seconds</span>
             </div>
           </div>
         </div>
@@ -113,16 +113,16 @@ export default function TimestampConverterTool() {
       {/* Input Field */}
       <div
         style={{
-          background: 'var(--bg-2, #18181B)',
-          border: '1px solid var(--border, #27272A)',
-          borderRadius: 12,
+          background: 'var(--bg-2)',
+          border: '1px solid var(--border)',
+          borderRadius: 'var(--radius-lg)',
           padding: 18,
           display: 'flex',
           flexDirection: 'column',
           gap: 10,
         }}
       >
-        <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink, #FFFFFF)' }}>
+        <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink)' }}>
           Enter Unix Timestamp or Date String
         </span>
         <div style={{ display: 'flex', gap: 8 }}>
@@ -133,11 +133,11 @@ export default function TimestampConverterTool() {
             placeholder="e.g. 1700000000 or 2026-09-24T12:00:00.000Z"
             style={{
               flex: 1,
-              background: 'var(--bg, #09090B)',
-              border: '1px solid var(--border, #27272A)',
-              borderRadius: 8,
+              background: 'var(--bg)',
+              border: '1px solid var(--border)',
+              borderRadius: 'var(--radius-md)',
               padding: '10px 14px',
-              color: 'var(--ink, #FFFFFF)',
+              color: 'var(--ink)',
               fontSize: 14,
               fontFamily: 'var(--font-mono, monospace)',
               outline: 'none',
@@ -153,14 +153,14 @@ export default function TimestampConverterTool() {
       {!converted.isValid && (
         <div
           style={{
-            background: 'rgba(239, 68, 68, 0.1)',
-            border: '1px solid rgba(239, 68, 68, 0.25)',
-            borderRadius: 8,
+            background: 'var(--neg-subtle)',
+            border: '1px solid var(--border)',
+            borderRadius: 'var(--radius-md)',
             padding: '10px 14px',
             display: 'flex',
             alignItems: 'center',
             gap: 8,
-            color: '#F87171',
+            color: 'var(--neg)',
             fontSize: 13,
           }}
         >
@@ -173,16 +173,16 @@ export default function TimestampConverterTool() {
       {converted.isValid && (
         <div
           style={{
-            background: 'var(--bg-2, #18181B)',
-            border: '1px solid var(--border, #27272A)',
-            borderRadius: 12,
+            background: 'var(--bg-2)',
+            border: '1px solid var(--border)',
+            borderRadius: 'var(--radius-lg)',
             padding: 18,
             display: 'flex',
             flexDirection: 'column',
             gap: 12,
           }}
         >
-          <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink, #FFFFFF)' }}>
+          <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink)' }}>
             Converted Formats
           </span>
 
@@ -201,18 +201,18 @@ export default function TimestampConverterTool() {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
-                  background: 'var(--bg, #09090B)',
-                  border: '1px solid var(--border, #27272A)',
-                  borderRadius: 8,
+                  background: 'var(--bg)',
+                  border: '1px solid var(--border)',
+                  borderRadius: 'var(--radius-md)',
                   padding: '10px 14px',
                   gap: 12,
                 }}
               >
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 2, minWidth: 180 }}>
-                  <span style={{ fontSize: 11, color: 'var(--ink-2, #A1A1AA)', fontWeight: 600, textTransform: 'uppercase' }}>
+                  <span style={{ fontSize: 11, color: 'var(--ink-2)', fontWeight: 600, textTransform: 'uppercase' }}>
                     {item.label}
                   </span>
-                  <span style={{ fontSize: 14, fontFamily: 'var(--font-mono, monospace)', color: 'var(--ink, #FFFFFF)', wordBreak: 'break-all' }}>
+                  <span style={{ fontSize: 14, fontFamily: 'var(--font-mono, monospace)', color: 'var(--ink)', wordBreak: 'break-all' }}>
                     {item.value}
                   </span>
                 </div>

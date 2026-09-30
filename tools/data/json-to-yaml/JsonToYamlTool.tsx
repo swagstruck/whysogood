@@ -32,7 +32,7 @@ export default function JsonToYamlTool() {
   const optionsToolbar = (
     <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-        <span style={{ fontSize: 12, color: 'var(--ink-2, #A1A1AA)' }}>Indent:</span>
+        <span style={{ fontSize: 12, color: 'var(--ink-2)' }}>Indent:</span>
         <div style={{ width: 100 }}>
           <Select
             value={String(indent)}
@@ -46,7 +46,7 @@ export default function JsonToYamlTool() {
       </div>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-        <span style={{ fontSize: 12, color: 'var(--ink-2, #A1A1AA)' }}>Quotes:</span>
+        <span style={{ fontSize: 12, color: 'var(--ink-2)' }}>Quotes:</span>
         <div style={{ width: 120 }}>
           <Select
             value={quoteStyle}
@@ -60,7 +60,7 @@ export default function JsonToYamlTool() {
         </div>
       </div>
 
-      <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--ink-2, #A1A1AA)', cursor: 'pointer' }}>
+      <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--ink-2)', cursor: 'pointer' }}>
         <input
           type="checkbox"
           checked={sortKeys}

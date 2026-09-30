@@ -75,10 +75,11 @@ export default function TextDiffTool() {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
       {/* Control Bar */}
       <div
+        className="c-card"
         style={{
-          background: 'var(--bg-2, #18181B)',
-          border: '1px solid var(--border, #27272A)',
-          borderRadius: 12,
+          background: 'var(--bg-2)',
+          border: '1px solid var(--border)',
+          borderRadius: 'var(--radius-md)',
           padding: 14,
           display: 'flex',
           justifyContent: 'space-between',
@@ -92,10 +93,10 @@ export default function TextDiffTool() {
           <div
             style={{
               display: 'flex',
-              background: 'var(--bg, #09090B)',
-              borderRadius: 8,
+              background: 'var(--bg)',
+              borderRadius: 'var(--radius-sm)',
               padding: 2,
-              border: '1px solid var(--border, #27272A)',
+              border: '1px solid var(--border)',
             }}
           >
             <button
@@ -103,13 +104,13 @@ export default function TextDiffTool() {
               onClick={() => setViewMode('side-by-side')}
               style={{
                 padding: '4px 10px',
-                borderRadius: 6,
+                borderRadius: 'var(--radius-xs)',
                 border: 'none',
                 fontSize: 12,
                 fontWeight: 600,
                 cursor: 'pointer',
-                background: viewMode === 'side-by-side' ? 'var(--brand, #6060E8)' : 'transparent',
-                color: viewMode === 'side-by-side' ? '#FFFFFF' : 'var(--ink-2, #A1A1AA)',
+                background: viewMode === 'side-by-side' ? 'var(--brand)' : 'transparent',
+                color: viewMode === 'side-by-side' ? 'var(--ink-inverse)' : 'var(--ink-2)',
                 display: 'flex',
                 alignItems: 'center',
                 gap: 6,
@@ -123,13 +124,13 @@ export default function TextDiffTool() {
               onClick={() => setViewMode('unified')}
               style={{
                 padding: '4px 10px',
-                borderRadius: 6,
+                borderRadius: 'var(--radius-xs)',
                 border: 'none',
                 fontSize: 12,
                 fontWeight: 600,
                 cursor: 'pointer',
-                background: viewMode === 'unified' ? 'var(--brand, #6060E8)' : 'transparent',
-                color: viewMode === 'unified' ? '#FFFFFF' : 'var(--ink-2, #A1A1AA)',
+                background: viewMode === 'unified' ? 'var(--brand)' : 'transparent',
+                color: viewMode === 'unified' ? 'var(--ink-inverse)' : 'var(--ink-2)',
                 display: 'flex',
                 alignItems: 'center',
                 gap: 6,
@@ -141,7 +142,7 @@ export default function TextDiffTool() {
           </div>
 
           {/* Options */}
-          <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--ink-2, #A1A1AA)', cursor: 'pointer' }}>
+          <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--ink-2)', cursor: 'pointer' }}>
             <input
               type="checkbox"
               checked={ignoreWhitespace}
@@ -149,7 +150,7 @@ export default function TextDiffTool() {
             />
             <span>Ignore Whitespace</span>
           </label>
-          <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--ink-2, #A1A1AA)', cursor: 'pointer' }}>
+          <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--ink-2)', cursor: 'pointer' }}>
             <input
               type="checkbox"
               checked={ignoreCase}
@@ -161,10 +162,10 @@ export default function TextDiffTool() {
 
         {/* Diff Metrics */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ fontSize: 12, padding: '4px 8px', borderRadius: 4, background: 'rgba(34, 197, 94, 0.15)', color: '#22C55E', fontWeight: 600 }}>
+          <span style={{ fontSize: 12, padding: '4px 8px', borderRadius: 'var(--radius-xs)', background: 'var(--pos-subtle)', color: 'var(--pos)', fontWeight: 600 }}>
             +{diffResult.summary.added} additions
           </span>
-          <span style={{ fontSize: 12, padding: '4px 8px', borderRadius: 4, background: 'rgba(239, 68, 68, 0.15)', color: '#EF4444', fontWeight: 600 }}>
+          <span style={{ fontSize: 12, padding: '4px 8px', borderRadius: 'var(--radius-xs)', background: 'var(--neg-subtle)', color: 'var(--neg)', fontWeight: 600 }}>
             -{diffResult.summary.removed} deletions
           </span>
         </div>
@@ -192,24 +193,25 @@ export default function TextDiffTool() {
 
       {/* Input Editors Split */}
       <div
+        className="tool-split-grid"
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 320px), 1fr))',
           gap: 16,
         }}
       >
         <div
           style={{
-            background: 'var(--bg-2, #18181B)',
-            border: '1px solid var(--border, #27272A)',
-            borderRadius: 12,
+            background: 'var(--bg-2)',
+            border: '1px solid var(--border)',
+            borderRadius: 'var(--radius-lg)',
             padding: 14,
             display: 'flex',
             flexDirection: 'column',
             gap: 8,
           }}
         >
-          <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink, #FFFFFF)' }}>Original Text</span>
+          <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink)' }}>Original Text</span>
           <textarea
             value={original}
             onChange={(e) => setOriginal(e.target.value)}
@@ -217,11 +219,11 @@ export default function TextDiffTool() {
             rows={8}
             style={{
               width: '100%',
-              background: 'var(--bg, #09090B)',
-              border: '1px solid var(--border, #27272A)',
-              borderRadius: 8,
+              background: 'var(--bg)',
+              border: '1px solid var(--border)',
+              borderRadius: 'var(--radius-md)',
               padding: 10,
-              color: 'var(--ink, #FFFFFF)',
+              color: 'var(--ink)',
               fontSize: 13,
               fontFamily: 'var(--font-mono, monospace)',
               lineHeight: 1.5,
@@ -232,16 +234,16 @@ export default function TextDiffTool() {
 
         <div
           style={{
-            background: 'var(--bg-2, #18181B)',
-            border: '1px solid var(--border, #27272A)',
-            borderRadius: 12,
+            background: 'var(--bg-2)',
+            border: '1px solid var(--border)',
+            borderRadius: 'var(--radius-lg)',
             padding: 14,
             display: 'flex',
             flexDirection: 'column',
             gap: 8,
           }}
         >
-          <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink, #FFFFFF)' }}>Modified Text</span>
+          <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink)' }}>Modified Text</span>
           <textarea
             value={modified}
             onChange={(e) => setModified(e.target.value)}
@@ -249,11 +251,11 @@ export default function TextDiffTool() {
             rows={8}
             style={{
               width: '100%',
-              background: 'var(--bg, #09090B)',
-              border: '1px solid var(--border, #27272A)',
-              borderRadius: 8,
+              background: 'var(--bg)',
+              border: '1px solid var(--border)',
+              borderRadius: 'var(--radius-md)',
               padding: 10,
-              color: 'var(--ink, #FFFFFF)',
+              color: 'var(--ink)',
               fontSize: 13,
               fontFamily: 'var(--font-mono, monospace)',
               lineHeight: 1.5,
@@ -266,24 +268,24 @@ export default function TextDiffTool() {
       {/* Diff Output Viewer */}
       <div
         style={{
-          background: 'var(--bg-2, #18181B)',
-          border: '1px solid var(--border, #27272A)',
-          borderRadius: 12,
+          background: 'var(--bg-2)',
+          border: '1px solid var(--border)',
+          borderRadius: 'var(--radius-lg)',
           padding: 16,
           display: 'flex',
           flexDirection: 'column',
           gap: 10,
         }}
       >
-        <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink, #FFFFFF)' }}>
+        <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink)' }}>
           Visual Diff Output
         </span>
 
         <div
           style={{
-            background: 'var(--bg, #09090B)',
-            border: '1px solid var(--border, #27272A)',
-            borderRadius: 8,
+            background: 'var(--bg)',
+            border: '1px solid var(--border)',
+            borderRadius: 'var(--radius-md)',
             overflow: 'auto',
             fontFamily: 'var(--font-mono, monospace)',
             fontSize: 13,
@@ -291,7 +293,7 @@ export default function TextDiffTool() {
           }}
         >
           {diffResult.chunks.length === 0 ? (
-            <div style={{ padding: 24, textAlign: 'center', color: 'var(--ink-2, #A1A1AA)' }}>
+            <div style={{ padding: 24, textAlign: 'center', color: 'var(--ink-2)' }}>
               No text to compare. Paste text into Original and Modified boxes above.
             </div>
           ) : (
@@ -299,15 +301,15 @@ export default function TextDiffTool() {
               const isAdded = chunk.type === 'added';
               const isRemoved = chunk.type === 'removed';
               const bg = isAdded
-                ? 'rgba(34, 197, 94, 0.12)'
+                ? 'var(--pos-subtle)'
                 : isRemoved
-                ? 'rgba(239, 68, 68, 0.12)'
+                ? 'var(--neg-subtle)'
                 : 'transparent';
               const color = isAdded
-                ? '#86EFAC'
+                ? 'var(--pos)'
                 : isRemoved
-                ? '#FCA5A5'
-                : 'var(--ink, #E4E4E7)';
+                ? 'var(--neg)'
+                : 'var(--ink)';
               const sign = isAdded ? '+' : isRemoved ? '-' : ' ';
 
               return (
@@ -317,17 +319,17 @@ export default function TextDiffTool() {
                     display: 'flex',
                     background: bg,
                     color: color,
-                    borderBottom: '1px solid rgba(255, 255, 255, 0.03)',
+                    borderBottom: '1px solid var(--border)',
                   }}
                 >
                   <span
                     style={{
                       width: 44,
                       padding: '2px 8px',
-                      color: 'var(--ink-2, #71717A)',
+                      color: 'var(--ink-2)',
                       textAlign: 'right',
                       userSelect: 'none',
-                      borderRight: '1px solid var(--border, #27272A)',
+                      borderRight: '1px solid var(--border)',
                     }}
                   >
                     {chunk.lineNumOld || ''}
@@ -336,10 +338,10 @@ export default function TextDiffTool() {
                     style={{
                       width: 44,
                       padding: '2px 8px',
-                      color: 'var(--ink-2, #71717A)',
+                      color: 'var(--ink-2)',
                       textAlign: 'right',
                       userSelect: 'none',
-                      borderRight: '1px solid var(--border, #27272A)',
+                      borderRight: '1px solid var(--border)',
                     }}
                   >
                     {chunk.lineNumNew || ''}
