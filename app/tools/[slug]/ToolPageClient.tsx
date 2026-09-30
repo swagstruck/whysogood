@@ -46,6 +46,15 @@ const TOOL_COMPONENTS: Record<string, React.LazyExoticComponent<React.ComponentT
   'svg-preview': lazy(() => import('@/tools/image/svg/SvgPreviewTool')),
   'background-remover': lazy(() => import('@/tools/image/background-remover/BackgroundRemoverTool')),
 
+  // ── Audio ────────────────────────────────────────────────────────────────
+  'mp3-trimmer': lazy(() => import('@/tools/audio/mp3-trimmer/Mp3TrimmerTool')),
+  'audio-trimmer': lazy(() => import('@/tools/audio/audio-trimmer/AudioTrimmerTool')),
+  'audio-merger': lazy(() => import('@/tools/audio/audio-merger/AudioMergerTool')),
+  'mp3-to-wav': lazy(() => import('@/tools/audio/mp3-to-wav/Mp3ToWavTool')),
+  'wav-to-mp3': lazy(() => import('@/tools/audio/wav-to-mp3/WavToMp3Tool')),
+  'audio-volume': lazy(() => import('@/tools/audio/audio-volume/AudioVolumeTool')),
+  'audio-metadata-remover': lazy(() => import('@/tools/audio/audio-metadata-remover/AudioMetadataRemoverTool')),
+
   // ── PDF ─────────────────────────────────────────────────────────────────
   'pdf-compressor': lazy(() => import('@/tools/pdf/compressor/PdfCompressorTool')),
   'pdf-merger': lazy(() => import('@/tools/pdf/merger/PdfMergerTool')),
@@ -125,9 +134,41 @@ const TOOL_COMPONENTS: Record<string, React.LazyExoticComponent<React.ComponentT
   'date-difference': lazy(() => import('@/tools/calculators/date-difference/DateDifferenceTool')),
   'unit-converter': lazy(() => import('@/tools/calculators/unit-converter/UnitConverterTool')),
 
-  // ── Other Categories ─────────────────────────────────────────────────────
+  // ── Design ───────────────────────────────────────────────────────────────
   'favicon-generator': lazy(() => import('@/tools/design/favicon-generator/FaviconGeneratorTool')),
+  'color-picker': lazy(() => import('@/tools/design/color-picker/ColorPickerTool')),
+  'hex-to-rgb': lazy(() => import('@/tools/design/hex-to-rgb/HexToRgbTool')),
+  'rgb-to-hex': lazy(() => import('@/tools/design/rgb-to-hex/RgbToHexTool')),
+  'hsl-converter': lazy(() => import('@/tools/design/hsl-converter/HslConverterTool')),
+  'color-palette': lazy(() => import('@/tools/design/color-palette/ColorPaletteTool')),
+  'css-gradient': lazy(() => import('@/tools/design/css-gradient/CssGradientTool')),
+  'css-shadow': lazy(() => import('@/tools/design/css-shadow/CssShadowTool')),
+  'glassmorphism': lazy(() => import('@/tools/design/glassmorphism/GlassmorphismTool')),
+  'border-radius-generator': lazy(() => import('@/tools/design/border-radius-generator/BorderRadiusTool')),
+  'svg-blob': lazy(() => import('@/tools/design/svg-blob/SvgBlobTool')),
+  'svg-wave': lazy(() => import('@/tools/design/svg-wave/SvgWaveTool')),
+
+  
+  // ── Generators ───────────────────────────────────────────────────────────
+  'qr-generator': lazy(() => import('@/tools/generators/qr/QrGeneratorTool')),
+  'barcode-generator': lazy(() => import('@/tools/generators/barcode/BarcodeGeneratorTool')),
+  'password-generator': lazy(() => import('@/tools/generators/password/PasswordGeneratorTool')),
+  'random-number': lazy(() => import('@/tools/generators/random/RandomNumberTool')),
+  'placeholder-image': lazy(() => import('@/tools/generators/placeholder-image/PlaceholderImageTool')),
+  'timestamp-generator': lazy(() => import('@/tools/generators/timestamp/TimestampGeneratorTool')),
+
+  // ── Security ─────────────────────────────────────────────────────────────
   'base64-encoder': lazy(() => import('@/tools/security/base64-encoder/Base64EncoderTool')),
+  'base64-decoder': lazy(() => import('@/tools/security/base64-decoder/Base64DecoderTool')),
+  'url-encoder': lazy(() => import('@/tools/security/url-encoder/UrlEncoderTool')),
+  'url-decoder': lazy(() => import('@/tools/security/url-decoder/UrlDecoderTool')),
+  'md5-hash': lazy(() => import('@/tools/security/md5-hash/Md5HashTool')),
+  'sha256-hash': lazy(() => import('@/tools/security/sha256-hash/Sha256HashTool')),
+  'sha512-hash': lazy(() => import('@/tools/security/sha512-hash/Sha512HashTool')),
+  'jwt-decoder-sec': lazy(() => import('@/tools/security/jwt-decoder/JwtDecoderSecTool')),
+  'password-strength': lazy(() => import('@/tools/security/password-strength/PasswordStrengthTool')),
+
+// ── Other Categories ─────────────────────────────────────────────────────
 };
 
 function LoadingSpinner() {
