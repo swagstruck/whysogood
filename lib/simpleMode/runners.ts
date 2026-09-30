@@ -1,3 +1,4 @@
+import { md5, sha256, base64DecodeToBytes } from '../security/engines';
 import type { ToolRunner, ToolRunnerResult, RunnerOptions, SimpleModeOutput } from './types';
 import { calcReductionPct } from '../utils';
 import { compressImage, stripJpegMetadata as safeStripJpegMetadata, minifySvgSync } from '../imageCompressor';
@@ -20,6 +21,7 @@ import {
   removeDuplicateLines, sortLines, reverseChars, reverseLines, reverseWords,
   findAndReplace, cleanText, removeWhitespace, generateSlug, generateLorem,
 } from '../text/engines';
+import { audioBufferToWav, changeVolume, stripId3Tags } from "../audio/engines";
 
 // ── Shared Helpers ────────────────────────────────────────────────────────────
 
@@ -1574,7 +1576,112 @@ async function runBase64Encoder(file: File): Promise<ToolRunnerResult> {
 
 // ── Tool Runner Registry Mapping ─────────────────────────────────────────────
 
+
+async function runMd5Hash(file: File): Promise<ToolRunnerResult> {
+  const text = await file.text();
+  const hash = md5(text);
+  return { blob: new Blob([hash], { type: 'text/plain' }), filename: file.name + '.md5.txt' };
+}
+async function runSha256Hash(file: File): Promise<ToolRunnerResult> {
+  const text = await file.text();
+  const hash = await sha256(text);
+  return { blob: new Blob([hash], { type: 'text/plain' }), filename: file.name + '.sha256.txt' };
+}
+async function runBase64Decoder(file: File): Promise<ToolRunnerResult> {
+  const text = await file.text();
+  try {
+    const bytes = base64DecodeToBytes(text);
+    return { blob: new Blob([bytes as any]), filename: file.name.replace(/\.b64$/, '') + '.dec.bin' };
+  } catch {
+    throw new Error('Invalid Base64');
+  }
+}
+
+// ── Audio Runners ─────────────────────────────────────────────────────────────
+
+async function runMp3ToWav(file: File): Promise<ToolRunnerResult> {
+  const arr = await file.arrayBuffer();
+  const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+  const buf = await ctx.decodeAudioData(arr);
+  const blob = audioBufferToWav(buf);
+  return {
+    blob: blob, filename: file.name.replace(/\.[^/.]+$/, '.wav'),
+  };
+}
+
+async function runAudioVolume(file: File): Promise<ToolRunnerResult> {
+  const arr = await file.arrayBuffer();
+  const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+  const buf = await ctx.decodeAudioData(arr);
+  const newBuf = changeVolume(buf, 1.5);
+  const blob = audioBufferToWav(newBuf);
+  return {
+    blob: blob, filename: file.name.replace(/\.[^/.]+$/, '_louder.wav'),
+  };
+}
+
+async function runAudioMetadataRemover(file: File): Promise<ToolRunnerResult> {
+  const arr = await file.arrayBuffer();
+  const cleaned = stripId3Tags(arr);
+  const blob = new Blob([cleaned], { type: 'audio/mpeg' });
+  return {
+    blob: blob, filename: file.name.replace(/\.[^/.]+$/, '_nometa.mp3'),
+  };
+}
+
+async function runFileHash(file: File): Promise<ToolRunnerResult> {
+  const { hashFileMd5, hashFileSha1, hashFileSha256, hashFileSha512 } = await import('../files/engines');
+  const buffer = await file.arrayBuffer();
+  const md5 = await hashFileMd5(buffer);
+  const sha1 = await hashFileSha1(buffer);
+  const sha256 = await hashFileSha256(buffer);
+  const sha512 = await hashFileSha512(buffer);
+
+  const report = `File Hash Report\n================\n\nFile: ${file.name}\nSize: ${file.size} bytes\n\nMD5: ${md5}\nSHA-1: ${sha1}\nSHA-256: ${sha256}\nSHA-512: ${sha512}\n`;
+  const outBlob = new Blob([report], { type: 'text/plain;charset=utf-8' });
+
+  return {
+    blob: outBlob, filename: `${file.name}.hashes.txt`
+  };
+}
+
+async function runMimeChecker(file: File): Promise<ToolRunnerResult> {
+  const { detectMimeBySignature } = await import('../files/engines');
+  const buffer = await file.arrayBuffer();
+  const det = detectMimeBySignature(buffer);
+
+  const report = `MIME Detection Report\n=====================\n\nFile: ${file.name}\nReported MIME: ${file.type || 'N/A'}\n\nDetected MIME: ${det.detected}\nConfidence: ${det.confidence}\nExpected Extension: .${det.extension}\nFormat: ${det.description}\nHeader Bytes: ${det.headerBytes}\n`;
+  const outBlob = new Blob([report], { type: 'text/plain;charset=utf-8' });
+
+  return {
+    blob: outBlob, filename: `${file.name}.mime.txt`
+  };
+}
+
 export const TOOL_RUNNERS: Record<string, ToolRunner> = {
+  // Audio
+  'mp3-to-wav': {
+    slug: 'mp3-to-wav',
+    name: 'MP3 → WAV',
+    category: 'Audio',
+    description: 'Convert MP3 audio files to WAV format',
+    run: runMp3ToWav,
+  },
+  'audio-volume': {
+    slug: 'audio-volume',
+    name: 'Audio Volume Changer',
+    category: 'Audio',
+    description: 'Increase volume of an audio file',
+    run: runAudioVolume,
+  },
+  'audio-metadata-remover': {
+    slug: 'audio-metadata-remover',
+    name: 'Audio Metadata Remover',
+    category: 'Audio',
+    description: 'Remove ID3 tags and metadata from audio files',
+    run: runAudioMetadataRemover,
+  },
+
   // Images
   'image-to-text': {
     slug: 'image-to-text',
@@ -2118,12 +2225,51 @@ export const TOOL_RUNNERS: Record<string, ToolRunner> = {
   'slug-generator': { slug: 'slug-generator', name: 'Slug Generator', category: 'Text', description: 'Convert text to URL slugs', run: runSlugGenerator },
 
   // Security
+
+  'md5-hash': {
+    slug: 'md5-hash',
+    name: 'MD5 Hash',
+    category: 'Security',
+    description: 'Generate MD5 hash',
+    run: runMd5Hash
+  },
+  'sha256-hash': {
+    slug: 'sha256-hash',
+    name: 'SHA-256 Hash',
+    category: 'Security',
+    description: 'Generate SHA-256 hash',
+    run: runSha256Hash
+  },
+  'base64-decoder': {
+    slug: 'base64-decoder',
+    name: 'Base64 Decoder',
+    category: 'Security',
+    description: 'Decode Base64 file',
+    run: runBase64Decoder
+  },
+
   'base64-encoder': {
     slug: 'base64-encoder',
     name: 'Base64 Encoder',
     category: 'Security',
     description: 'Encode any file into Base64 text string',
     run: runBase64Encoder,
+  },
+
+  // Files
+  'file-hash': {
+    slug: 'file-hash',
+    name: 'File Hash Generator',
+    category: 'Files',
+    description: 'Generate MD5, SHA-256, and SHA-512 checksums for any file.',
+    run: runFileHash,
+  },
+  'mime-checker': {
+    slug: 'mime-checker',
+    name: 'MIME Type Checker',
+    category: 'Files',
+    description: 'Detect the MIME type of any file by content inspection.',
+    run: runMimeChecker,
   },
 };
 

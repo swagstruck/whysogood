@@ -73,6 +73,12 @@ const TOOL_COMPONENTS: Record<string, React.LazyExoticComponent<React.ComponentT
   'pdf-password': lazy(() => import('@/tools/pdf/security/PdfPasswordTool')),
   'pdf-unlock': lazy(() => import('@/tools/pdf/security/PdfUnlockTool')),
 
+  // ── Files ────────────────────────────────────────────────────────────────
+  'file-hash': lazy(() => import('@/tools/files/file-hash/FileHashTool')),
+  'file-metadata': lazy(() => import('@/tools/files/file-metadata/FileMetadataTool')),
+  'mime-checker': lazy(() => import('@/tools/files/mime-checker/MimeCheckerTool')),
+  'zip-creator': lazy(() => import('@/tools/files/zip-creator/ZipCreatorTool')),
+
   // ── Developer ────────────────────────────────────────────────────────────
   'json-formatter': lazy(() => import('@/tools/developer/json-formatter/JsonFormatterTool')),
   'json-validator': lazy(() => import('@/tools/developer/json-validator/JsonValidatorTool')),
