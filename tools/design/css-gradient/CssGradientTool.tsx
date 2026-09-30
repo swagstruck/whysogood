@@ -67,7 +67,21 @@ export default function CssGradientTool() {
       {stops.length < 5 && <Button variant="secondary" onClick={addStop} icon={<Plus size={16} />}>Add Color</Button>}
 
       <div>
-        <textarea readOnly value={`background: ${css};`} className="input-base" style={{ width: '100%', height: 80, fontFamily: 'var(--font-mono)' }} />
+        <textarea
+          readOnly
+          value={`background: ${css};`}
+          className="input-base"
+          style={{
+            width: '100%',
+            height: 80,
+            fontFamily: 'var(--font-mono)',
+            fontSize: 13,
+            padding: '12px 14px',
+            boxSizing: 'border-box',
+            lineHeight: 1.6,
+            borderRadius: 'var(--radius-md)',
+          }}
+        />
         <Button style={{ marginTop: 12 }} onClick={copy} icon={<Copy size={16} />}>Copy CSS</Button>
       </div>
     </div>

@@ -59,7 +59,21 @@ export default function CssShadowTool() {
       </div>
 
       <div>
-        <textarea readOnly value={`box-shadow: ${css};`} className="input-base" style={{ width: '100%', height: 80, fontFamily: 'var(--font-mono)' }} />
+        <textarea
+          readOnly
+          value={`box-shadow: ${css};`}
+          className="input-base"
+          style={{
+            width: '100%',
+            height: 80,
+            fontFamily: 'var(--font-mono)',
+            fontSize: 13,
+            padding: '12px 14px',
+            boxSizing: 'border-box',
+            lineHeight: 1.6,
+            borderRadius: 'var(--radius-md)',
+          }}
+        />
         <Button style={{ marginTop: 12 }} onClick={copy} icon={<Copy size={16} />}>Copy CSS</Button>
       </div>
     </div>

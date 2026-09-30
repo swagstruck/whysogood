@@ -99,6 +99,8 @@ body {
   border-radius: var(--radius-full);
   color: var(--ink);
   font-family: var(--font-sans);
+  padding: 0 14px;
+  box-sizing: border-box;
   transition: border-color var(--transition-fast), background var(--transition-fast);
 }
 .input-base:focus { border-color: var(--brand); outline: none; }
@@ -114,9 +116,13 @@ body {
   outline: none;
 }
 
+textarea,
 textarea.input-base,
 .textarea-base {
   border-radius: var(--radius-md) !important;
+  padding: 12px 14px !important;
+  line-height: 1.6 !important;
+  box-sizing: border-box !important;
 }
 
 /* ── Global Select & Dropdown Styling ───────────────────────── */

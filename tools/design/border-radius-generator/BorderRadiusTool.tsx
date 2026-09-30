@@ -36,14 +36,28 @@ export default function BorderRadiusTool() {
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-        <div><label style={{ fontSize: 12 }}>Top Left ({tl}{isPercent ? '%' : 'px'})</label><input type="range" min="0" max={isPercent ? 100 : 200} value={tl} onChange={e => setTl(parseInt(e.target.value))} style={{ width: '100%' }} /></div>
-        <div><label style={{ fontSize: 12 }}>Top Right ({tr}{isPercent ? '%' : 'px'})</label><input type="range" min="0" max={isPercent ? 100 : 200} value={tr} onChange={e => setTr(parseInt(e.target.value))} style={{ width: '100%' }} /></div>
-        <div><label style={{ fontSize: 12 }}>Bottom Left ({bl}{isPercent ? '%' : 'px'})</label><input type="range" min="0" max={isPercent ? 100 : 200} value={bl} onChange={e => setBl(parseInt(e.target.value))} style={{ width: '100%' }} /></div>
-        <div><label style={{ fontSize: 12 }}>Bottom Right ({br}{isPercent ? '%' : 'px'})</label><input type="range" min="0" max={isPercent ? 100 : 200} value={br} onChange={e => setBr(parseInt(e.target.value))} style={{ width: '100%' }} /></div>
+        <div><label style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink)' }}>Top Left ({tl}{isPercent ? '%' : 'px'})</label><input type="range" min="0" max={isPercent ? 100 : 200} value={tl} onChange={e => setTl(parseInt(e.target.value))} style={{ width: '100%', accentColor: 'var(--brand)' }} /></div>
+        <div><label style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink)' }}>Top Right ({tr}{isPercent ? '%' : 'px'})</label><input type="range" min="0" max={isPercent ? 100 : 200} value={tr} onChange={e => setTr(parseInt(e.target.value))} style={{ width: '100%', accentColor: 'var(--brand)' }} /></div>
+        <div><label style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink)' }}>Bottom Left ({bl}{isPercent ? '%' : 'px'})</label><input type="range" min="0" max={isPercent ? 100 : 200} value={bl} onChange={e => setBl(parseInt(e.target.value))} style={{ width: '100%', accentColor: 'var(--brand)' }} /></div>
+        <div><label style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink)' }}>Bottom Right ({br}{isPercent ? '%' : 'px'})</label><input type="range" min="0" max={isPercent ? 100 : 200} value={br} onChange={e => setBr(parseInt(e.target.value))} style={{ width: '100%', accentColor: 'var(--brand)' }} /></div>
       </div>
 
       <div>
-        <textarea readOnly value={cssText} className="input-base" style={{ width: '100%', height: 60, fontFamily: 'var(--font-mono)' }} />
+        <textarea
+          readOnly
+          value={cssText}
+          className="input-base"
+          style={{
+            width: '100%',
+            height: 60,
+            fontFamily: 'var(--font-mono)',
+            fontSize: 13,
+            padding: '12px 14px',
+            boxSizing: 'border-box',
+            lineHeight: 1.6,
+            borderRadius: 'var(--radius-md)',
+          }}
+        />
         <Button style={{ marginTop: 12 }} onClick={copy} icon={<Copy size={16} />}>Copy CSS</Button>
       </div>
     </div>
