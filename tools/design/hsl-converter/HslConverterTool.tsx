@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/Button';
 import { useToast } from '@/components/ui/ToastProvider';
 import { copyToClipboard } from '@/lib/utils';
-import { Copy } from 'lucide-react';
+import { Copy, Check } from 'lucide-react';
 import { hexToHsl, rgbToHsl, hslToHex, hslToRgb } from '@/lib/design/engines';
 
 export default function HslConverterTool() {
@@ -11,11 +11,14 @@ export default function HslConverterTool() {
   const [hex, setHex] = useState('#6366f1');
   const [rgb, setRgb] = useState('99, 102, 241');
   const [hsl, setHsl] = useState('239, 84, 67');
+  const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const toast = useToast();
 
-  const copy = (text: string) => {
+  const copy = (text: string, key: string) => {
     copyToClipboard(text);
-    toast.success('Copied!');
+    setCopiedKey(key);
+    toast.success('Copied to clipboard!');
+    setTimeout(() => setCopiedKey(null), 2000);
   };
 
   let outHex = '', outRgb = { r:0, g:0, b:0 }, outHsl = { h:0, s:0, l:0 };
@@ -47,33 +50,109 @@ export default function HslConverterTool() {
   const hslStr = `hsl(${outHsl.h}, ${outHsl.s}%, ${outHsl.l}%)`;
 
   return (
-    <div className="card" style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 24 }}>
+    <div className="c-card" style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 24 }}>
+      {/* Mode Selector Tabs */}
       <div style={{ display: 'flex', gap: 8 }}>
-        <Button variant={mode === 'hex' ? 'primary' : 'secondary'} onClick={() => setMode('hex')}>HEX &rarr; HSL</Button>
-        <Button variant={mode === 'rgb' ? 'primary' : 'secondary'} onClick={() => setMode('rgb')}>RGB &rarr; HSL</Button>
-        <Button variant={mode === 'hsl' ? 'primary' : 'secondary'} onClick={() => setMode('hsl')}>HSL &rarr; Both</Button>
+        <button
+          onClick={() => setMode('hex')}
+          className="c-btn"
+          style={{
+            padding: '8px 16px',
+            borderRadius: 'var(--radius-md)',
+            fontSize: 13,
+            fontWeight: mode === 'hex' ? 600 : 500,
+            background: mode === 'hex' ? 'var(--brand)' : 'var(--bg-2)',
+            color: mode === 'hex' ? '#ffffff' : 'var(--ink-2)',
+            border: mode === 'hex' ? '1px solid var(--brand)' : '1px solid var(--border)',
+            cursor: 'pointer',
+          }}
+        >
+          HEX &rarr; HSL
+        </button>
+        <button
+          onClick={() => setMode('rgb')}
+          className="c-btn"
+          style={{
+            padding: '8px 16px',
+            borderRadius: 'var(--radius-md)',
+            fontSize: 13,
+            fontWeight: mode === 'rgb' ? 600 : 500,
+            background: mode === 'rgb' ? 'var(--brand)' : 'var(--bg-2)',
+            color: mode === 'rgb' ? '#ffffff' : 'var(--ink-2)',
+            border: mode === 'rgb' ? '1px solid var(--brand)' : '1px solid var(--border)',
+            cursor: 'pointer',
+          }}
+        >
+          RGB &rarr; HSL
+        </button>
+        <button
+          onClick={() => setMode('hsl')}
+          className="c-btn"
+          style={{
+            padding: '8px 16px',
+            borderRadius: 'var(--radius-md)',
+            fontSize: 13,
+            fontWeight: mode === 'hsl' ? 600 : 500,
+            background: mode === 'hsl' ? 'var(--brand)' : 'var(--bg-2)',
+            color: mode === 'hsl' ? '#ffffff' : 'var(--ink-2)',
+            border: mode === 'hsl' ? '1px solid var(--brand)' : '1px solid var(--border)',
+            cursor: 'pointer',
+          }}
+        >
+          HSL &rarr; Both
+        </button>
       </div>
 
       <div>
-        {mode === 'hex' && <input value={hex} onChange={e => setHex(e.target.value)} className="input-base" style={{ width: '100%' }} placeholder="#000000" />}
-        {mode === 'rgb' && <input value={rgb} onChange={e => setRgb(e.target.value)} className="input-base" style={{ width: '100%' }} placeholder="255, 255, 255" />}
-        {mode === 'hsl' && <input value={hsl} onChange={e => setHsl(e.target.value)} className="input-base" style={{ width: '100%' }} placeholder="360, 100, 50" />}
+        <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: 'var(--ink)', marginBottom: 8 }}>
+          {mode === 'hex' ? 'Enter HEX Color' : mode === 'rgb' ? 'Enter RGB (R, G, B)' : 'Enter HSL (H, S, L)'}
+        </label>
+        {mode === 'hex' && <input value={hex} onChange={e => setHex(e.target.value)} className="input-base" style={{ width: '100%', fontFamily: 'var(--font-mono)' }} placeholder="#000000" />}
+        {mode === 'rgb' && <input value={rgb} onChange={e => setRgb(e.target.value)} className="input-base" style={{ width: '100%', fontFamily: 'var(--font-mono)' }} placeholder="255, 255, 255" />}
+        {mode === 'hsl' && <input value={hsl} onChange={e => setHsl(e.target.value)} className="input-base" style={{ width: '100%', fontFamily: 'var(--font-mono)' }} placeholder="360, 100, 50" />}
       </div>
 
-      <div style={{ width: 128, height: 128, borderRadius: 8, background: isValid ? outHex : 'transparent', border: '1px solid var(--color-border)' }} />
+      <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+        <div style={{ width: 72, height: 72, borderRadius: 'var(--radius-md)', background: isValid ? outHex : 'transparent', border: '1px solid var(--border)', flexShrink: 0 }} />
+        <div>
+          <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--ink)' }}>
+            {isValid ? outHex.toUpperCase() : 'Invalid Input'}
+          </div>
+          <div style={{ fontSize: 12, color: 'var(--ink-2)', marginTop: 2 }}>
+            {isValid ? 'Preview Swatch' : 'Please check input format'}
+          </div>
+        </div>
+      </div>
 
-      <div style={{ display: 'grid', gap: 16 }}>
-        <div className="card" style={{ padding: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div><div style={{ fontSize: 12, color: 'var(--color-muted)' }}>HEX</div><div style={{ fontSize: 16 }}>{isValid ? outHex : 'Invalid'}</div></div>
-          <Button variant="secondary" onClick={() => copy(outHex)}>Copy</Button>
+      <div style={{ display: 'grid', gap: 12 }}>
+        <div style={{ padding: '12px 16px', background: 'var(--bg-2)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div>
+            <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--ink-3)', textTransform: 'uppercase' }}>HEX</div>
+            <div style={{ fontSize: 15, fontFamily: 'var(--font-mono)', fontWeight: 600, color: 'var(--ink)', marginTop: 2 }}>{isValid ? outHex : 'Invalid'}</div>
+          </div>
+          <Button variant="secondary" size="sm" onClick={() => copy(outHex, 'hex')} icon={copiedKey === 'hex' ? <Check size={14} /> : <Copy size={14} />}>
+            {copiedKey === 'hex' ? 'Copied' : 'Copy'}
+          </Button>
         </div>
-        <div className="card" style={{ padding: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div><div style={{ fontSize: 12, color: 'var(--color-muted)' }}>RGB</div><div style={{ fontSize: 16 }}>{isValid ? rgbStr : 'Invalid'}</div></div>
-          <Button variant="secondary" onClick={() => copy(rgbStr)}>Copy</Button>
+
+        <div style={{ padding: '12px 16px', background: 'var(--bg-2)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div>
+            <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--ink-3)', textTransform: 'uppercase' }}>RGB</div>
+            <div style={{ fontSize: 15, fontFamily: 'var(--font-mono)', fontWeight: 600, color: 'var(--ink)', marginTop: 2 }}>{isValid ? rgbStr : 'Invalid'}</div>
+          </div>
+          <Button variant="secondary" size="sm" onClick={() => copy(rgbStr, 'rgb')} icon={copiedKey === 'rgb' ? <Check size={14} /> : <Copy size={14} />}>
+            {copiedKey === 'rgb' ? 'Copied' : 'Copy'}
+          </Button>
         </div>
-        <div className="card" style={{ padding: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div><div style={{ fontSize: 12, color: 'var(--color-muted)' }}>HSL</div><div style={{ fontSize: 16 }}>{isValid ? hslStr : 'Invalid'}</div></div>
-          <Button variant="secondary" onClick={() => copy(hslStr)}>Copy</Button>
+
+        <div style={{ padding: '12px 16px', background: 'var(--bg-2)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div>
+            <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--ink-3)', textTransform: 'uppercase' }}>HSL</div>
+            <div style={{ fontSize: 15, fontFamily: 'var(--font-mono)', fontWeight: 600, color: 'var(--ink)', marginTop: 2 }}>{isValid ? hslStr : 'Invalid'}</div>
+          </div>
+          <Button variant="secondary" size="sm" onClick={() => copy(hslStr, 'hsl')} icon={copiedKey === 'hsl' ? <Check size={14} /> : <Copy size={14} />}>
+            {copiedKey === 'hsl' ? 'Copied' : 'Copy'}
+          </Button>
         </div>
       </div>
     </div>

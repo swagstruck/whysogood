@@ -93,16 +93,34 @@ body {
 .btn-secondary:hover:not(:disabled) { background: var(--bg-3); border-color: var(--border-hover); }
 .btn-secondary:disabled { opacity: 0.5; cursor: not-allowed; }
 
+/* ── Global Input & Text Box Styling ───────────────────────── */
 .input-base {
   background: var(--bg-2);
   border: 1px solid var(--border);
-  border-radius: var(--radius-full);
+  border-radius: var(--radius-md);
   color: var(--ink);
   font-family: var(--font-sans);
-  padding: 0 14px;
+  font-size: 14px;
   box-sizing: border-box;
   transition: border-color var(--transition-fast), background var(--transition-fast);
 }
+
+input.input-base,
+input[type="text"].input-base,
+input[type="number"].input-base,
+input[type="search"].input-base,
+input[type="email"].input-base,
+input[type="password"].input-base,
+input[type="url"].input-base,
+input[type="date"].input-base,
+.input-base:not(textarea):not([type="range"]):not([type="color"]):not([type="checkbox"]):not([type="radio"]) {
+  min-height: 40px;
+  padding: 8px 14px;
+  border-radius: var(--radius-md);
+  line-height: 1.4;
+  box-sizing: border-box;
+}
+
 .input-base:focus { border-color: var(--brand); outline: none; }
 .input-base::placeholder { color: var(--ink-3); }
 .input-base[aria-invalid="true"],
@@ -119,10 +137,13 @@ body {
 textarea,
 textarea.input-base,
 .textarea-base {
+  height: auto;
   border-radius: var(--radius-md) !important;
   padding: 12px 14px !important;
   line-height: 1.6 !important;
   box-sizing: border-box !important;
+  font-size: 13px;
+  resize: vertical;
 }
 
 /* ── Global Select & Dropdown Styling ───────────────────────── */
