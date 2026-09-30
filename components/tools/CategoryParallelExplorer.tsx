@@ -11,6 +11,15 @@ export function CategoryParallelExplorer() {
   const [selectedCategory, setSelectedCategory] = useState<Category | 'All'>('Images');
   const [searchQuery, setSearchQuery] = useState('');
 
+  // Tool count per category for the sidebar
+  const categoryCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    CATEGORIES.forEach(cat => {
+      counts[cat] = getToolsByCategory(cat).length;
+    });
+    counts['All'] = TOOLS_DEDUPED.filter(t => !t.hidden).length;
+    return counts;
+  }, []);
 
   // Filter tools for current selection
   const displayedTools = useMemo(() => {
@@ -82,6 +91,8 @@ export function CategoryParallelExplorer() {
             style={{
               display: 'flex',
               alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: 12,
               padding: '9px 12px',
               borderRadius: 'var(--radius-md)',
               fontSize: 13,
@@ -118,6 +129,9 @@ export function CategoryParallelExplorer() {
               </div>
               <span>All Categories</span>
             </div>
+            <span style={{ fontSize: 11, color: 'var(--ink-3)', fontWeight: 500, flexShrink: 0 }}>
+              {categoryCounts['All']}
+            </span>
           </button>
 
           {/* Individual Category Buttons */}
@@ -133,6 +147,8 @@ export function CategoryParallelExplorer() {
                 style={{
                   display: 'flex',
                   alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: 12,
                   padding: '9px 12px',
                   borderRadius: 'var(--radius-md)',
                   fontSize: 13,
@@ -169,6 +185,9 @@ export function CategoryParallelExplorer() {
                   </div>
                   <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{cat}</span>
                 </div>
+                <span style={{ fontSize: 11, color: 'var(--ink-3)', fontWeight: 500, flexShrink: 0 }}>
+                  {categoryCounts[cat] ?? 0}
+                </span>
               </button>
             );
           })}
