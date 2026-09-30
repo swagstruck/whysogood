@@ -142,27 +142,27 @@ export default function SipCalculatorTool() {
             </div>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, padding: '8px 12px', background: 'var(--color-surface2)', borderRadius: 'var(--radius-sm)' }}>
-              <span style={{ color: 'var(--color-muted)' }}>Invested Amount</span>
-              <strong style={{ color: 'var(--color-text)' }}>{formatCurrency(totalInvestment)}</strong>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, padding: '8px 12px', background: 'var(--bg-2)', borderRadius: 'var(--radius-sm)' }}>
+              <span style={{ color: 'var(--ink-2)' }}>Invested Amount</span>
+              <strong style={{ color: 'var(--ink)' }}>{formatCurrency(totalInvestment)}</strong>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, padding: '8px 12px', background: 'var(--color-surface2)', borderRadius: 'var(--radius-sm)' }}>
-              <span style={{ color: 'var(--color-muted)' }}>Est. Returns</span>
-              <strong style={{ color: 'var(--color-success)' }}>+{formatCurrency(wealthGained)}</strong>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, padding: '8px 12px', background: 'var(--bg-2)', borderRadius: 'var(--radius-sm)' }}>
+              <span style={{ color: 'var(--ink-2)' }}>Est. Returns</span>
+              <strong style={{ color: 'var(--pos)' }}>+{formatCurrency(wealthGained)}</strong>
             </div>
           </div>
           <div>
-            <div style={{ height: 10, width: '100%', background: 'var(--color-surface3)', borderRadius: 'var(--radius-full)', overflow: 'hidden', display: 'flex' }}>
-              <div style={{ width: `${investedPct}%`, background: 'var(--color-accent)', transition: 'width 0.2s' }} />
-              <div style={{ width: `${returnPct}%`, background: 'var(--color-success)', transition: 'width 0.2s' }} />
+            <div style={{ height: 10, width: '100%', background: 'var(--bg-3, #333)', borderRadius: 'var(--radius-full)', overflow: 'hidden', display: 'flex' }}>
+              <div style={{ width: `${investedPct}%`, background: 'var(--brand)', transition: 'width 0.2s' }} />
+              <div style={{ width: `${returnPct}%`, background: 'var(--pos)', transition: 'width 0.2s' }} />
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: 'var(--color-muted)', marginTop: 8 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: 'var(--ink-3)', marginTop: 8 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--color-accent)' }} />
+                <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--brand)' }} />
                 <span>Invested ({investedPct.toFixed(0)}%)</span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--color-success)' }} />
+                <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--pos)' }} />
                 <span>Gain ({returnPct.toFixed(0)}%)</span>
               </div>
             </div>
@@ -171,12 +171,12 @@ export default function SipCalculatorTool() {
       </div>
 
       {/* Yearly Growth Table */}
-      <div className="card" style={{ padding: 20, overflow: 'hidden' }}>
-        <h3 style={{ fontSize: 16, fontWeight: 700, margin: '0 0 16px', color: 'var(--color-text)' }}>Yearly Growth Schedule</h3>
+      <div className="c-card" style={{ padding: 20, overflow: 'hidden' }}>
+        <h3 style={{ fontSize: 16, fontWeight: 700, margin: '0 0 16px', color: 'var(--ink)' }}>Yearly Growth Schedule</h3>
         <div style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13, textAlign: 'left' }}>
             <thead>
-              <tr style={{ borderBottom: '2px solid var(--color-border)', color: 'var(--color-muted)' }}>
+              <tr style={{ borderBottom: '2px solid var(--border)', color: 'var(--ink-3)' }}>
                 <th style={{ padding: '8px 12px' }}>Year</th>
                 <th style={{ padding: '8px 12px' }}>Invested Amount</th>
                 <th style={{ padding: '8px 12px' }}>Estimated Returns</th>
@@ -185,11 +185,11 @@ export default function SipCalculatorTool() {
             </thead>
             <tbody>
               {yearlyBreakdown.map(row => (
-                <tr key={row.year} style={{ borderBottom: '1px solid var(--color-border)' }}>
+                <tr key={row.year} style={{ borderBottom: '1px solid var(--border)' }}>
                   <td style={{ padding: '10px 12px', fontWeight: 600 }}>Year {row.year}</td>
-                  <td style={{ padding: '10px 12px', color: 'var(--color-text)' }}>{formatCurrency(row.invested)}</td>
-                  <td style={{ padding: '10px 12px', color: 'var(--color-success)' }}>+{formatCurrency(row.returns)}</td>
-                  <td style={{ padding: '10px 12px', fontWeight: 700, color: 'var(--color-text)' }}>{formatCurrency(row.total)}</td>
+                  <td style={{ padding: '10px 12px', color: 'var(--ink)' }}>{formatCurrency(row.invested)}</td>
+                  <td style={{ padding: '10px 12px', color: 'var(--pos)' }}>+{formatCurrency(row.returns)}</td>
+                  <td style={{ padding: '10px 12px', fontWeight: 700, color: 'var(--ink)' }}>{formatCurrency(row.total)}</td>
                 </tr>
               ))}
             </tbody>

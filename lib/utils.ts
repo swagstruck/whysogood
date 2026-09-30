@@ -6,7 +6,13 @@ export function formatFileSize(bytes: number): string {
   return `${(bytes / 1_073_741_824).toFixed(2)} GB`;
 }
 
-export function formatNumber(n: number): string {
+export function formatNumber(n: number, maxDecimals?: number): string {
+  if (maxDecimals !== undefined) {
+    return new Intl.NumberFormat('en-US', {
+      maximumFractionDigits: maxDecimals,
+      minimumFractionDigits: 0,
+    }).format(n);
+  }
   return new Intl.NumberFormat().format(n);
 }
 

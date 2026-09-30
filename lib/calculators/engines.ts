@@ -181,7 +181,7 @@ export function calcFd(principal: number, annualRate: number, years: number, com
   return { maturityAmount, totalInterest, principalAmount: principal, yearlyBreakdown };
 }
 
-export interface DateDiffResult { totalDays: number; years: number; months: number; days: number; weeks: number; hours: number; minutes: number; seconds: number; }
+export interface DateDiffResult { totalDays: number; years: number; months: number; days: number; weeks: number; hours: number; minutes: number; seconds: number; businessDays: number; weekendDays: number; }
 export function calcDateDiff(from: Date, to: Date): DateDiffResult {
   const diffTime = Math.abs(to.getTime() - from.getTime());
   const totalDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
@@ -190,8 +190,8 @@ export function calcDateDiff(from: Date, to: Date): DateDiffResult {
   const totalHours = Math.floor(totalMinutes / 60);
   const weeks = Math.floor(totalDays / 7);
   
-  const minDate = from < to ? from : to;
-  const maxDate = from > to ? from : to;
+  const minDate = new Date(from < to ? from : to);
+  const maxDate = new Date(from > to ? from : to);
   
   let years = maxDate.getFullYear() - minDate.getFullYear();
   let months = maxDate.getMonth() - minDate.getMonth();
@@ -206,27 +206,46 @@ export function calcDateDiff(from: Date, to: Date): DateDiffResult {
     years--;
     months += 12;
   }
+
+  // Calculate working/weekend days
+  let businessDays = 0;
+  let weekendDays = 0;
+  const cur = new Date(minDate);
+  cur.setHours(0, 0, 0, 0);
+  const end = new Date(maxDate);
+  end.setHours(0, 0, 0, 0);
+  while (cur < end) {
+    const day = cur.getDay();
+    if (day === 0 || day === 6) {
+      weekendDays++;
+    } else {
+      businessDays++;
+    }
+    cur.setDate(cur.getDate() + 1);
+  }
   
-  return { totalDays, years, months, days, weeks, hours: totalHours, minutes: totalMinutes, seconds: totalSeconds };
+  return { totalDays, years, months, days, weeks, hours: totalHours, minutes: totalMinutes, seconds: totalSeconds, businessDays, weekendDays };
 }
 
-export type UnitCategory = 'length' | 'weight' | 'temperature' | 'area' | 'volume' | 'speed' | 'data';
+export type UnitCategory = 'length' | 'weight' | 'temperature' | 'area' | 'volume' | 'speed' | 'data' | 'time';
 const factors: Record<string, Record<string, number>> = {
   length: { mm: 0.001, cm: 0.01, m: 1, km: 1000, in: 0.0254, ft: 0.3048, yd: 0.9144, mi: 1609.344 },
   weight: { mg: 0.000001, g: 0.001, kg: 1, t: 1000, oz: 0.0283495, lb: 0.453592 },
   area: { mm2: 0.000001, cm2: 0.0001, m2: 1, km2: 1000000, in2: 0.00064516, ft2: 0.092903, ac: 4046.86, ha: 10000 },
   volume: { ml: 0.001, L: 1, m3: 1000, tsp: 0.00492892, tbsp: 0.0147868, floz: 0.0295735, cup: 0.24, pt: 0.473176, qt: 0.946353, gal: 3.78541 },
   speed: { 'm/s': 1, 'km/h': 0.277778, mph: 0.44704, knot: 0.514444, 'ft/s': 0.3048 },
-  data: { B: 1, KB: 1024, MB: 1048576, GB: 1073741824, TB: 1099511627776, PB: 1125899906842624 }
+  data: { B: 1, KB: 1024, MB: 1048576, GB: 1073741824, TB: 1099511627776, PB: 1125899906842624 },
+  time: { ms: 0.001, s: 1, min: 60, h: 3600, d: 86400, wk: 604800, mo: 2592000, yr: 31536000 }
 };
 const unitLabels: Record<string, string> = {
-  mm: 'Millimeters', cm: 'Centimeters', m: 'Meters', km: 'Kilometers', in: 'Inches', ft: 'Feet', yd: 'Yards', mi: 'Miles',
-  mg: 'Milligrams', g: 'Grams', kg: 'Kilograms', t: 'Metric Tons', oz: 'Ounces', lb: 'Pounds',
-  C: 'Celsius', F: 'Fahrenheit', K: 'Kelvin',
-  mm2: 'Square Millimeters', cm2: 'Square Centimeters', m2: 'Square Meters', km2: 'Square Kilometers', in2: 'Square Inches', ft2: 'Square Feet', ac: 'Acres', ha: 'Hectares',
-  ml: 'Milliliters', L: 'Liters', m3: 'Cubic Meters', tsp: 'Teaspoons', tbsp: 'Tablespoons', floz: 'Fluid Ounces', cup: 'Cups', pt: 'Pints', qt: 'Quarts', gal: 'Gallons',
-  'm/s': 'Meters per second', 'km/h': 'Kilometers per hour', mph: 'Miles per hour', knot: 'Knots', 'ft/s': 'Feet per second',
-  B: 'Bytes', KB: 'Kilobytes', MB: 'Megabytes', GB: 'Gigabytes', TB: 'Terabytes', PB: 'Petabytes'
+  mm: 'Millimeters (mm)', cm: 'Centimeters (cm)', m: 'Meters (m)', km: 'Kilometers (km)', in: 'Inches (in)', ft: 'Feet (ft)', yd: 'Yards (yd)', mi: 'Miles (mi)',
+  mg: 'Milligrams (mg)', g: 'Grams (g)', kg: 'Kilograms (kg)', t: 'Metric Tons (t)', oz: 'Ounces (oz)', lb: 'Pounds (lb)',
+  C: 'Celsius (°C)', F: 'Fahrenheit (°F)', K: 'Kelvin (K)',
+  mm2: 'Square Millimeters (mm²)', cm2: 'Square Centimeters (cm²)', m2: 'Square Meters (m²)', km2: 'Square Kilometers (km²)', in2: 'Square Inches (in²)', ft2: 'Square Feet (ft²)', ac: 'Acres (ac)', ha: 'Hectares (ha)',
+  ml: 'Milliliters (ml)', L: 'Liters (L)', m3: 'Cubic Meters (m³)', tsp: 'Teaspoons (tsp)', tbsp: 'Tablespoons (tbsp)', floz: 'Fluid Ounces (fl oz)', cup: 'Cups', pt: 'Pints (pt)', qt: 'Quarts (qt)', gal: 'Gallons (gal)',
+  'm/s': 'Meters/second (m/s)', 'km/h': 'Kilometers/hour (km/h)', mph: 'Miles/hour (mph)', knot: 'Knots (kn)', 'ft/s': 'Feet/second (ft/s)',
+  B: 'Bytes (B)', KB: 'Kilobytes (KB)', MB: 'Megabytes (MB)', GB: 'Gigabytes (GB)', TB: 'Terabytes (TB)', PB: 'Petabytes (PB)',
+  ms: 'Milliseconds (ms)', s: 'Seconds (s)', min: 'Minutes (min)', h: 'Hours (h)', d: 'Days (d)', wk: 'Weeks (wk)', mo: 'Months (30d)', yr: 'Years (365d)'
 };
 export function convertUnit(value: number, fromUnit: string, toUnit: string, category: UnitCategory): number {
   if (category === 'temperature') {
@@ -244,7 +263,7 @@ export function convertUnit(value: number, fromUnit: string, toUnit: string, cat
   return inBase / factorList[toUnit];
 }
 export function getUnitsForCategory(category: UnitCategory): { label: string; value: string }[] {
-  if (category === 'temperature') return [{label:'Celsius', value:'C'}, {label:'Fahrenheit', value:'F'}, {label:'Kelvin', value:'K'}];
+  if (category === 'temperature') return [{label:'Celsius (°C)', value:'C'}, {label:'Fahrenheit (°F)', value:'F'}, {label:'Kelvin (K)', value:'K'}];
   const factorList = factors[category];
   if (!factorList) return [];
   return Object.keys(factorList).map(k => ({ label: unitLabels[k] || k, value: k }));
