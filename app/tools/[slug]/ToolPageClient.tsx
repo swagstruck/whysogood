@@ -96,10 +96,21 @@ const TOOL_COMPONENTS: Record<string, React.LazyExoticComponent<React.ComponentT
   'yaml-to-json': lazy(() => import('@/tools/data/yaml-to-json/YamlToJsonTool')),
   'json-to-yaml': lazy(() => import('@/tools/data/json-to-yaml/JsonToYamlTool')),
 
-  // ── Other Categories ─────────────────────────────────────────────────────
+  // ── Text ─────────────────────────────────────────────────────────────────
   'word-counter': lazy(() => import('@/tools/text/word-counter/WordCounterTool')),
   'character-counter': lazy(() => import('@/tools/text/character-counter/CharacterCounterTool')),
   'reading-time': lazy(() => import('@/tools/text/reading-time/ReadingTimeTool')),
+  'case-converter': lazy(() => import('@/tools/text/case-converter/CaseConverterTool')),
+  'remove-duplicate-lines': lazy(() => import('@/tools/text/remove-duplicate-lines/RemoveDuplicateLinesTool')),
+  'sort-lines': lazy(() => import('@/tools/text/sort-lines/SortLinesTool')),
+  'reverse-text': lazy(() => import('@/tools/text/reverse-text/ReverseTextTool')),
+  'find-replace': lazy(() => import('@/tools/text/find-replace/FindReplaceTool')),
+  'text-cleaner': lazy(() => import('@/tools/text/text-cleaner/TextCleanerTool')),
+  'whitespace-remover': lazy(() => import('@/tools/text/whitespace-remover/WhitespaceRemoverTool')),
+  'slug-generator': lazy(() => import('@/tools/text/slug-generator/SlugGeneratorTool')),
+  'lorem-ipsum': lazy(() => import('@/tools/text/lorem-ipsum/LoremIpsumTool')),
+
+  // ── Other Categories ─────────────────────────────────────────────────────
   'sip-calculator': lazy(() => import('@/tools/calculators/sip/SipCalculatorTool')),
   'favicon-generator': lazy(() => import('@/tools/design/favicon-generator/FaviconGeneratorTool')),
   'base64-encoder': lazy(() => import('@/tools/security/base64-encoder/Base64EncoderTool')),

@@ -15,6 +15,11 @@ import {
   jsonToYaml,
   jsonToCsvData,
 } from '../data';
+import {
+  toUpperCase, toTitleCase, toCamelCase, toSnakeCase, toKebabCase,
+  removeDuplicateLines, sortLines, reverseChars, reverseLines, reverseWords,
+  findAndReplace, cleanText, removeWhitespace, generateSlug, generateLorem,
+} from '../text/engines';
 
 // ── Shared Helpers ────────────────────────────────────────────────────────────
 
@@ -1480,6 +1485,70 @@ async function runWordCounter(file: File): Promise<ToolRunnerResult> {
   };
 }
 
+async function runCaseConverter(file: File): Promise<ToolRunnerResult> {
+  const text = await file.text();
+  const result = toTitleCase(text);
+  const blob = new Blob([result], { type: 'text/plain;charset=utf-8' });
+  const baseName = file.name.replace(/\.[^.]+$/, '');
+  return { blob, filename: `${baseName}_titlecase.txt`, metadata: { 'Conversion': 'Title Case' } };
+}
+
+async function runRemoveDuplicateLines(file: File): Promise<ToolRunnerResult> {
+  const text = await file.text();
+  const res = removeDuplicateLines(text, false);
+  const blob = new Blob([res.result], { type: 'text/plain;charset=utf-8' });
+  const baseName = file.name.replace(/\.[^.]+$/, '');
+  return { blob, filename: `${baseName}_deduped.txt`, metadata: { 'Duplicates Removed': res.duplicatesRemoved, 'Unique Lines': res.uniqueLines } };
+}
+
+async function runSortLines(file: File): Promise<ToolRunnerResult> {
+  const text = await file.text();
+  const result = sortLines(text, 'asc', false, true, false);
+  const blob = new Blob([result], { type: 'text/plain;charset=utf-8' });
+  const baseName = file.name.replace(/\.[^.]+$/, '');
+  return { blob, filename: `${baseName}_sorted.txt`, metadata: { 'Sort': 'Ascending A→Z' } };
+}
+
+async function runReverseText(file: File): Promise<ToolRunnerResult> {
+  const text = await file.text();
+  const result = reverseLines(text);
+  const blob = new Blob([result], { type: 'text/plain;charset=utf-8' });
+  const baseName = file.name.replace(/\.[^.]+$/, '');
+  return { blob, filename: `${baseName}_reversed.txt`, metadata: { 'Mode': 'Reversed Lines' } };
+}
+
+async function runTextCleaner(file: File): Promise<ToolRunnerResult> {
+  const text = await file.text();
+  const res = cleanText(text, {
+    removeExtraSpaces: true, trimLeadingTrailing: true, removeBlankLines: false,
+    removeSpecialChars: false, removeNumbers: false, removePunctuation: false,
+    removeHtmlTags: true, normalizeLineBreaks: true, removeInvisibleChars: true,
+  });
+  const blob = new Blob([res.result], { type: 'text/plain;charset=utf-8' });
+  const baseName = file.name.replace(/\.[^.]+$/, '');
+  return { blob, filename: `${baseName}_cleaned.txt`, metadata: { 'Chars Removed': res.charsRemoved } };
+}
+
+async function runWhitespaceRemover(file: File): Promise<ToolRunnerResult> {
+  const text = await file.text();
+  const res = removeWhitespace(text, {
+    trimLeading: true, trimTrailing: true, collapseInner: true,
+    removeBlankLines: false, normalizeToUnix: true,
+  });
+  const blob = new Blob([res.result], { type: 'text/plain;charset=utf-8' });
+  const baseName = file.name.replace(/\.[^.]+$/, '');
+  return { blob, filename: `${baseName}_trimmed.txt`, metadata: { 'Spaces Removed': res.spacesRemoved } };
+}
+
+async function runSlugGenerator(file: File): Promise<ToolRunnerResult> {
+  const text = await file.text();
+  const lines = text.split('\n').filter(l => l.trim());
+  const slugs = lines.map(line => generateSlug(line, { separator: '-', lowercase: true, removeStopWords: false, maxLength: 0 })).join('\n');
+  const blob = new Blob([slugs], { type: 'text/plain;charset=utf-8' });
+  const baseName = file.name.replace(/\.[^.]+$/, '');
+  return { blob, filename: `${baseName}_slugs.txt`, metadata: { 'Slugs Generated': lines.length } };
+}
+
 async function runBase64Encoder(file: File): Promise<ToolRunnerResult> {
   const buffer = await file.arrayBuffer();
   const bytes = new Uint8Array(buffer);
@@ -2040,6 +2109,13 @@ export const TOOL_RUNNERS: Record<string, ToolRunner> = {
     description: 'Analyze word count, reading time, and metrics',
     run: runWordCounter,
   },
+  'case-converter': { slug: 'case-converter', name: 'Case Converter', category: 'Text', description: 'Convert text case (Title, camel, snake, etc.)', run: runCaseConverter },
+  'remove-duplicate-lines': { slug: 'remove-duplicate-lines', name: 'Remove Duplicate Lines', category: 'Text', description: 'Remove duplicate lines from text', run: runRemoveDuplicateLines },
+  'sort-lines': { slug: 'sort-lines', name: 'Sort Lines', category: 'Text', description: 'Sort lines alphabetically', run: runSortLines },
+  'reverse-text': { slug: 'reverse-text', name: 'Reverse Text', category: 'Text', description: 'Reverse text lines or characters', run: runReverseText },
+  'text-cleaner': { slug: 'text-cleaner', name: 'Text Cleaner', category: 'Text', description: 'Clean and sanitize text', run: runTextCleaner },
+  'whitespace-remover': { slug: 'whitespace-remover', name: 'Whitespace Remover', category: 'Text', description: 'Remove and collapse whitespace', run: runWhitespaceRemover },
+  'slug-generator': { slug: 'slug-generator', name: 'Slug Generator', category: 'Text', description: 'Convert text to URL slugs', run: runSlugGenerator },
 
   // Security
   'base64-encoder': {
