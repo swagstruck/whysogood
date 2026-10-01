@@ -1,6 +1,6 @@
 'use client';
 import React, { useState } from 'react';
-import { CATEGORIES, getToolsByCategory } from '@/lib/registry';
+import { CATEGORIES, getToolsByCategory, COMING_SOON_CATEGORIES } from '@/lib/registry';
 import type { Category, Tool } from '@/lib/types';
 import { isToolExecutable } from '@/lib/simpleMode/runners';
 import * as Icons from 'lucide-react';
@@ -55,10 +55,13 @@ export function ToolSelector({
       >
         {CATEGORIES.map(cat => {
           const isSelected = cat === currentCategory;
+          const isComingSoon = COMING_SOON_CATEGORIES.includes(cat);
           return (
             <button
               key={cat}
-              onClick={() => onSelectCategory(cat)}
+              disabled={isComingSoon}
+              onClick={() => !isComingSoon && onSelectCategory(cat)}
+              title={isComingSoon ? `${cat} (Coming Soon)` : cat}
               className="c-btn"
               style={{
                 borderRadius: 'var(--radius-full)',
@@ -68,13 +71,34 @@ export function ToolSelector({
                 background: isSelected ? 'var(--brand)' : 'var(--bg-2)',
                 color: isSelected ? 'var(--ink-inverse)' : 'var(--ink-2)',
                 border: isSelected ? '1px solid var(--brand)' : '1px solid var(--border)',
-                cursor: 'pointer',
+                cursor: isComingSoon ? 'not-allowed' : 'pointer',
+                opacity: isComingSoon ? 0.5 : 1,
                 whiteSpace: 'nowrap',
                 transition: 'all var(--transition-fast)',
                 flexShrink: 0,
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 6,
               }}
             >
               <span>{cat}</span>
+              {isComingSoon && (
+                <span
+                  className="c-badge c-badge--neutral"
+                  style={{
+                    fontSize: 9,
+                    fontWeight: 700,
+                    padding: '0 4px',
+                    borderRadius: 'var(--radius-sm)',
+                    lineHeight: 1.3,
+                    background: 'var(--bg-3)',
+                    color: 'var(--ink-3)',
+                    border: '1px solid var(--border)',
+                  }}
+                >
+                  Soon
+                </span>
+              )}
             </button>
           );
         })}

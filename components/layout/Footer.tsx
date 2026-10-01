@@ -1,7 +1,7 @@
 'use client';
 import Link from 'next/link';
 import { Zap } from 'lucide-react';
-import { CATEGORIES } from '@/lib/registry';
+import { CATEGORIES, COMING_SOON_CATEGORIES } from '@/lib/registry';
 
 export function Footer() {
   const categoryGroups = [
@@ -62,17 +62,32 @@ export function Footer() {
                 {g.heading}
               </p>
               <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 8 }}>
-                {g.links.map(l => (
-                  <li key={l.href}>
-                    <Link href={l.href} style={{
-                      fontSize: 13, color: 'var(--ink-2)', textDecoration: 'none',
-                      transition: 'color var(--transition-fast)',
-                    }}
-                    onMouseEnter={e => e.currentTarget.style.color = 'var(--ink)'}
-                    onMouseLeave={e => e.currentTarget.style.color = 'var(--ink-2)'}
-                    >{l.label}</Link>
-                  </li>
-                ))}
+                {g.links.map(l => {
+                  const isComingSoon = COMING_SOON_CATEGORIES.includes(l.label as any);
+                  return (
+                    <li key={l.href}>
+                      <Link href={l.href} style={{
+                        fontSize: 13, color: 'var(--ink-2)', textDecoration: 'none',
+                        display: 'inline-flex', alignItems: 'center', gap: 6,
+                        opacity: isComingSoon ? 0.75 : 1,
+                        transition: 'color var(--transition-fast)',
+                      }}
+                      onMouseEnter={e => e.currentTarget.style.color = 'var(--ink)'}
+                      onMouseLeave={e => e.currentTarget.style.color = 'var(--ink-2)'}
+                      >
+                        <span>{l.label}</span>
+                        {isComingSoon && (
+                          <span
+                            className="c-badge c-badge--neutral"
+                            style={{ fontSize: 9, padding: '0 4px', lineHeight: 1.3, borderRadius: 'var(--radius-sm)' }}
+                          >
+                            Soon
+                          </span>
+                        )}
+                      </Link>
+                    </li>
+                  );
+                })}
               </ul>
             </div>
           ))}

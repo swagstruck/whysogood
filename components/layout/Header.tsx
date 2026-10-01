@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Search, Menu, X, Zap, Sparkles } from 'lucide-react';
 import { useSession } from '@/lib/session';
 import { searchTools } from '@/lib/search';
-import { CATEGORIES } from '@/lib/registry';
+import { CATEGORIES, COMING_SOON_CATEGORIES } from '@/lib/registry';
 import type { SearchResult } from '@/lib/search';
 
 export function Header() {
@@ -224,19 +224,33 @@ export function Header() {
             >
               <Search size={15} /> Search tools&hellip;
             </button>
-            {CATEGORIES.map(cat => (
-              <Link key={cat} href={`/${cat.toLowerCase()}`}
-                onClick={() => setMobileOpen(false)}
-                style={{
-                  padding: '10px 12px', borderRadius: 'var(--radius-md)',
-                  fontSize: 14, fontWeight: 500, color: 'var(--ink-2)',
-                  textDecoration: 'none', display: 'block',
-                  transition: 'background var(--transition-fast), color var(--transition-fast)',
-                }}
-                onMouseEnter={e => { e.currentTarget.style.color = 'var(--ink)'; e.currentTarget.style.background = 'var(--bg-2)'; }}
-                onMouseLeave={e => { e.currentTarget.style.color = 'var(--ink-2)'; e.currentTarget.style.background = 'transparent'; }}
-              >{cat}</Link>
-            ))}
+            {CATEGORIES.map(cat => {
+              const isComingSoon = COMING_SOON_CATEGORIES.includes(cat);
+              return (
+                <Link key={cat} href={`/${cat.toLowerCase()}`}
+                  onClick={() => setMobileOpen(false)}
+                  style={{
+                    padding: '10px 12px', borderRadius: 'var(--radius-md)',
+                    fontSize: 14, fontWeight: 500, color: 'var(--ink-2)',
+                    textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    opacity: isComingSoon ? 0.6 : 1,
+                    transition: 'background var(--transition-fast), color var(--transition-fast)',
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.color = 'var(--ink)'; e.currentTarget.style.background = 'var(--bg-2)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.color = 'var(--ink-2)'; e.currentTarget.style.background = 'transparent'; }}
+                >
+                  <span>{cat}</span>
+                  {isComingSoon && (
+                    <span
+                      className="c-badge c-badge--neutral"
+                      style={{ fontSize: 10, padding: '1px 6px', fontWeight: 600, borderRadius: 'var(--radius-sm)' }}
+                    >
+                      Soon
+                    </span>
+                  )}
+                </Link>
+              );
+            })}
           </div>
         </>
       )}

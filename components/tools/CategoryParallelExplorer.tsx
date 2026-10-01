@@ -3,7 +3,7 @@ import React, { useState, useMemo } from 'react';
 
 import { Search, Sparkles } from 'lucide-react';
 import * as Icons from 'lucide-react';
-import { CATEGORIES, CATEGORY_ICONS, CATEGORY_DESCRIPTIONS, getToolsByCategory, TOOLS_DEDUPED } from '@/lib/registry';
+import { CATEGORIES, CATEGORY_ICONS, CATEGORY_DESCRIPTIONS, getToolsByCategory, TOOLS_DEDUPED, COMING_SOON_CATEGORIES } from '@/lib/registry';
 import { ToolCard } from '@/components/tools/ToolCard';
 import type { Category, Tool } from '@/lib/types';
 
@@ -136,6 +136,7 @@ export function CategoryParallelExplorer() {
 
           {/* Individual Category Buttons */}
           {CATEGORIES.map(cat => {
+            const isComingSoon = COMING_SOON_CATEGORIES.includes(cat);
             const isSelected = selectedCategory === cat;
             const iconName = CATEGORY_ICONS[cat] || 'Zap';
             const IconEl = ((Icons as Record<string, unknown>)[iconName] || Icons.Zap) as React.ComponentType<{ size?: number; style?: React.CSSProperties }>;
@@ -143,38 +144,45 @@ export function CategoryParallelExplorer() {
             return (
               <button
                 key={cat}
-                onClick={() => setSelectedCategory(cat)}
+                disabled={isComingSoon}
+                onClick={() => {
+                  if (!isComingSoon) {
+                    setSelectedCategory(cat);
+                  }
+                }}
+                title={isComingSoon ? `${cat} (Coming Soon)` : cat}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
-                  gap: 12,
+                  gap: 10,
                   padding: '9px 12px',
                   borderRadius: 'var(--radius-md)',
                   fontSize: 13,
                   fontWeight: isSelected ? 600 : 500,
-                  cursor: 'pointer',
+                  cursor: isComingSoon ? 'not-allowed' : 'pointer',
                   border: isSelected ? '1px solid var(--border-hover)' : '1px solid transparent',
                   background: isSelected ? 'var(--bg-2)' : 'transparent',
                   color: isSelected ? 'var(--ink)' : 'var(--ink-2)',
+                  opacity: isComingSoon ? 0.5 : 1,
                   transition: 'all var(--transition-fast)',
                   textAlign: 'left',
                   width: '100%',
                 }}
                 onMouseEnter={e => {
-                  if (!isSelected) {
+                  if (!isSelected && !isComingSoon) {
                     e.currentTarget.style.background = 'var(--bg-2)';
                     e.currentTarget.style.color = 'var(--ink)';
                   }
                 }}
                 onMouseLeave={e => {
-                  if (!isSelected) {
+                  if (!isSelected && !isComingSoon) {
                     e.currentTarget.style.background = 'transparent';
                     e.currentTarget.style.color = 'var(--ink-2)';
                   }
                 }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0, flex: 1 }}>
                   <div style={{
                     width: 26, height: 26, borderRadius: 'var(--radius-sm)',
                     background: isSelected ? 'var(--brand-subtle)' : 'var(--bg-2)',
@@ -185,9 +193,28 @@ export function CategoryParallelExplorer() {
                   </div>
                   <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{cat}</span>
                 </div>
-                <span style={{ fontSize: 11, color: 'var(--ink-3)', fontWeight: 500, flexShrink: 0 }}>
-                  {categoryCounts[cat] ?? 0}
-                </span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+                  {isComingSoon && (
+                    <span
+                      className="c-badge c-badge--neutral"
+                      style={{
+                        fontSize: 10,
+                        fontWeight: 600,
+                        padding: '1px 6px',
+                        lineHeight: 1.4,
+                        borderRadius: 'var(--radius-sm)',
+                        background: 'var(--bg-3)',
+                        color: 'var(--ink-3)',
+                        border: '1px solid var(--border)',
+                      }}
+                    >
+                      Soon
+                    </span>
+                  )}
+                  <span style={{ fontSize: 11, color: 'var(--ink-3)', fontWeight: 500 }}>
+                    {categoryCounts[cat] ?? 0}
+                  </span>
+                </div>
               </button>
             );
           })}

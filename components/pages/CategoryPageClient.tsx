@@ -3,7 +3,7 @@ import React, { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { Search, ArrowLeft } from 'lucide-react';
 import * as Icons from 'lucide-react';
-import { getToolsByCategory, CATEGORY_ICONS, CATEGORY_DESCRIPTIONS } from '@/lib/registry';
+import { getToolsByCategory, CATEGORY_ICONS, CATEGORY_DESCRIPTIONS, COMING_SOON_CATEGORIES } from '@/lib/registry';
 import type { Category } from '@/lib/types';
 import { ToolCard } from '@/components/tools/ToolCard';
 
@@ -14,6 +14,7 @@ interface Props {
 export function CategoryPageClient({ category }: Props) {
   const [query, setQuery] = useState('');
   const allTools = getToolsByCategory(category);
+  const isComingSoon = COMING_SOON_CATEGORIES.includes(category);
   const catIconName = CATEGORY_ICONS[category] || 'Zap';
   const CatIcon = ((Icons as Record<string, unknown>)[catIconName] || Icons.Zap) as React.ComponentType<{ size?: number; style?: React.CSSProperties }>;
 
@@ -50,12 +51,43 @@ export function CategoryPageClient({ category }: Props) {
           <CatIcon size={26} style={{ color: 'var(--brand-500)' }} />
         </div>
         <div>
-          <h1 style={{ fontSize: 'clamp(1.5rem, 4vw, 2rem)', fontWeight: 800, letterSpacing: '-0.03em', margin: '0 0 6px', color: 'var(--ink)' }}>{category}</h1>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
+            <h1 style={{ fontSize: 'clamp(1.5rem, 4vw, 2rem)', fontWeight: 800, letterSpacing: '-0.03em', margin: 0, color: 'var(--ink)' }}>{category}</h1>
+            {isComingSoon && (
+              <span className="c-badge c-badge--neutral" style={{ fontSize: 11, padding: '2px 8px' }}>
+                Coming Soon
+              </span>
+            )}
+          </div>
           <p style={{ margin: 0, color: 'var(--ink-2)', fontSize: 15 }}>
-            {CATEGORY_DESCRIPTIONS[category]} &bull; {allTools.length} tools
+            {CATEGORY_DESCRIPTIONS[category]} &bull; {allTools.length} tools {isComingSoon ? '(in roadmap)' : ''}
           </p>
         </div>
       </div>
+
+      {/* Coming Soon Notice */}
+      {isComingSoon && (
+        <div style={{
+          padding: '16px 20px',
+          background: 'var(--bg-2)',
+          border: '1px solid var(--border)',
+          borderRadius: 'var(--radius-lg)',
+          marginBottom: 32,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 12,
+        }}>
+          <span style={{ fontSize: 20 }}>🚧</span>
+          <div>
+            <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--ink)' }}>
+              This category is currently in roadmap
+            </div>
+            <div style={{ fontSize: 13, color: 'var(--ink-2)', marginTop: 2 }}>
+              We are rebuilding the functionality and front-end interface. These tools will be available soon.
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Search within category */}
       <div style={{ position: 'relative', marginBottom: 32, maxWidth: 440 }}>
