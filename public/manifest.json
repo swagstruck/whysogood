@@ -1,16 +1,31 @@
 {
-  "name": "whysogood — One-Stop Web Utilities",
+  "name": "whysogood — Free Online Tools",
   "short_name": "whysogood",
   "description": "100+ fast, private, in-browser online tools. No server uploads. No accounts.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0A0A0A",
-  "theme_color": "#0A0A0A",
+  "theme_color": "#3B3BDF",
   "icons": [
     {
       "src": "/favicon.ico",
       "sizes": "64x64 32x32 24x24 16x16",
       "type": "image/x-icon"
+    },
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
     }
   ]
 }
