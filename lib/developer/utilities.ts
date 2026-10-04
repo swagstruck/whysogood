@@ -140,7 +140,7 @@ function base64UrlDecode(str: string): string {
     b64 += '=';
   }
 
-  if (typeof Buffer !== 'undefined') {
+  if (typeof window === 'undefined' && typeof Buffer !== 'undefined') {
     return Buffer.from(b64, 'base64').toString('utf-8');
   }
 
@@ -1062,7 +1062,7 @@ function bytesToHex(bytes: Uint8Array): string {
 }
 
 function bytesToBase64(bytes: Uint8Array): string {
-  if (typeof Buffer !== 'undefined') {
+  if (typeof window === 'undefined' && typeof Buffer !== 'undefined') {
     return Buffer.from(bytes).toString('base64');
   }
   let binary = '';

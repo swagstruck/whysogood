@@ -389,26 +389,8 @@ For billing questions, write to billing@payments.io or security-team@internal.ne
 We guarantee a response within 24 hours.`;
 export const SAMPLE_REGEX_REPLACEMENT = '[REDACTED_EMAIL]';
 
-export const SAMPLE_JWT = (() => {
-  const b64 = (obj: unknown) => {
-    const str = typeof obj === 'string' ? obj : JSON.stringify(obj);
-    if (typeof Buffer !== 'undefined') {
-      return Buffer.from(str).toString('base64url');
-    }
-    return btoa(str).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-  };
-  const header = b64({ alg: 'HS256', typ: 'JWT', kid: 'key-2026-auth' });
-  const payload = b64({
-    sub: 'usr_84920491',
-    name: 'Ada Lovelace',
-    email: 'ada@whysogood.app',
-    roles: ['admin', 'developer'],
-    org: { id: 'org_enterprise_1', plan: 'pro' },
-    iat: 1758750000,
-    exp: 2500000000,
-  });
-  return `${header}.${payload}.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ`;
-})();
+export const SAMPLE_JWT =
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImtleS0yMDI2LWF1dGgifQ.eyJzdWIiOiJ1c3JfODQ5MjA0OTEiLCJuYW1lIjoiQWRhIExvdmVsYWNlIiwiZW1haWwiOiJhZGFAd2h5c29nb29kLmFwcCIsInJvbGVzIjpbImFkbWluIiwiZGV2ZWxvcGVyIl0sIm9yZyI6eyJpZCI6Im9yZ19lbnRlcnByaXNlXzEiLCJwbGFuIjoicHJvIn0sImlhdCI6MTc1ODc1MDAwMCwiZXhwIjoyNTAwMDAwMDAwfQ.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ';
 
 export const SAMPLE_DIFF_ORIGINAL = `// User Account Service v1.0
 export interface User {
