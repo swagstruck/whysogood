@@ -390,7 +390,7 @@ We guarantee a response within 24 hours.`;
 export const SAMPLE_REGEX_REPLACEMENT = '[REDACTED_EMAIL]';
 
 export const SAMPLE_JWT = (() => {
-  const b64 = (obj: any) => {
+  const b64 = (obj: unknown) => {
     const str = typeof obj === 'string' ? obj : JSON.stringify(obj);
     if (typeof Buffer !== 'undefined') {
       return Buffer.from(str).toString('base64url');

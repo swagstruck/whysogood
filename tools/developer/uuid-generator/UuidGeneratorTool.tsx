@@ -15,7 +15,16 @@ import {
 } from 'lucide-react';
 import type { UuidVersion } from '@/lib/developer/types';
 
+const STATIC_FALLBACK_UUIDS = [
+  'f47ac10b-58cc-4372-a567-0e02b2c3d479',
+  'c9a646d3-9c61-4cd7-9f59-e1b6e12f1a85',
+  '6ba7b810-9dad-11d1-80b4-00c04fd430c8',
+  '6ba7b811-9dad-11d1-80b4-00c04fd430c8',
+  '6ba7b812-9dad-11d1-80b4-00c04fd430c8',
+];
+
 export default function UuidGeneratorTool() {
+  const [mounted, setMounted] = useState(false);
   const [count, setCount] = useState<number>(5);
   const [version, setVersion] = useState<UuidVersion>('v4');
   const [uppercase, setUppercase] = useState<boolean>(false);
@@ -25,11 +34,18 @@ export default function UuidGeneratorTool() {
 
   const toast = useToast();
 
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const generatedIds = useMemo(() => {
+    if (!mounted) {
+      return STATIC_FALLBACK_UUIDS.slice(0, count);
+    }
     // seed triggers regeneration
     return generateUuids(count, version, uppercase, noHyphens);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [count, version, uppercase, noHyphens, seed]);
+  }, [mounted, count, version, uppercase, noHyphens, seed]);
 
   const outputText = useMemo(() => {
     return generatedIds.join('\n');
@@ -160,6 +176,7 @@ export default function UuidGeneratorTool() {
 
         <textarea
           readOnly
+          suppressHydrationWarning
           value={outputText}
           rows={Math.min(Math.max(count, 5), 18)}
           style={{

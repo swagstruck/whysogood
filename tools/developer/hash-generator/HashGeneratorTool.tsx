@@ -33,11 +33,15 @@ export default function HashGeneratorTool() {
 
   useEffect(() => {
     let isCancelled = false;
-    generateHashes(text, isHmac && hmacKey ? hmacKey : undefined).then((res) => {
-      if (!isCancelled) {
-        setHashes(res);
-      }
-    });
+    generateHashes(text, isHmac && hmacKey ? hmacKey : undefined)
+      .then((res) => {
+        if (!isCancelled) {
+          setHashes(res);
+        }
+      })
+      .catch((err) => {
+        console.error('Hash generation error:', err);
+      });
     return () => {
       isCancelled = true;
     };

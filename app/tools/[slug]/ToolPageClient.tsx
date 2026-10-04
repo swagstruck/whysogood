@@ -3,6 +3,7 @@ import React, { lazy, Suspense } from 'react';
 import { TOOL_MAP } from '@/lib/registry';
 import { ToolLayout } from '@/components/tools/ToolLayout';
 import { ComingSoon } from '@/components/tools/ComingSoon';
+import { ToolErrorBoundary } from '@/components/ui/ToolErrorBoundary';
 
 // Lazy-load active tool implementations
 const TOOL_COMPONENTS: Record<string, React.LazyExoticComponent<React.ComponentType>> = {
@@ -194,9 +195,11 @@ export function ToolPageClient({ slug }: { slug: string }) {
   return (
     <ToolLayout tool={tool}>
       {tool.status === 'active' && ToolComponent ? (
-        <Suspense fallback={<LoadingSpinner />}>
-          <ToolComponent />
-        </Suspense>
+        <ToolErrorBoundary toolName={tool.name}>
+          <Suspense fallback={<LoadingSpinner />}>
+            <ToolComponent />
+          </Suspense>
+        </ToolErrorBoundary>
       ) : (
         <ComingSoon toolName={tool.name} description={tool.longDescription || tool.description} />
       )}

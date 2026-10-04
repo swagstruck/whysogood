@@ -28,6 +28,7 @@ const PRESETS = [
 ];
 
 export default function CronGeneratorTool() {
+  const [mounted, setMounted] = useState(false);
   const [minute, setMinute] = useState('*');
   const [hour, setHour] = useState('*');
   const [dayOfMonth, setDayOfMonth] = useState('*');
@@ -36,6 +37,10 @@ export default function CronGeneratorTool() {
   const [copied, setCopied] = useState(false);
 
   const toast = useToast();
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const expression = useMemo(() => {
     return `${minute.trim() || '*'} ${hour.trim() || '*'} ${dayOfMonth.trim() || '*'} ${month.trim() || '*'} ${dayOfWeek.trim() || '*'}`;
@@ -366,7 +371,9 @@ export default function CronGeneratorTool() {
             >
               <Calendar size={14} color="var(--brand)" />
               <span style={{ color: 'var(--brand)', fontWeight: 600 }}>#{i + 1}</span>
-              <span>{new Date(r).toUTCString()} ({new Date(r).toLocaleString()})</span>
+              <span suppressHydrationWarning>
+                {new Date(r).toUTCString()}{mounted ? ` (${new Date(r).toLocaleString()})` : ''}
+              </span>
             </div>
           ))}
         </div>

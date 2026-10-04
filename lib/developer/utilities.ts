@@ -66,7 +66,7 @@ export function testRegex(
 
         const captures = match.slice(1);
         // Build groups object that supports both numeric indices (groups[0]) and named capture groups
-        let groupsObj: any = captures.slice();
+        let groupsObj: Record<string, string> | (string | undefined)[] = captures.slice();
         if (match.groups) {
           groupsObj = Object.assign(captures.slice(), match.groups);
         }
@@ -89,7 +89,7 @@ export function testRegex(
       const match = reg.exec(text);
       if (match) {
         const captures = match.slice(1);
-        let groupsObj: any = captures.slice();
+        let groupsObj: Record<string, string> | (string | undefined)[] = captures.slice();
         if (match.groups) {
           groupsObj = Object.assign(captures.slice(), match.groups);
         }
@@ -1142,26 +1142,33 @@ export async function generateHashes(
       sha512B64 = bytesToBase64(b512);
     }
   } else {
-    // Dynamic import Node crypto as fallback if subtle is unavailable
-    const nodeCrypto = await import('crypto');
-    const algos = ['sha1', 'sha256', 'sha512'] as const;
-    const res: Record<string, Uint8Array> = {};
+    // If subtle is unavailable in environment, fallback safely without poisoning webpack client bundle
+    if (typeof window === 'undefined') {
+      try {
+        const req = (eval)('require');
+        const nodeCrypto = req('crypto');
+        const algos = ['sha1', 'sha256', 'sha512'] as const;
+        const res: Record<string, Uint8Array> = {};
 
-    for (const algo of algos) {
-      if (hmacKey) {
-        res[algo] = nodeCrypto.createHmac(algo, hmacKey).update(text).digest();
-      } else {
-        res[algo] = nodeCrypto.createHash(algo).update(text).digest();
+        for (const algo of algos) {
+          if (hmacKey) {
+            res[algo] = nodeCrypto.createHmac(algo, hmacKey).update(text).digest();
+          } else {
+            res[algo] = nodeCrypto.createHash(algo).update(text).digest();
+          }
+        }
+
+        sha1Hex = bytesToHex(res.sha1);
+        sha256Hex = bytesToHex(res.sha256);
+        sha512Hex = bytesToHex(res.sha512);
+
+        sha1B64 = bytesToBase64(res.sha1);
+        sha256B64 = bytesToBase64(res.sha256);
+        sha512B64 = bytesToBase64(res.sha512);
+      } catch {
+        // Fallback unavailable
       }
     }
-
-    sha1Hex = bytesToHex(res.sha1);
-    sha256Hex = bytesToHex(res.sha256);
-    sha512Hex = bytesToHex(res.sha512);
-
-    sha1B64 = bytesToBase64(res.sha1);
-    sha256B64 = bytesToBase64(res.sha256);
-    sha512B64 = bytesToBase64(res.sha512);
   }
 
   return {

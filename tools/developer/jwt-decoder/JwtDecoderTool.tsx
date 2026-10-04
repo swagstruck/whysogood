@@ -20,14 +20,19 @@ import {
 } from 'lucide-react';
 
 export default function JwtDecoderTool() {
+  const [mounted, setMounted] = useState(false);
   const [token, setToken] = useState(SAMPLE_JWT);
   const toast = useToast();
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const result = useMemo(() => {
     return decodeJwt(token);
   }, [token]);
 
-  const handleCopySection = async (data: any, label: string) => {
+  const handleCopySection = async (data: unknown, label: string) => {
     if (!data) return;
     try {
       await copyToClipboard(typeof data === 'string' ? data : JSON.stringify(data, null, 2));
@@ -170,7 +175,9 @@ export default function JwtDecoderTool() {
               }}
             >
               <Clock size={15} />
-              <span>Expires: {new Date(result.expiresAt).toLocaleString()}</span>
+              <span suppressHydrationWarning>
+                Expires: {mounted ? new Date(result.expiresAt).toLocaleString() : new Date(result.expiresAt).toUTCString()}
+              </span>
             </div>
           )}
 
@@ -188,7 +195,9 @@ export default function JwtDecoderTool() {
                 border: '1px solid var(--border)',
               }}
             >
-              <span>Issued: {new Date(result.issuedAt).toLocaleString()}</span>
+              <span suppressHydrationWarning>
+                Issued: {mounted ? new Date(result.issuedAt).toLocaleString() : new Date(result.issuedAt).toUTCString()}
+              </span>
             </div>
           )}
         </div>

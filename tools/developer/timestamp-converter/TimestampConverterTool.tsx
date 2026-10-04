@@ -17,21 +17,29 @@ import {
 } from 'lucide-react';
 
 export default function TimestampConverterTool() {
-  const [currentNow, setCurrentNow] = useState<number>(Date.now());
+  const [mounted, setMounted] = useState(false);
+  const [currentNow, setCurrentNow] = useState<number>(1700000000000);
   const [isPaused, setIsPaused] = useState<boolean>(false);
-  const [inputVal, setInputVal] = useState<string>(Math.floor(Date.now() / 1000).toString());
+  const [inputVal, setInputVal] = useState<string>('1700000000');
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
   const toast = useToast();
 
+  useEffect(() => {
+    setMounted(true);
+    const now = Date.now();
+    setCurrentNow(now);
+    setInputVal(Math.floor(now / 1000).toString());
+  }, []);
+
   // Clock ticker
   useEffect(() => {
-    if (isPaused) return;
+    if (!mounted || isPaused) return;
     const interval = setInterval(() => {
       setCurrentNow(Date.now());
     }, 1000);
     return () => clearInterval(interval);
-  }, [isPaused]);
+  }, [mounted, isPaused]);
 
   const converted = useMemo(() => {
     return convertTimestamp(inputVal);
@@ -88,7 +96,7 @@ export default function TimestampConverterTool() {
             <div style={{ fontSize: 12, color: 'var(--ink-2)', fontWeight: 600, textTransform: 'uppercase' }}>
               Current Epoch Time
             </div>
-            <div style={{ fontSize: 22, fontWeight: 700, fontFamily: 'var(--font-mono, monospace)', color: 'var(--ink)' }}>
+            <div suppressHydrationWarning style={{ fontSize: 22, fontWeight: 700, fontFamily: 'var(--font-mono, monospace)', color: 'var(--ink)' }}>
               {Math.floor(currentNow / 1000)} <span style={{ fontSize: 13, color: 'var(--ink-2)', fontWeight: 400 }}>seconds</span>
             </div>
           </div>
@@ -212,7 +220,7 @@ export default function TimestampConverterTool() {
                   <span style={{ fontSize: 11, color: 'var(--ink-2)', fontWeight: 600, textTransform: 'uppercase' }}>
                     {item.label}
                   </span>
-                  <span style={{ fontSize: 14, fontFamily: 'var(--font-mono, monospace)', color: 'var(--ink)', wordBreak: 'break-all' }}>
+                  <span suppressHydrationWarning style={{ fontSize: 14, fontFamily: 'var(--font-mono, monospace)', color: 'var(--ink)', wordBreak: 'break-all' }}>
                     {item.value}
                   </span>
                 </div>

@@ -1,18 +1,39 @@
 'use client';
+
 import React, { useState } from 'react';
-import { Copy, Download, Trash2, Check, AlertCircle, FileCode } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { DeveloperSplitPane } from '../common/DeveloperSplitPane';
 import { Select } from '@/components/ui/Select';
-import { useToast } from '@/components/ui/ToastProvider';
-import { copyToClipboard, downloadBlob } from '@/lib/utils';
+import { Button } from '@/components/ui/Button';
+import { SAMPLE_JSON } from '@/lib/developer/samples';
+import { getLineAndColumn } from '@/lib/developer/formatters';
+import { Sparkles, Minimize2 } from 'lucide-react';
 
 export default function JsonFormatterTool() {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
-  const [indent, setIndent] = useState<number>(2);
-  const [error, setError] = useState<{ message: string; line?: number; col?: number } | null>(null);
-  const [copied, setCopied] = useState(false);
-  const toast = useToast();
+  const [indentOption, setIndentOption] = useState('2');
+  const [sortKeys, setSortKeys] = useState(false);
+  const [error, setError] = useState<{ message: string; line?: number; column?: number } | null>(null);
+
+  const getIndent = () => {
+    if (indentOption === 'tab') return '\t';
+    return Number(indentOption) || 2;
+  };
+
+  const sortObjectKeys = (obj: unknown): unknown => {
+    if (Array.isArray(obj)) {
+      return obj.map(sortObjectKeys);
+    }
+    if (obj !== null && typeof obj === 'object') {
+      const sorted: Record<string, unknown> = {};
+      const keys = Object.keys(obj as Record<string, unknown>).sort();
+      for (const k of keys) {
+        sorted[k] = sortObjectKeys((obj as Record<string, unknown>)[k]);
+      }
+      return sorted;
+    }
+    return obj;
+  };
 
   const handleFormat = () => {
     if (!input.trim()) {
@@ -20,69 +41,79 @@ export default function JsonFormatterTool() {
       setError(null);
       return;
     }
+
     try {
-      const parsed = JSON.parse(input);
-      const formatted = JSON.stringify(parsed, null, indent);
+      let parsed = JSON.parse(input);
+      if (sortKeys) {
+        parsed = sortObjectKeys(parsed);
+      }
+      const formatted = JSON.stringify(parsed, null, getIndent());
       setOutput(formatted);
       setError(null);
     } catch (err: unknown) {
       if (err instanceof SyntaxError) {
         const msg = err.message;
-        // Try parsing line and col from message
-        const match = msg.match(/at position (\d+)/) || msg.match(/line (\d+) column (\d+)/);
+        let line: number | undefined;
+        let column: number | undefined;
+
+        const posMatch = msg.match(/position\s+(\d+)/i);
+        if (posMatch) {
+          const pos = parseInt(posMatch[1], 10);
+          const loc = getLineAndColumn(input, pos);
+          line = loc.line;
+          column = loc.column;
+        } else {
+          const lineColMatch = msg.match(/line\s+(\d+)\s+column\s+(\d+)/i);
+          if (lineColMatch) {
+            line = parseInt(lineColMatch[1], 10);
+            column = parseInt(lineColMatch[2], 10);
+          }
+        }
+
         setError({
           message: msg,
-          line: match && match[2] ? parseInt(match[1]) : undefined,
-          col: match && match[2] ? parseInt(match[2]) : undefined,
+          line,
+          column,
         });
       } else {
-        setError({ message: 'Invalid JSON' });
+        setError({
+          message: err instanceof Error ? err.message : 'Invalid JSON input',
+        });
       }
     }
   };
 
   const handleMinify = () => {
-    if (!input.trim()) return;
+    if (!input.trim()) {
+      setOutput('');
+      setError(null);
+      return;
+    }
+
     try {
-      const parsed = JSON.parse(input);
+      let parsed = JSON.parse(input);
+      if (sortKeys) {
+        parsed = sortObjectKeys(parsed);
+      }
       const minified = JSON.stringify(parsed);
       setOutput(minified);
       setError(null);
     } catch (err: unknown) {
-      setError({ message: err instanceof Error ? err.message : 'Invalid JSON' });
+      setError({
+        message: err instanceof Error ? err.message : 'Invalid JSON input',
+      });
     }
   };
 
-  const handleCopy = async () => {
-    if (!output) return;
-    await copyToClipboard(output);
-    setCopied(true);
-    toast.success('Copied to clipboard');
-    setTimeout(() => setCopied(false), 2000);
-  };
-
-  const handleDownload = () => {
-    if (!output) return;
-    const blob = new Blob([output], { type: 'application/json' });
-    downloadBlob(blob, 'formatted.json');
-    toast.success('Downloaded formatted.json');
-  };
-
-  const loadSample = () => {
-    const sample = {
-      name: "whysogood",
-      tagline: "One-stop client-side web utilities hub",
-      features: ["Fast", "Simple", "Private", "Useful"],
-      privacy: {
-        clientSide: true,
-        serverUploads: false,
-        tracking: "none"
-      },
-      toolsCount: 120
-    };
-    setInput(JSON.stringify(sample));
-    setOutput(JSON.stringify(sample, null, 2));
-    setError(null);
+  const handleLoadSample = () => {
+    setInput(SAMPLE_JSON);
+    try {
+      const parsed = JSON.parse(SAMPLE_JSON);
+      setOutput(JSON.stringify(parsed, null, getIndent()));
+      setError(null);
+    } catch {
+      setOutput(SAMPLE_JSON);
+    }
   };
 
   const handleClear = () => {
@@ -91,94 +122,74 @@ export default function JsonFormatterTool() {
     setError(null);
   };
 
+  const optionsToolbar = (
+    <>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--ink-2)' }}>
+        <span>Indent:</span>
+        <Select
+          selectSize="sm"
+          fullWidth={false}
+          value={indentOption}
+          onChange={(e) => setIndentOption(e.target.value)}
+          options={[
+            { value: '2', label: '2 spaces' },
+            { value: '4', label: '4 spaces' },
+            { value: 'tab', label: 'Tab' },
+          ]}
+          style={{ width: 110 }}
+        />
+      </div>
+
+      <Button
+        variant="secondary"
+        size="sm"
+        onClick={handleMinify}
+        icon={<Minimize2 size={14} />}
+        title="Minify JSON (inline whitespace removal)"
+      >
+        Minify
+      </Button>
+
+      <label
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 6,
+          fontSize: 13,
+          color: 'var(--ink-2)',
+          cursor: 'pointer',
+          userSelect: 'none',
+        }}
+      >
+        <input
+          type="checkbox"
+          checked={sortKeys}
+          onChange={(e) => setSortKeys(e.target.checked)}
+          style={{ cursor: 'pointer', accentColor: 'var(--brand)' }}
+        />
+        <span>Sort Keys</span>
+      </label>
+    </>
+  );
+
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-      {/* Action Toolbar */}
-      <div className="card" style={{ padding: '12px 16px', display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'center', justifyContent: 'space-between' }}>
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
-          <Button onClick={handleFormat}>Format</Button>
-          <Button variant="secondary" onClick={handleMinify}>Minify</Button>
-          <Button variant="ghost" onClick={loadSample}>Sample</Button>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--color-muted)', marginLeft: 8 }}>
-            <span>Indent:</span>
-            <Select
-              selectSize="sm"
-              fullWidth={false}
-              value={indent}
-              onChange={e => setIndent(Number(e.target.value))}
-              options={[
-                { value: 2, label: '2 spaces' },
-                { value: 4, label: '4 spaces' },
-                { value: 1, label: 'Tab' },
-              ]}
-              style={{ width: 110 }}
-            />
-          </div>
-        </div>
-
-        <div style={{ display: 'flex', gap: 8 }}>
-          <Button variant="secondary" size="sm" onClick={handleCopy} disabled={!output} icon={copied ? <Check size={14} /> : <Copy size={14} />}>
-            {copied ? 'Copied' : 'Copy'}
-          </Button>
-          <Button variant="secondary" size="sm" onClick={handleDownload} disabled={!output} icon={<Download size={14} />}>
-            Download
-          </Button>
-          <Button variant="ghost" size="sm" onClick={handleClear} icon={<Trash2 size={14} />}>
-            Clear
-          </Button>
-        </div>
-      </div>
-
-      {error && (
-        <div style={{
-          padding: '10px 14px', borderRadius: 'var(--radius-md)',
-          background: 'var(--color-error-subtle)', color: 'var(--color-error)',
-          fontSize: 13, display: 'flex', alignItems: 'center', gap: 8,
-        }}>
-          <AlertCircle size={16} />
-          <span><strong>JSON Syntax Error:</strong> {error.message}</span>
-        </div>
-      )}
-
-      {/* Editor grid */}
-      <div className="tool-split-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 320px), 1fr))', gap: 16 }}>
-        {/* Input */}
-        <div className="card" style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-          <div style={{ padding: '8px 14px', borderBottom: '1px solid var(--color-border)', fontSize: 12, fontWeight: 700, color: 'var(--color-muted)', textTransform: 'uppercase' }}>
-            Input JSON
-          </div>
-          <textarea
-            value={input}
-            onChange={e => setInput(e.target.value)}
-            placeholder="Paste your JSON here..."
-            style={{
-              width: '100%', height: 380, padding: 14,
-              background: 'transparent', border: 'none', outline: 'none',
-              color: 'var(--color-text)', fontFamily: 'var(--font-mono)', fontSize: 13,
-              resize: 'none', boxSizing: 'border-box', lineHeight: 1.5,
-            }}
-          />
-        </div>
-
-        {/* Output */}
-        <div className="card" style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-          <div style={{ padding: '8px 14px', borderBottom: '1px solid var(--color-border)', fontSize: 12, fontWeight: 700, color: 'var(--color-muted)', textTransform: 'uppercase', display: 'flex', justifyContent: 'space-between' }}>
-            <span>Formatted Output</span>
-            {output && <span style={{ color: 'var(--color-accent)' }}>{output.length} chars</span>}
-          </div>
-          <textarea
-            readOnly
-            value={output}
-            placeholder="Formatted output will appear here..."
-            style={{
-              width: '100%', height: 380, padding: 14,
-              background: 'transparent', border: 'none', outline: 'none',
-              color: 'var(--color-text)', fontFamily: 'var(--font-mono)', fontSize: 13,
-              resize: 'none', boxSizing: 'border-box', lineHeight: 1.5,
-            }}
-          />
-        </div>
-      </div>
-    </div>
+    <DeveloperSplitPane
+      inputLabel="Input JSON"
+      inputValue={input}
+      onInputChange={setInput}
+      inputPlaceholder="Paste or write JSON here to format, beautify, and validate..."
+      outputLabel="Formatted JSON"
+      outputValue={output}
+      outputPlaceholder="Formatted and indented JSON will appear here..."
+      onExecute={handleFormat}
+      executeLabel="Format JSON"
+      executeIcon={<Sparkles size={15} />}
+      onClear={handleClear}
+      onLoadSample={handleLoadSample}
+      optionsToolbar={optionsToolbar}
+      downloadFilename="formatted.json"
+      downloadMimeType="application/json"
+      error={error}
+    />
   );
 }
