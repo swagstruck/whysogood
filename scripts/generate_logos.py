@@ -3,16 +3,19 @@ import struct
 import zlib
 import os
 
+# Brand Identity: #0E98A7
+# Style: edge - sharp 2px corners, minimal
+
 # 1. Generate SVG strings
 ICON_SVG_32 = '''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" fill="none">
-  <rect width="32" height="32" rx="9" fill="#3B3BDF"/>
+  <rect width="32" height="32" rx="2" fill="#0E98A7"/>
   <g transform="translate(4, 4)">
     <path d="M15.914 4a1.5 1.5 0 0 0-2.474-1.561l-9 9A1.5 1.5 0 0 0 5.5 14h4.002a.5.5 0 0 1 .471.666L8.086 20a1.5 1.5 0 0 0 2.475 1.56l9-9A1.5 1.5 0 0 0 18.5 10h-3.997a.5.5 0 0 1-.472-.667z" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
   </g>
 </svg>'''
 
 ICON_SVG_512 = '''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" fill="none">
-  <rect width="512" height="512" rx="146" fill="#3B3BDF"/>
+  <rect width="512" height="512" rx="32" fill="#0E98A7"/>
   <g transform="translate(64, 64) scale(16)">
     <path d="M15.914 4a1.5 1.5 0 0 0-2.474-1.561l-9 9A1.5 1.5 0 0 0 5.5 14h4.002a.5.5 0 0 1 .471.666L8.086 20a1.5 1.5 0 0 0 2.475 1.56l9-9A1.5 1.5 0 0 0 18.5 10h-3.997a.5.5 0 0 1-.472-.667z" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
   </g>
@@ -20,27 +23,27 @@ ICON_SVG_512 = '''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" 
 
 def make_logo_svg(text_color):
     return f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 190 40" width="190" height="40" fill="none">
-  <!-- Brand Mark Icon -->
-  <rect x="2" y="2" width="36" height="36" rx="10" fill="#3B3BDF"/>
+  <!-- Brand Mark Icon (edge style) -->
+  <rect x="2" y="2" width="36" height="36" rx="2" fill="#0E98A7"/>
   <g transform="translate(8, 8)">
     <path d="M15.914 4a1.5 1.5 0 0 0-2.474-1.561l-9 9A1.5 1.5 0 0 0 5.5 14h4.002a.5.5 0 0 1 .471.666L8.086 20a1.5 1.5 0 0 0 2.475 1.56l9-9A1.5 1.5 0 0 0 18.5 10h-3.997a.5.5 0 0 1-.472-.667z" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
   </g>
   <!-- Wordmark -->
-  <text x="48" y="27" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="22" font-weight="700" letter-spacing="-0.03em" fill="{text_color}">whysogood</text>
+  <text x="48" y="27" font-family="'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="22" font-weight="700" letter-spacing="-0.03em" fill="{text_color}">whysogood</text>
 </svg>'''
 
 LOGO_SVG_ADAPTIVE = '''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 190 40" width="190" height="40" fill="none">
   <style>
-    .wordmark { fill: #0F172A; }
+    .wordmark { fill: #0A1517; }
     @media (prefers-color-scheme: dark) {
-      .wordmark { fill: #FAFAFA; }
+      .wordmark { fill: #F0F6F7; }
     }
   </style>
-  <rect x="2" y="2" width="36" height="36" rx="10" fill="#3B3BDF"/>
+  <rect x="2" y="2" width="36" height="36" rx="2" fill="#0E98A7"/>
   <g transform="translate(8, 8)">
     <path d="M15.914 4a1.5 1.5 0 0 0-2.474-1.561l-9 9A1.5 1.5 0 0 0 5.5 14h4.002a.5.5 0 0 1 .471.666L8.086 20a1.5 1.5 0 0 0 2.475 1.56l9-9A1.5 1.5 0 0 0 18.5 10h-3.997a.5.5 0 0 1-.472-.667z" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
   </g>
-  <text x="48" y="27" class="wordmark" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="22" font-weight="700" letter-spacing="-0.03em">whysogood</text>
+  <text x="48" y="27" class="wordmark" font-family="'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="22" font-weight="700" letter-spacing="-0.03em">whysogood</text>
 </svg>'''
 
 # 2. Rasterizer for high-res icons and favicon
@@ -63,7 +66,8 @@ def render_icon(size):
     H = size * ss
     img = bytearray(W * H * 4)
 
-    rad = size * 0.28 * ss
+    # Edge style: 2px corner radius scaled
+    rad = max(2.0, size * (2.0 / 32.0)) * ss
     margin = size * 0.04 * ss
     r_left = margin
     r_top = margin
@@ -110,7 +114,8 @@ def render_icon(size):
                 if point_in_poly(x, y, poly):
                     img[idx:idx+4] = [255, 255, 255, 255]
                 else:
-                    img[idx:idx+4] = [59, 59, 223, 255] # #3B3BDF
+                    # #0E98A7 -> RGB: 14, 152, 167
+                    img[idx:idx+4] = [14, 152, 167, 255]
             else:
                 img[idx:idx+4] = [0, 0, 0, 0]
 
@@ -168,9 +173,9 @@ def main():
     with open('public/logo.svg', 'w') as f:
         f.write(LOGO_SVG_ADAPTIVE)
     with open('public/logo-dark.svg', 'w') as f:
-        f.write(make_logo_svg('#FAFAFA'))
+        f.write(make_logo_svg('#F0F6F7'))
     with open('public/logo-light.svg', 'w') as f:
-        f.write(make_logo_svg('#0F172A'))
+        f.write(make_logo_svg('#0A1517'))
 
     print('Wrote SVG logo and icon files.')
 
