@@ -1,190 +1,273 @@
 'use client';
-import React, { useState, useRef, useCallback } from 'react';
-import { Image as ImageIcon, Download, AlertCircle, FileText, CheckCircle2, Loader2 } from 'lucide-react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
+import {
+  Image as ImageIcon,
+  Download,
+  AlertCircle,
+  FileText,
+  CheckCircle2,
+  Loader2,
+  ZapIcon,
+} from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { formatFileSize, downloadBlob } from '@/lib/utils';
 import { getPdfJs, createZipArchive } from '@/lib/pdfUtils';
 
-interface RenderedPage {
+// ─── Types ────────────────────────────────────────────────────────────────────
+
+interface PageState {
   pageNumber: number;
-  blob: Blob;
-  dataUrl: string;
-  width: number;
-  height: number;
+  /** low-res thumbnail shown immediately after upload */
+  thumbDataUrl: string | null;
+  /** full-quality blob produced only when user requests download */
+  blob: Blob | null;
+  /** true while this individual page is being converted */
+  converting: boolean;
 }
 
+// ─── Canvas rendering helpers ─────────────────────────────────────────────────
+
 /**
- * Robustly renders a single PDF page to a JPEG blob.
+ * Render a PDF page from an already-loaded PDFDocumentProxy.
+ * Returns a jpeg dataUrl (thumbnail) or a Blob (for download).
  *
- * Key correctness measures:
- *  1. `data` is copied fresh per render call – avoids ArrayBuffer detachment
- *     that happens when the same buffer is transferred to the PDF.js worker.
- *  2. White background is filled before rendering (JPEG has no alpha channel).
- *  3. After `page.render().promise` we yield one microtask tick via
- *     `createImageBitmap()` which acts as a GPU compositing flush, ensuring
- *     the rasterised pixels are committed to the canvas before `toBlob()`.
- *  4. Canvas dimensions are set *before* rendering (PDF.js requirement).
+ * KEY FIX: We keep a single PDFDocumentProxy alive in a ref and always
+ * call doc.getPage() from that one instance.  Never load getDocument()
+ * more than once per file — doing so re-transfers the ArrayBuffer to the
+ * worker and the old handle becomes detached / returns blank pixels.
  */
-async function renderPageToJpeg(
-  fileData: Uint8Array,
+async function renderPageOnCanvas(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  doc: any,
   pageNumber: number,
   scale: number,
-  quality: number,
-): Promise<RenderedPage> {
-  const pdfjs = await getPdfJs();
-
-  // Fresh copy per call – prevents the previous getDocument() transfer from
-  // detaching this buffer when the worker receives it.
-  const safeCopy = fileData.slice();
-  const doc = await pdfjs.getDocument({ data: safeCopy }).promise;
+): Promise<HTMLCanvasElement> {
   const page = await doc.getPage(pageNumber);
-
   const viewport = page.getViewport({ scale });
 
-  // Guard against unreasonably large canvases (browser limit ~16,384px per edge)
+  // Clamp canvas size to avoid silent failure at very high DPI on large pages
   const MAX_PX = 8192;
-  const clampedScale =
+  const safeScale =
     viewport.width > MAX_PX || viewport.height > MAX_PX
       ? Math.min(MAX_PX / viewport.width, MAX_PX / viewport.height) * scale
       : scale;
-  const finalViewport =
-    clampedScale !== scale ? page.getViewport({ scale: clampedScale }) : viewport;
+  const vp = safeScale !== scale ? page.getViewport({ scale: safeScale }) : viewport;
 
   const canvas = document.createElement('canvas');
-  canvas.width = Math.floor(finalViewport.width);
-  canvas.height = Math.floor(finalViewport.height);
+  canvas.width = Math.round(vp.width);
+  canvas.height = Math.round(vp.height);
 
+  // alpha:false → pre-multiplied white background, required for JPEG
   const ctx = canvas.getContext('2d', { alpha: false });
-  if (!ctx) throw new Error(`Canvas 2D context unavailable for page ${pageNumber}`);
+  if (!ctx) throw new Error(`Canvas 2D context unavailable (page ${pageNumber})`);
 
-  // JPEG has no transparency – always fill white first
   ctx.fillStyle = '#ffffff';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  const renderTask = page.render({ canvasContext: ctx, viewport: finalViewport });
-  await renderTask.promise;
+  await page.render({ canvasContext: ctx, viewport: vp }).promise;
 
-  // Flush compositing pipeline: createImageBitmap forces the browser to
-  // commit all pending canvas draw calls before we snapshot with toBlob().
+  // GPU flush: forces browser to commit all composited pixels before toBlob
   try {
     const bmp = await createImageBitmap(canvas);
     bmp.close();
   } catch {
-    // Older Safari: fall back to a single rAF tick
-    await new Promise<void>(resolve => requestAnimationFrame(() => resolve()));
+    await new Promise<void>(r => requestAnimationFrame(() => r()));
   }
 
-  // Snapshot
-  const blob = await new Promise<Blob>((resolve, reject) => {
-    canvas.toBlob(
-      b => (b ? resolve(b) : reject(new Error(`toBlob returned null for page ${pageNumber}`))),
-      'image/jpeg',
-      quality,
-    );
-  });
-
-  const dataUrl = canvas.toDataURL('image/jpeg', quality);
-
-  // Release the page resources
   page.cleanup();
-  await doc.destroy();
-
-  return { pageNumber, blob, dataUrl, width: canvas.width, height: canvas.height };
+  return canvas;
 }
+
+// ─── Component ────────────────────────────────────────────────────────────────
 
 export default function PdfToJpgTool() {
   const [file, setFile] = useState<File | null>(null);
   const [pageCount, setPageCount] = useState(0);
-  const [dpi, setDpi] = useState<number>(150);
-  const [quality, setQuality] = useState<number>(0.85);
-  const [isConverting, setIsConverting] = useState(false);
-  const [progress, setProgress] = useState({ current: 0, total: 0 });
-  const [renderedImages, setRenderedImages] = useState<RenderedPage[]>([]);
+  const [dpi, setDpi] = useState(150);
+  const [quality, setQuality] = useState(0.85);
+  const [pages, setPages] = useState<PageState[]>([]);
+  const [loadingThumbs, setLoadingThumbs] = useState(false);
+  const [thumbProgress, setThumbProgress] = useState({ current: 0, total: 0 });
+  const [bulkConverting, setBulkConverting] = useState(false);
+  const [bulkProgress, setBulkProgress] = useState({ current: 0, total: 0 });
   const [error, setError] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  // Stable reference to file bytes – read once, reused safely via .slice()
-  const fileBytesRef = useRef<Uint8Array | null>(null);
 
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  // The single live PDFDocumentProxy — never re-created for the same file
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const docRef = useRef<any>(null);
+
+  // Destroy the old document when component unmounts or file changes
+  const destroyDoc = useCallback(async () => {
+    if (docRef.current) {
+      try { await docRef.current.destroy(); } catch { /* ignore */ }
+      docRef.current = null;
+    }
+  }, []);
+
+  useEffect(() => { return () => { destroyDoc(); }; }, [destroyDoc]);
+
+  // ── Load file & render thumbnails ──────────────────────────────────────────
   const handleFile = useCallback(async (f: File | null) => {
     if (!f) return;
     if (f.type !== 'application/pdf' && !f.name.toLowerCase().endsWith('.pdf')) {
       setError('Please select a valid PDF file.');
       return;
     }
+
+    await destroyDoc();
     setError(null);
     setFile(f);
-    setRenderedImages([]);
-    fileBytesRef.current = null;
+    setPages([]);
+    setLoadingThumbs(true);
+    setPageCount(0);
 
     try {
-      // Read bytes once up-front; store as Uint8Array so subsequent renders
-      // can do a safe .slice() without re-reading the File object.
-      const buffer = await f.arrayBuffer();
-      const bytes = new Uint8Array(buffer);
-      fileBytesRef.current = bytes;
-
       const pdfjs = await getPdfJs();
-      if (!pdfjs) throw new Error('PDF.js renderer not available.');
-      // Use a fresh copy so the page-count doc doesn't consume the only copy
-      const doc = await pdfjs.getDocument({ data: bytes.slice() }).promise;
-      setPageCount(doc.numPages);
-      await doc.destroy();
+      if (!pdfjs) throw new Error('PDF.js not available.');
+
+      // Read once — PDF.js transfers this buffer to its worker.
+      // After this call docRef.current owns the document; we never re-read f.arrayBuffer().
+      const buffer = await f.arrayBuffer();
+      const doc = await pdfjs.getDocument({ data: new Uint8Array(buffer) }).promise;
+      docRef.current = doc;
+
+      const numPages: number = doc.numPages;
+      setPageCount(numPages);
+
+      // Initialise placeholder states so the grid renders immediately
+      setPages(
+        Array.from({ length: numPages }, (_, i) => ({
+          pageNumber: i + 1,
+          thumbDataUrl: null,
+          blob: null,
+          converting: false,
+        })),
+      );
+      setThumbProgress({ current: 0, total: numPages });
+
+      // Render thumbnails sequentially (low DPI = fast, small)
+      const THUMB_SCALE = 0.4; // ~108px wide for a standard A4 page
+      for (let i = 1; i <= numPages; i++) {
+        setThumbProgress({ current: i, total: numPages });
+        const canvas = await renderPageOnCanvas(doc, i, THUMB_SCALE);
+        const thumbDataUrl = canvas.toDataURL('image/jpeg', 0.75);
+        setPages(prev =>
+          prev.map(p =>
+            p.pageNumber === i ? { ...p, thumbDataUrl } : p,
+          ),
+        );
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load PDF.');
+    } finally {
+      setLoadingThumbs(false);
     }
-  }, []);
+  }, [destroyDoc]);
 
-  const convertToJpg = useCallback(async () => {
-    if (!file || !fileBytesRef.current) return;
-    setIsConverting(true);
+  // ── Convert a single page → Blob ──────────────────────────────────────────
+  const convertOnePage = useCallback(
+    async (pageNumber: number): Promise<Blob> => {
+      const doc = docRef.current;
+      if (!doc) throw new Error('PDF document not loaded.');
+      const scale = dpi / 72;
+      const canvas = await renderPageOnCanvas(doc, pageNumber, scale);
+      return new Promise<Blob>((resolve, reject) => {
+        canvas.toBlob(
+          b =>
+            b
+              ? resolve(b)
+              : reject(new Error(`toBlob returned null (page ${pageNumber})`)),
+          'image/jpeg',
+          quality,
+        );
+      });
+    },
+    [dpi, quality],
+  );
+
+  // ── Individual page download ───────────────────────────────────────────────
+  const downloadPage = useCallback(
+    async (pageNumber: number) => {
+      setPages(prev =>
+        prev.map(p => (p.pageNumber === pageNumber ? { ...p, converting: true } : p)),
+      );
+      try {
+        const blob = await convertOnePage(pageNumber);
+        const baseName = file!.name.replace(/\.pdf$/i, '');
+        downloadBlob(blob, `${baseName}_page_${pageNumber}.jpg`);
+        setPages(prev =>
+          prev.map(p =>
+            p.pageNumber === pageNumber ? { ...p, blob, converting: false } : p,
+          ),
+        );
+      } catch (err) {
+        setError(err instanceof Error ? err.message : `Failed to convert page ${pageNumber}.`);
+        setPages(prev =>
+          prev.map(p => (p.pageNumber === pageNumber ? { ...p, converting: false } : p)),
+        );
+      }
+    },
+    [convertOnePage, file],
+  );
+
+  // ── Bulk convert & ZIP download ────────────────────────────────────────────
+  const convertAll = useCallback(async () => {
+    if (!file || !docRef.current) return;
+    setBulkConverting(true);
+    setBulkProgress({ current: 0, total: pageCount });
     setError(null);
-    setRenderedImages([]);
-    setProgress({ current: 0, total: pageCount });
 
-    const images: RenderedPage[] = [];
-    const scale = dpi / 72; // PDF base DPI = 72
+    const baseName = file.name.replace(/\.pdf$/i, '');
+    const filesMap: Record<string, Blob> = {};
+    const blobs: { pageNumber: number; blob: Blob }[] = [];
 
     try {
       for (let i = 1; i <= pageCount; i++) {
-        setProgress({ current: i, total: pageCount });
-        // Each call gets its own fresh copy via .slice() inside renderPageToJpeg
-        const rendered = await renderPageToJpeg(fileBytesRef.current, i, scale, quality);
-        images.push(rendered);
-        // Show pages as they complete
-        setRenderedImages(prev => [...prev, rendered]);
+        setBulkProgress({ current: i, total: pageCount });
+        const blob = await convertOnePage(i);
+        blobs.push({ pageNumber: i, blob });
+        filesMap[`${baseName}_page_${i}.jpg`] = blob;
+
+        // Update the card to show it's been converted
+        setPages(prev =>
+          prev.map(p => (p.pageNumber === i ? { ...p, blob } : p)),
+        );
       }
 
-      const baseName = file.name.replace(/\.pdf$/i, '');
-      if (images.length === 1) {
-        downloadBlob(images[0].blob, `${baseName}_page_1.jpg`);
+      if (pageCount === 1) {
+        downloadBlob(blobs[0].blob, `${baseName}_page_1.jpg`);
       } else {
-        const filesMap: Record<string, Blob> = {};
-        for (const item of images) {
-          filesMap[`${baseName}_page_${item.pageNumber}.jpg`] = item.blob;
-        }
         const zipBlob = await createZipArchive(filesMap);
         downloadBlob(zipBlob, `${baseName}_jpg_images.zip`);
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to convert PDF to JPG.');
+      setError(err instanceof Error ? err.message : 'Conversion failed.');
     } finally {
-      setIsConverting(false);
+      setBulkConverting(false);
     }
-  }, [file, pageCount, dpi, quality]);
+  }, [file, pageCount, convertOnePage]);
 
-  const reset = () => {
+  const reset = useCallback(async () => {
+    await destroyDoc();
     setFile(null);
     setPageCount(0);
-    setRenderedImages([]);
+    setPages([]);
     setError(null);
-    fileBytesRef.current = null;
-  };
+    setLoadingThumbs(false);
+    setBulkConverting(false);
+  }, [destroyDoc]);
 
   const dpiOptions = [
     { label: '72 — Web', val: 72 },
     { label: '150 — Normal', val: 150 },
     { label: '300 — Print', val: 300 },
   ];
+
+  const allConverted = pages.length > 0 && pages.every(p => p.blob !== null);
+  const thumbsDone = !loadingThumbs && pages.length > 0;
+
+  // ─────────────────────────────────────────────────────────────────────────
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
@@ -212,22 +295,18 @@ export default function PdfToJpgTool() {
             border: '2px dashed var(--border)',
             borderRadius: 'var(--radius-lg)',
             background: 'var(--bg-1)',
-            padding: '56px 24px',
+            padding: '64px 24px',
             textAlign: 'center',
             cursor: 'pointer',
-            transition: 'border-color var(--transition-fast)',
           }}
         >
           <div
             style={{
-              width: 56,
-              height: 56,
+              width: 56, height: 56,
               borderRadius: 'var(--radius-lg)',
               background: 'var(--brand-subtle)',
               color: 'var(--brand-500)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
               margin: '0 auto 16px',
             }}
           >
@@ -237,104 +316,76 @@ export default function PdfToJpgTool() {
             Select a PDF to convert to JPG
           </p>
           <p style={{ fontSize: 13, color: 'var(--ink-2)', margin: 0 }}>
-            or drop PDF here &bull; renders every page into high quality JPEG images
+            Drop PDF here &bull; each page becomes a high-quality JPEG image
           </p>
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+
           {/* ── File Header ── */}
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              flexWrap: 'wrap',
-              gap: 12,
-            }}
-          >
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <div
-                style={{
-                  width: 40,
-                  height: 40,
-                  borderRadius: 'var(--radius-md)',
-                  background: 'var(--brand-subtle)',
-                  color: 'var(--brand-500)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
+              <div style={{ width: 40, height: 40, borderRadius: 'var(--radius-md)', background: 'var(--brand-subtle)', color: 'var(--brand-500)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <FileText size={20} />
               </div>
               <div>
-                <p style={{ margin: 0, fontWeight: 700, fontSize: 15, color: 'var(--ink)' }}>
-                  {file.name}
-                </p>
+                <p style={{ margin: 0, fontWeight: 700, fontSize: 15, color: 'var(--ink)' }}>{file.name}</p>
                 <p style={{ margin: '2px 0 0', fontSize: 12, color: 'var(--ink-2)' }}>
                   {formatFileSize(file.size)} &bull; {pageCount} {pageCount === 1 ? 'page' : 'pages'}
+                  {loadingThumbs && (
+                    <span style={{ marginLeft: 8, color: 'var(--brand)' }}>
+                      — loading previews {thumbProgress.current}/{thumbProgress.total}
+                    </span>
+                  )}
                 </p>
               </div>
             </div>
-            <Button variant="ghost" size="sm" onClick={reset}>
-              Choose Another PDF
-            </Button>
+            <Button variant="ghost" size="sm" onClick={reset}>Choose Another PDF</Button>
           </div>
 
           {/* ── Options ── */}
           <div
             className="c-card"
-            style={{
-              padding: '18px 20px',
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-              gap: 20,
-            }}
+            style={{ padding: '18px 20px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 20 }}
           >
             {/* DPI */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               <label style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink)' }}>
-                Resolution (DPI):
+                Image Resolution (DPI):
               </label>
               <div style={{ display: 'flex', gap: 6 }}>
-                {dpiOptions.map(item => (
+                {dpiOptions.map(opt => (
                   <button
-                    key={item.val}
+                    key={opt.val}
                     type="button"
-                    onClick={() => setDpi(item.val)}
+                    onClick={() => setDpi(opt.val)}
                     className="c-btn c-btn--sm"
                     style={{
                       flex: 1,
-                      background: dpi === item.val ? 'var(--brand)' : 'var(--bg-2)',
-                      color: dpi === item.val ? '#fff' : 'var(--ink)',
-                      border: `1px solid ${dpi === item.val ? 'var(--brand)' : 'var(--border)'}`,
-                      fontWeight: dpi === item.val ? 700 : 500,
+                      background: dpi === opt.val ? 'var(--brand)' : 'var(--bg-2)',
+                      color: dpi === opt.val ? '#fff' : 'var(--ink)',
+                      border: `1px solid ${dpi === opt.val ? 'var(--brand)' : 'var(--border)'}`,
+                      fontWeight: dpi === opt.val ? 700 : 500,
+                      borderRadius: 'var(--radius-md)',
                     }}
                   >
-                    {item.label}
+                    {opt.label}
                   </button>
                 ))}
               </div>
             </div>
 
             {/* Quality */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <label style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink)' }}>
-                  JPEG Quality:
-                </label>
-                <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--brand)' }}>
-                  {Math.round(quality * 100)}%
-                </span>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <label style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink)' }}>JPEG Quality:</label>
+                <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--brand)' }}>{Math.round(quality * 100)}%</span>
               </div>
               <input
-                type="range"
-                min="0.5"
-                max="1.0"
-                step="0.05"
+                type="range" min="0.5" max="1.0" step="0.05"
                 value={quality}
                 onChange={e => setQuality(parseFloat(e.target.value))}
-                style={{ width: '100%', accentColor: 'var(--brand)', height: 6 }}
+                style={{ width: '100%', accentColor: 'var(--brand)', height: 6, cursor: 'pointer' }}
               />
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'var(--ink-3)' }}>
                 <span>Smaller file</span>
@@ -343,43 +394,19 @@ export default function PdfToJpgTool() {
             </div>
           </div>
 
-          {/* ── Preview Gallery (streaming — shows pages as they complete) ── */}
-          {renderedImages.length > 0 && (
+          {/* ── Page Gallery ── */}
+          {pages.length > 0 && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
                 <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--ink)' }}>
-                  Converted Pages
-                  <span
-                    style={{
-                      marginLeft: 8,
-                      fontSize: 12,
-                      fontWeight: 600,
-                      color: 'var(--ink-2)',
-                      background: 'var(--bg-2)',
-                      padding: '2px 8px',
-                      borderRadius: 99,
-                    }}
-                  >
-                    {renderedImages.length} / {pageCount} JPG
-                  </span>
+                  {loadingThumbs
+                    ? `Loading previews… ${thumbProgress.current}/${thumbProgress.total}`
+                    : `JPG Pages (${pageCount})`}
                 </span>
-                {renderedImages.length === pageCount && renderedImages.length > 1 && (
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    icon={<Download size={13} />}
-                    onClick={async () => {
-                      const baseName = file.name.replace(/\.pdf$/i, '');
-                      const filesMap: Record<string, Blob> = {};
-                      for (const img of renderedImages) {
-                        filesMap[`${baseName}_page_${img.pageNumber}.jpg`] = img.blob;
-                      }
-                      const zipBlob = await createZipArchive(filesMap);
-                      downloadBlob(zipBlob, `${baseName}_jpg_images.zip`);
-                    }}
-                  >
-                    Download All (ZIP)
-                  </Button>
+                {allConverted && pageCount > 1 && (
+                  <span style={{ fontSize: 12, color: 'var(--pos)', display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <CheckCircle2 size={13} /> All pages converted
+                  </span>
                 )}
               </div>
 
@@ -390,165 +417,149 @@ export default function PdfToJpgTool() {
                   gap: 14,
                 }}
               >
-                {renderedImages.map(img => (
+                {pages.map(pg => (
                   <div
-                    key={img.pageNumber}
+                    key={pg.pageNumber}
                     className="c-card"
                     style={{
-                      padding: 12,
+                      padding: 10,
                       display: 'flex',
                       flexDirection: 'column',
                       gap: 8,
                       alignItems: 'center',
+                      position: 'relative',
                     }}
                   >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={img.dataUrl}
-                      alt={`Page ${img.pageNumber}`}
-                      style={{
-                        maxWidth: '100%',
-                        maxHeight: 160,
-                        objectFit: 'contain',
-                        borderRadius: 'var(--radius-sm)',
-                        border: '1px solid var(--border)',
-                        background: '#fff',
-                      }}
-                    />
+                    {/* Thumbnail area */}
                     <div
                       style={{
                         width: '100%',
+                        aspectRatio: '0.707', // A4 ratio
+                        background: pg.thumbDataUrl ? 'transparent' : 'var(--bg-2)',
+                        borderRadius: 'var(--radius-sm)',
+                        border: '1px solid var(--border)',
+                        overflow: 'hidden',
                         display: 'flex',
                         alignItems: 'center',
-                        justifyContent: 'space-between',
-                        marginTop: 4,
+                        justifyContent: 'center',
+                        position: 'relative',
                       }}
                     >
+                      {pg.thumbDataUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={pg.thumbDataUrl}
+                          alt={`Page ${pg.pageNumber}`}
+                          style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                        />
+                      ) : (
+                        <Loader2
+                          size={20}
+                          style={{ animation: 'spin 1s linear infinite', color: 'var(--ink-3)' }}
+                        />
+                      )}
+                      {/* Converted checkmark badge */}
+                      {pg.blob && (
+                        <div
+                          style={{
+                            position: 'absolute',
+                            top: 6, right: 6,
+                            width: 20, height: 20,
+                            borderRadius: '50%',
+                            background: 'var(--pos)',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          }}
+                        >
+                          <CheckCircle2 size={12} color="#fff" />
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Page number + download button */}
+                    <div style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                       <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--ink-2)' }}>
-                        Page {img.pageNumber}
+                        Page {pg.pageNumber}
                       </span>
-                      <Button
-                        variant="secondary"
-                        size="sm"
-                        icon={<Download size={12} />}
-                        onClick={() =>
-                          downloadBlob(
-                            img.blob,
-                            `${file.name.replace(/\.pdf$/i, '')}_page_${img.pageNumber}.jpg`,
-                          )
-                        }
+                      <button
+                        type="button"
+                        onClick={() => downloadPage(pg.pageNumber)}
+                        disabled={pg.converting || bulkConverting}
+                        className="c-btn c-btn--sm"
+                        style={{
+                          display: 'flex', alignItems: 'center', gap: 4,
+                          background: pg.blob ? 'var(--pos-subtle)' : 'var(--bg-2)',
+                          color: pg.blob ? 'var(--pos)' : 'var(--ink)',
+                          border: `1px solid ${pg.blob ? 'var(--pos-subtle)' : 'var(--border)'}`,
+                          borderRadius: 'var(--radius-md)',
+                          fontSize: 12, fontWeight: 600,
+                          cursor: pg.converting || bulkConverting ? 'not-allowed' : 'pointer',
+                          opacity: pg.converting || bulkConverting ? 0.6 : 1,
+                          padding: '3px 8px',
+                        }}
                       >
+                        {pg.converting ? (
+                          <Loader2 size={11} style={{ animation: 'spin 1s linear infinite' }} />
+                        ) : (
+                          <Download size={11} />
+                        )}
                         JPG
-                      </Button>
+                      </button>
                     </div>
                   </div>
                 ))}
-
-                {/* Placeholder cards for in-progress pages */}
-                {isConverting &&
-                  Array.from({ length: pageCount - renderedImages.length }).map((_, idx) => (
-                    <div
-                      key={`loading-${idx}`}
-                      className="c-card"
-                      style={{
-                        padding: 12,
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: 8,
-                        alignItems: 'center',
-                        minHeight: 180,
-                        justifyContent: 'center',
-                        opacity: 0.5,
-                      }}
-                    >
-                      <Loader2 size={24} style={{ animation: 'spin 1s linear infinite', color: 'var(--ink-3)' }} />
-                      <span style={{ fontSize: 12, color: 'var(--ink-3)' }}>
-                        Page {renderedImages.length + idx + 1}
-                      </span>
-                    </div>
-                  ))}
               </div>
             </div>
           )}
 
           {/* ── Error ── */}
           {error && (
-            <div
-              style={{
-                padding: '10px 14px',
-                borderRadius: 'var(--radius-md)',
-                background: 'var(--neg-subtle)',
-                color: 'var(--neg)',
-                fontSize: 13,
-                display: 'flex',
-                alignItems: 'center',
-                gap: 8,
-              }}
-            >
-              <AlertCircle size={16} />
-              {error}
+            <div style={{ padding: '10px 14px', borderRadius: 'var(--radius-md)', background: 'var(--neg-subtle)', color: 'var(--neg)', fontSize: 13, display: 'flex', alignItems: 'center', gap: 8 }}>
+              <AlertCircle size={16} />{error}
             </div>
           )}
 
           {/* ── Action Bar ── */}
           <div
             className="c-card"
-            style={{
-              padding: '16px 20px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              flexWrap: 'wrap',
-              gap: 12,
-            }}
+            style={{ padding: '16px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}
           >
-            <div>
-              {isConverting ? (
-                <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--ink)' }}>
-                  Rendering page {progress.current} of {progress.total}…
-                </span>
-              ) : renderedImages.length === pageCount && pageCount > 0 ? (
-                <span
-                  style={{
-                    fontSize: 14,
-                    fontWeight: 600,
-                    color: 'var(--pos)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 6,
-                  }}
-                >
-                  <CheckCircle2 size={16} />
-                  {pageCount} {pageCount === 1 ? 'page' : 'pages'} converted successfully
-                </span>
-              ) : (
-                <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--ink)' }}>
-                  Convert {pageCount} {pageCount === 1 ? 'page' : 'pages'} &rarr; JPG at {dpi} DPI
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--ink)' }}>
+                {bulkConverting
+                  ? `Converting page ${bulkProgress.current} of ${bulkProgress.total}…`
+                  : allConverted
+                  ? `${pageCount} ${pageCount === 1 ? 'page' : 'pages'} ready`
+                  : loadingThumbs
+                  ? 'Loading page previews…'
+                  : `${pageCount} ${pageCount === 1 ? 'page' : 'pages'} at ${dpi} DPI, ${Math.round(quality * 100)}% quality`}
+              </span>
+              {!bulkConverting && !loadingThumbs && !allConverted && (
+                <span style={{ fontSize: 12, color: 'var(--ink-3)' }}>
+                  Click ↓ JPG on any page to download individually, or convert all below
                 </span>
               )}
             </div>
 
             <Button
-              onClick={convertToJpg}
-              loading={isConverting}
-              disabled={isConverting || pageCount === 0}
-              icon={<Download size={15} />}
+              onClick={convertAll}
+              loading={bulkConverting}
+              disabled={bulkConverting || loadingThumbs || pageCount === 0}
+              icon={bulkConverting ? undefined : allConverted ? <ZapIcon size={15} /> : <Download size={15} />}
             >
-              {isConverting
-                ? `Converting (${progress.current}/${progress.total})…`
-                : renderedImages.length === pageCount && pageCount > 0
-                ? 'Re-convert'
+              {bulkConverting
+                ? `Converting (${bulkProgress.current}/${bulkProgress.total})…`
+                : allConverted
+                ? pageCount === 1 ? 'Re-download JPG' : 'Re-download ZIP'
                 : pageCount === 1
                 ? 'Convert & Download JPG'
                 : 'Convert & Download All (ZIP)'}
             </Button>
           </div>
+
         </div>
       )}
 
-      <style>{`
-        @keyframes spin { to { transform: rotate(360deg); } }
-      `}</style>
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );
 }
