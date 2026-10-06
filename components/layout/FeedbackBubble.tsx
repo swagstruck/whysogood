@@ -19,16 +19,61 @@ const PRIORITY_BG: Record<Priority, string> = {
   'Good to have': 'var(--pos-subtle)',
 };
 
+const TOOLTIP_MESSAGES = [
+  "Going berserk! to hear from you 🚀",
+  "Just tell me what is needed 🛠️",
+  "Got a minute? Spill the tea! ☕",
+  "Missing a tool? Vent right here! 💡",
+  "Going berserk trying to build what you want! ✨",
+  "Tell me what tool to build next 🎯",
+  "Roast or toast us — I'm all ears! 🔥",
+  "Got thoughts? Shout them out! 🗣️",
+];
+
 const ENDPOINT = process.env.NEXT_PUBLIC_FEEDBACK_ENDPOINT ?? '';
 
 export function FeedbackBubble() {
-  const [open, setOpen]         = useState(false);
-  const [text, setText]         = useState('');
-  const [priority, setPriority] = useState<Priority>('Could have');
-  const [stage, setStage]       = useState<Stage>('idle');
-  const [dropOpen, setDropOpen] = useState(false);
+  const [open, setOpen]                 = useState(false);
+  const [text, setText]                 = useState('');
+  const [priority, setPriority]         = useState<Priority>('Could have');
+  const [stage, setStage]               = useState<Stage>('idle');
+  const [dropOpen, setDropOpen]         = useState(false);
+  const [showTooltip, setShowTooltip]   = useState(false);
+  const [tooltipMessage, setTooltipMessage] = useState('');
   const panelRef = useRef<HTMLDivElement>(null);
   const dropRef  = useRef<HTMLDivElement>(null);
+
+  // Tooltip display: random message, once per session after dismiss
+  useEffect(() => {
+    try {
+      const dismissed = sessionStorage.getItem('whysogood_feedback_tooltip_dismissed');
+      if (!dismissed) {
+        const randomIndex = Math.floor(Math.random() * TOOLTIP_MESSAGES.length);
+        setTooltipMessage(TOOLTIP_MESSAGES[randomIndex]);
+        const timer = setTimeout(() => {
+          setShowTooltip(true);
+        }, 1200);
+        return () => clearTimeout(timer);
+      }
+    } catch {
+      // Safe fallback if storage restricted
+    }
+  }, []);
+
+  const handleDismissTooltip = (e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    setShowTooltip(false);
+    try {
+      sessionStorage.setItem('whysogood_feedback_tooltip_dismissed', 'true');
+    } catch {
+      // Safe fallback
+    }
+  };
+
+  const handleToggleOpen = () => {
+    handleDismissTooltip();
+    setOpen(v => !v);
+  };
 
   // Close panel/dropdown on outside click
   useEffect(() => {
@@ -89,35 +134,161 @@ export function FeedbackBubble() {
 
   return (
     <>
-      {/* ── Floating bubble ─────────────────────────────────── */}
+      {/* ── Tooltip popup with cross ─────────────────────────── */}
+      {showTooltip && !open && (
+        <div
+          onClick={handleToggleOpen}
+          role="status"
+          aria-live="polite"
+          style={{
+            position:       'fixed',
+            bottom:          88,
+            right:           24,
+            zIndex:          9998,
+            maxWidth:       'min(280px, calc(100vw - 48px))',
+            background:     'var(--bg-1)',
+            border:         '1px solid var(--border)',
+            borderRadius:   'var(--radius-lg)',
+            boxShadow:      '0 8px 30px rgba(0, 0, 0, 0.25), 0 2px 8px rgba(0, 0, 0, 0.08)',
+            padding:        '10px 34px 10px 14px',
+            cursor:         'pointer',
+            animation:      'fade-in 250ms ease forwards',
+            display:        'flex',
+            alignItems:     'center',
+            gap:             8,
+            transition:     'transform var(--transition-fast), border-color var(--transition-fast)',
+          }}
+          onMouseEnter={e => {
+            (e.currentTarget as HTMLDivElement).style.borderColor = 'var(--brand)';
+            (e.currentTarget as HTMLDivElement).style.transform = 'translateY(-2px)';
+          }}
+          onMouseLeave={e => {
+            (e.currentTarget as HTMLDivElement).style.borderColor = 'var(--border)';
+            (e.currentTarget as HTMLDivElement).style.transform = 'translateY(0)';
+          }}
+        >
+          {/* Message Text */}
+          <span
+            style={{
+              fontSize: 13,
+              fontWeight: 600,
+              color: 'var(--ink)',
+              lineHeight: 1.35,
+              fontFamily: 'var(--font-sans)',
+            }}
+          >
+            {tooltipMessage}
+          </span>
+
+          {/* Dismiss Cross */}
+          <button
+            onClick={handleDismissTooltip}
+            aria-label="Dismiss message"
+            title="Dismiss"
+            style={{
+              position:       'absolute',
+              top:             6,
+              right:           6,
+              width:           22,
+              height:          22,
+              borderRadius:   'var(--radius-sm)',
+              display:        'flex',
+              alignItems:     'center',
+              justifyContent: 'center',
+              background:     'transparent',
+              border:         'none',
+              cursor:         'pointer',
+              color:          'var(--ink-3)',
+              padding:         0,
+              transition:     'color var(--transition-fast), background var(--transition-fast)',
+            }}
+            onMouseEnter={e => {
+              (e.currentTarget as HTMLButtonElement).style.color = 'var(--ink)';
+              (e.currentTarget as HTMLButtonElement).style.background = 'var(--bg-2)';
+            }}
+            onMouseLeave={e => {
+              (e.currentTarget as HTMLButtonElement).style.color = 'var(--ink-3)';
+              (e.currentTarget as HTMLButtonElement).style.background = 'transparent';
+            }}
+          >
+            <X size={14} strokeWidth={2.2} />
+          </button>
+
+          {/* Pointer tail pointing down towards button */}
+          <div
+            style={{
+              position:     'absolute',
+              bottom:       -6,
+              right:         20,
+              width:         11,
+              height:        11,
+              background:   'var(--bg-1)',
+              borderRight:  '1px solid var(--border)',
+              borderBottom: '1px solid var(--border)',
+              transform:    'rotate(45deg)',
+              pointerEvents: 'none',
+            }}
+          />
+        </div>
+      )}
+
+      {/* ── Floating bubble button ───────────────────────────── */}
       <button
-        onClick={() => setOpen(v => !v)}
+        onClick={handleToggleOpen}
         aria-label={open ? 'Close feedback' : 'Give feedback'}
+        title={open ? 'Close feedback' : 'Share feedback'}
         style={{
           position:       'fixed',
           bottom:          24,
           right:           24,
           zIndex:          9998,
-          width:           52,
-          height:          52,
+          width:           54,
+          height:          54,
           borderRadius:   '50%',
-          background:     'var(--brand)',
-          border:          'none',
+          background:      open ? 'var(--brand)' : 'var(--bg-2)',
+          border:         '2px solid var(--border)',
           cursor:          'pointer',
+          padding:         0,
+          overflow:       'hidden',
           display:         'flex',
           alignItems:      'center',
           justifyContent: 'center',
-          boxShadow:       '0 4px 20px rgba(0,0,0,0.35)',
-          transition:      'transform 200ms ease, box-shadow 200ms ease, background 200ms ease',
-          transform:        open ? 'scale(0.9) rotate(10deg)' : 'scale(1) rotate(0deg)',
+          boxShadow:       open ? '0 6px 24px rgba(0,0,0,0.35)' : '0 6px 22px rgba(0,0,0,0.28)',
+          transition:      'transform 200ms ease, box-shadow 200ms ease, background 200ms ease, border-color 200ms ease',
+          transform:        open ? 'scale(0.92)' : 'scale(1)',
         }}
-        onMouseEnter={e => { if (!open) (e.currentTarget as HTMLButtonElement).style.background = 'var(--brand-hover)'; }}
-        onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--brand)'; }}
+        onMouseEnter={e => {
+          const btn = e.currentTarget as HTMLButtonElement;
+          btn.style.borderColor = 'var(--brand)';
+          btn.style.transform = open ? 'scale(0.92)' : 'scale(1.08)';
+          btn.style.boxShadow = '0 8px 28px rgba(0,0,0,0.38)';
+        }}
+        onMouseLeave={e => {
+          const btn = e.currentTarget as HTMLButtonElement;
+          btn.style.borderColor = 'var(--border)';
+          btn.style.transform = open ? 'scale(0.92)' : 'scale(1)';
+          btn.style.boxShadow = open ? '0 6px 24px rgba(0,0,0,0.35)' : '0 6px 22px rgba(0,0,0,0.28)';
+        }}
       >
-        {open
-          ? <X     size={20} color="var(--ink-inverse)" strokeWidth={2.5} />
-          : <MessageSquare size={20} color="var(--ink-inverse)" strokeWidth={2} />
-        }
+        {open ? (
+          <X size={22} color="var(--ink-inverse)" strokeWidth={2.5} />
+        ) : (
+          <img
+            src="/feedback-avatar.png"
+            alt="Feedback avatar"
+            width={54}
+            height={54}
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              borderRadius: '50%',
+              display: 'block',
+              userSelect: 'none',
+              pointerEvents: 'none',
+            }}
+          />
+        )}
       </button>
 
       {/* ── Panel ───────────────────────────────────────────── */}
@@ -152,11 +323,18 @@ export function FeedbackBubble() {
           background:     'var(--bg-2)',
         }}>
           <div style={{
-            width: 34, height: 34, borderRadius: '50%',
-            background: 'var(--brand-subtle)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+            width: 38, height: 38, borderRadius: '50%',
+            overflow: 'hidden', flexShrink: 0,
+            border: '1px solid var(--border)',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.12)',
           }}>
-            <MessageSquare size={16} style={{ color: 'var(--brand)' }} />
+            <img
+              src="/feedback-avatar.png"
+              alt="Avatar"
+              width={38}
+              height={38}
+              style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+            />
           </div>
           <div>
             <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--ink)' }}>Share Feedback</div>
