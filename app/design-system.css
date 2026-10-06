@@ -1,28 +1,28 @@
 /* ============================================================
    whysogood — Design System
-   Brand identity: #0E98A7 → var(--brand-500) [decorative use only: logos, icons, badges — NEVER for buttons]
+   Brand identity: #1580D1 → var(--brand-500) [decorative use only: logos, icons, badges — NEVER for buttons]
    Brand interactive: var(--brand) [WCAG AA-compliant version of the brand — use for ALL buttons, links, focus rings]
-   Style: edge — sharp 2px corners, minimal
-   Fonts: 'Geist' via var(--font-sans), 'Geist Mono' via var(--font-mono)
+   Style: soft — 6px corners, balanced
+   Fonts: 'Onest' via var(--font-sans), 'Geist Mono' via var(--font-mono)
    Theme: toggle via data-theme="dark" | data-theme="light" on <html>
    ============================================================ */
 
-@import url('https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Geist+Mono:wght@100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Geist+Mono:wght@100..900&family=Onest:wght@100..900&display=swap');
 
 /* ── Design Tokens ─────────────────────────────────────────── */
 :root {
   /* Brand palette — identity stops (decorative use only) */
-  --brand-50:  #E7F6F8;
-  --brand-100: #CCEAEE;
-  --brand-200: #A2D9E1;
-  --brand-300: #78C6D1;
-  --brand-400: #4BAFBD;
-  --brand-500: #0E98A7;  /* ← original input — identity color, NOT for interactive elements */
-  --brand-600: #007886;
-  --brand-700: #005B67;
-  --brand-800: #00414B;
-  --brand-900: #002A31;
-  --brand-950: #00181D;
+  --brand-50:  #E6F4FF;
+  --brand-100: #CAE4FF;
+  --brand-200: #9FCFFF;
+  --brand-300: #74B7F6;
+  --brand-400: #499BE6;
+  --brand-500: #1580D1;  /* ← original input — identity color, NOT for interactive elements */
+  --brand-600: #0063AD;
+  --brand-700: #004A8A;
+  --brand-800: #003567;
+  --brand-900: #002146;
+  --brand-950: #00132C;
 
   /* Semantic — pre-computed, WCAG AA compliant */
   --pos:       #04AB62;  /* success — use var(--pos) */
@@ -40,12 +40,13 @@
   --warn-subtle: rgba(232, 157, 0, 0.12);
   --info-subtle: rgba(0, 157, 211, 0.12);
 
-  /* Radius — style: edge (sharp 2px corners, minimal) */
-  --radius-sm: 0px;   /* badges, tags */
-  --radius-md: 2px;   /* buttons, inputs */
-  --radius-lg: 2px;   /* cards, panels */
-  --radius-xl: 4px;   /* modals, drawers */
-  --radius-full: 2px; /* edge mode: buttons and pills use sharp edge corners */
+  /* Radius — style: soft (6px corners, balanced) */
+  --radius-xs: 1px;   /* micro-elements */
+  --radius-sm: 2px;   /* badges, tags */
+  --radius-md: 6px;   /* buttons, inputs */
+  --radius-lg: 10px;  /* cards, panels */
+  --radius-xl: 14px;  /* modals, drawers */
+  --radius-full: 9999px; /* full rounded / pills */
 
   /* Type scale */
   --text-display: 49px;
@@ -76,7 +77,7 @@
   --text-overline-weight: 600;
 
   /* Font families */
-  --font-sans: 'Geist', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+  --font-sans: 'Onest', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
   --font-mono: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 
   /* Contrast inverse & overlays */
@@ -92,49 +93,49 @@
 :root,
 [data-theme="dark"] {
   /* Surfaces — use vars only */
-  --bg:   #0A0F10;  /* page background */
-  --bg-1: #11181A;  /* slightly elevated */
-  --bg-2: #182224;  /* card / panel */
-  --bg-3: #202D30;  /* input / well */
+  --bg:   #0A0E13;  /* page background */
+  --bg-1: #101720;  /* slightly elevated */
+  --bg-2: #16202C;  /* card / panel */
+  --bg-3: #1D2B3A;  /* input / well */
 
   /* Borders */
-  --border:       #253437;
-  --border-hover: #34474B;
+  --border:       #243547;
+  --border-hover: #32475E;
 
   /* Text — use vars only */
-  --ink:   #F0F6F7;  /* primary text */
-  --ink-2: #8EA2A6;  /* secondary text */
-  --ink-3: #596E72;  /* placeholder / caption */
-  --ink-4: #354548;  /* disabled / muted */
+  --ink:   #F0F5FA;  /* primary text */
+  --ink-2: #8E9EA9;  /* secondary text */
+  --ink-3: #5A6D7C;  /* placeholder / caption */
+  --ink-4: #364450;  /* disabled / muted */
 
   /* Brand interactive (WCAG AA on dark surfaces, buttons & focus rings) */
-  --brand:        #008291;
-  --brand-hover:  #0095A6;
-  --brand-subtle: rgba(14, 152, 167, 0.16);
+  --brand:        #006BB8;
+  --brand-hover:  #005B9E;
+  --brand-subtle: rgba(21, 128, 209, 0.16);
 }
 
 /* ── Light Theme ──────────────────────────────────────────── */
 [data-theme="light"] {
   /* Surfaces — use vars only */
-  --bg:   #F7FAFA;  /* page background */
+  --bg:   #F8FAFC;  /* page background */
   --bg-1: #FFFFFF;  /* slightly elevated */
-  --bg-2: #EEF3F4;  /* card / panel */
-  --bg-3: #E2EAEC;  /* input / well */
+  --bg-2: #F0F4F8;  /* card / panel */
+  --bg-3: #E2E8F0;  /* input / well */
 
   /* Borders */
-  --border:       #D7E2E4;
-  --border-hover: #B6C7CA;
+  --border:       #D8E1E8;
+  --border-hover: #B8C7D4;
 
   /* Text — use vars only */
-  --ink:   #0A1517;  /* primary text */
-  --ink-2: #4B6165;  /* secondary text */
-  --ink-3: #7C9397;  /* placeholder / caption */
-  --ink-4: #AFC1C4;  /* disabled / muted */
+  --ink:   #0A1116;  /* primary text */
+  --ink-2: #4A5B69;  /* secondary text */
+  --ink-3: #7D8E9C;  /* placeholder / caption */
+  --ink-4: #B0BFCB;  /* disabled / muted */
 
   /* Brand interactive (WCAG AA on light surfaces, buttons & focus rings) */
-  --brand:        #007886;
-  --brand-hover:  #005B67;
-  --brand-subtle: rgba(14, 152, 167, 0.08);
+  --brand:        #0063AD;
+  --brand-hover:  #004A8A;
+  --brand-subtle: rgba(21, 128, 209, 0.08);
 }
 
 /* ── Backward-compat aliases (so existing codebase works seamlessly) ── */
@@ -175,7 +176,7 @@
   white-space: nowrap;
   cursor: pointer;
   border: 1px solid transparent;
-  border-radius: var(--radius-md); /* 2px edge style */
+  border-radius: var(--radius-md); /* 6px soft style */
   transition:
     background var(--transition-fast),
     color var(--transition-fast),
@@ -283,7 +284,7 @@
 .c-field__input {
   background: var(--bg-3);
   border: 1px solid var(--border);
-  border-radius: var(--radius-md); /* 2px edge style */
+  border-radius: var(--radius-md); /* 6px soft style */
   color: var(--ink);
   font-family: var(--font-sans);
   font-size: 14px;
@@ -338,7 +339,7 @@
   padding: 0 36px 0 12px;
   background: var(--bg-2);
   border: 1px solid var(--border);
-  border-radius: var(--radius-md); /* 2px edge style */
+  border-radius: var(--radius-md); /* 6px soft style */
   color: var(--ink);
   font-family: var(--font-sans);
   font-size: 14px;
@@ -389,7 +390,7 @@
 .c-textarea {
   background: var(--bg-3);
   border: 1px solid var(--border);
-  border-radius: var(--radius-md); /* 2px edge style */
+  border-radius: var(--radius-md); /* 6px soft style */
   color: var(--ink);
   font-family: var(--font-sans);
   font-size: 14px;
@@ -412,7 +413,7 @@
 .c-card {
   background: var(--bg-1);
   border: 1px solid var(--border);
-  border-radius: var(--radius-lg); /* 2px edge style */
+  border-radius: var(--radius-lg); /* 10px soft style */
 }
 .c-card-content {
   padding: 20px;
@@ -435,7 +436,7 @@
 .metric-card {
   background: var(--bg-1);
   border: 1px solid var(--border);
-  border-radius: var(--radius-lg); /* 2px edge style */
+  border-radius: var(--radius-lg); /* 10px soft style */
   padding: 20px;
 }
 .metric-label {
@@ -459,13 +460,13 @@
 .metric-delta--pos { color: var(--pos); }
 .metric-delta--neg { color: var(--neg); }
 
-/* ── Badges & Status (edge style: 0px radius) ──────────────── */
+/* ── Badges & Status (soft style: 2px radius) ──────────────── */
 .c-badge {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   padding: 2px 8px;
-  border-radius: var(--radius-sm); /* 0px sharp corners */
+  border-radius: var(--radius-sm); /* 2px soft corners */
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.04em;
@@ -473,7 +474,7 @@
   line-height: 1.5;
   border: 1px solid transparent;
 }
-.c-badge--brand   { background: var(--brand-subtle); color: var(--brand-500); border-color: rgba(14, 152, 167, 0.25); }
+.c-badge--brand   { background: var(--brand-subtle); color: var(--brand-500); border-color: rgba(21, 128, 209, 0.25); }
 .c-badge--pos     { background: var(--pos-subtle);   color: var(--pos);       border-color: rgba(4, 171, 98, 0.25); }
 .c-badge--neg     { background: var(--neg-subtle);   color: var(--neg);       border-color: rgba(222, 59, 61, 0.25); }
 .c-badge--warn    { background: var(--warn-subtle);  color: var(--warn);      border-color: rgba(232, 157, 0, 0.25); }
@@ -483,7 +484,7 @@
 .c-badge-dot {
   width: 6px;
   height: 6px;
-  border-radius: 0px; /* sharp square dot */
+  border-radius: 50%; /* soft round dot */
   background: currentColor;
   display: inline-block;
 }
@@ -494,7 +495,7 @@
   align-items: flex-start;
   gap: 12px;
   padding: 12px 16px;
-  border-radius: var(--radius-lg); /* 2px */
+  border-radius: var(--radius-lg); /* 10px */
   font-size: 13px;
   font-weight: 500;
   border: 1px solid transparent;
@@ -510,12 +511,12 @@
   gap: 4px;
   background: var(--bg-2);
   padding: 4px;
-  border-radius: var(--radius-md); /* 2px */
+  border-radius: var(--radius-md); /* 6px */
   border: 1px solid var(--border);
 }
 .tab-item {
   padding: 6px 14px;
-  border-radius: var(--radius-sm); /* 0px */
+  border-radius: var(--radius-sm); /* 2px */
   font-size: 12px;
   font-weight: 600;
   border: none;
@@ -571,7 +572,7 @@
 .modal {
   background: var(--bg-1);
   border: 1px solid var(--border);
-  border-radius: var(--radius-xl); /* 4px */
+  border-radius: var(--radius-xl); /* 14px soft style */
   width: 100%;
   max-width: 560px;
   max-height: 90vh;

@@ -154,11 +154,11 @@ export function Header() {
               flexShrink: 0,
               transition: 'all var(--transition-fast)',
               background: simpleMode ? 'var(--brand)' : 'var(--bg-2)',
-              color: simpleMode ? 'var(--ink-inverse)' : 'var(--ink)',
+              color: simpleMode ? '#ffffff' : 'var(--ink)',
               border: simpleMode ? '1px solid var(--brand)' : '1px solid var(--border)',
             }}
           >
-            <Sparkles size={14} style={{ color: simpleMode ? 'var(--ink-inverse)' : 'var(--brand)' }} />
+            <Sparkles size={14} style={{ color: simpleMode ? '#ffffff' : 'var(--brand)' }} />
             <span className="simple-mode-label">Simple Mode</span>
           </button>
 

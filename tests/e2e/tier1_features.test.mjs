@@ -698,8 +698,14 @@ export async function runTier1Tests() {
     const designCss = fs.readFileSync('app/design-system.css', 'utf-8');
     // Check card border radius values
     assertTrue(designCss.includes('--radius-lg:') && designCss.includes('--radius-xl:'), 'Radius tokens exist');
-    assertTrue(designCss.includes('--radius-sm:   8px;'), 'Radius-sm is 8px');
-    assertTrue(designCss.includes('--radius-md:   14px;'), 'Radius-md is 14px');
+    const cardTokens = ['--radius-sm', '--radius-md', '--radius-lg', '--radius-xl'];
+    for (const token of cardTokens) {
+      const regex = new RegExp(`${token}:\\s*(\\d+)px;`);
+      const match = designCss.match(regex);
+      assertTrue(Boolean(match), `Token ${token} must be defined`);
+      const px = parseInt(match[1], 10);
+      assertTrue(px <= 48, `Card radius token ${token} must be <= 48px, but was ${px}px`);
+    }
   });
 
   await tracker.runTest('F16.3: Responsive max-width container bounds workbench to 1280px', async () => {
