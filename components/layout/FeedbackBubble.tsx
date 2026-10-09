@@ -43,35 +43,29 @@ export function FeedbackBubble() {
   const panelRef = useRef<HTMLDivElement>(null);
   const dropRef  = useRef<HTMLDivElement>(null);
 
-  // Tooltip display: random message, once per session after dismiss
+  // Tooltip display: random message on every page load/refresh
   useEffect(() => {
     try {
-      const dismissed = sessionStorage.getItem('whysogood_feedback_tooltip_dismissed');
-      if (!dismissed) {
-        const randomIndex = Math.floor(Math.random() * TOOLTIP_MESSAGES.length);
-        setTooltipMessage(TOOLTIP_MESSAGES[randomIndex]);
-        const timer = setTimeout(() => {
-          setShowTooltip(true);
-        }, 1200);
-        return () => clearTimeout(timer);
-      }
+      sessionStorage.removeItem('whysogood_feedback_tooltip_dismissed');
     } catch {
-      // Safe fallback if storage restricted
+      // Safe fallback
     }
+
+    const randomIndex = Math.floor(Math.random() * TOOLTIP_MESSAGES.length);
+    setTooltipMessage(TOOLTIP_MESSAGES[randomIndex]);
+    const timer = setTimeout(() => {
+      setShowTooltip(true);
+    }, 1200);
+    return () => clearTimeout(timer);
   }, []);
 
   const handleDismissTooltip = (e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
     setShowTooltip(false);
-    try {
-      sessionStorage.setItem('whysogood_feedback_tooltip_dismissed', 'true');
-    } catch {
-      // Safe fallback
-    }
   };
 
   const handleToggleOpen = () => {
-    handleDismissTooltip();
+    setShowTooltip(false);
     setOpen(v => !v);
   };
 
