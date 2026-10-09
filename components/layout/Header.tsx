@@ -2,7 +2,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Search, Menu, X, Zap, Sparkles } from 'lucide-react';
+import { Search, Menu, X, Sparkles } from 'lucide-react';
+import { LogoMark } from '@/components/layout/LogoMark';
 import { useSession } from '@/lib/session';
 import { searchTools } from '@/lib/search';
 import { CATEGORIES, COMING_SOON_CATEGORIES } from '@/lib/registry';
@@ -89,9 +90,7 @@ export function Header() {
         <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 16px', height: 60, display: 'flex', alignItems: 'center', gap: 16 }}>
           {/* Logo — brand-500 is decorative per spec */}
           <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 8, textDecoration: 'none', flexShrink: 0 }}>
-            <div style={{ width: 28, height: 28, borderRadius: 'var(--radius-sm)', background: 'var(--brand-500)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <Zap size={16} color="var(--ink-inverse)" fill="var(--ink-inverse)" />
-            </div>
+            <LogoMark size={28} />
             <span style={{ fontWeight: 700, fontSize: 18, color: 'var(--ink)', letterSpacing: '-0.02em' }}>
               whysogood
             </span>

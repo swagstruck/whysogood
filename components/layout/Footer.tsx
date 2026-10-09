@@ -1,6 +1,6 @@
 'use client';
 import Link from 'next/link';
-import { Zap } from 'lucide-react';
+import { LogoMark } from '@/components/layout/LogoMark';
 import { CATEGORIES, COMING_SOON_CATEGORIES } from '@/lib/registry';
 
 export function Footer() {
@@ -39,10 +39,7 @@ export function Footer() {
           {/* Brand */}
           <div style={{ maxWidth: 300 }}>
             <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 8, textDecoration: 'none', marginBottom: 12 }}>
-              {/* brand-500 = decorative use for logos/icons per spec */}
-              <div style={{ width: 24, height: 24, borderRadius: 'var(--radius-sm)', background: 'var(--brand-500)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Zap size={13} color="var(--ink-inverse)" fill="var(--ink-inverse)" />
-              </div>
+              <LogoMark size={24} />
               <span style={{ fontWeight: 700, fontSize: 16, color: 'var(--ink)' }}>whysogood</span>
             </Link>
             <p style={{ fontSize: 13, color: 'var(--ink-2)', lineHeight: 1.6, margin: 0 }}>

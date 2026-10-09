@@ -17,6 +17,15 @@ export const metadata: Metadata = {
     title: "whysogood — Free Online Tools",
     description: "100+ free private browser tools. No uploads. No sign-up.",
   },
+  icons: {
+    icon: [
+      { url: '/favicon.ico', sizes: 'any' },
+      { url: '/icon.svg', type: 'image/svg+xml' },
+    ],
+    apple: [
+      { url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
+    ],
+  },
   other: {
     'google-adsense-account': 'ca-pub-4317877277908124',
   },

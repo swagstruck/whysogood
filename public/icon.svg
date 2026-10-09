@@ -1,6 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" fill="none">
   <rect width="512" height="512" rx="96" fill="#1580D1"/>
-  <g transform="translate(64, 64) scale(16)">
-    <path d="M15.914 4a1.5 1.5 0 0 0-2.474-1.561l-9 9A1.5 1.5 0 0 0 5.5 14h4.002a.5.5 0 0 1 .471.666L8.086 20a1.5 1.5 0 0 0 2.475 1.56l9-9A1.5 1.5 0 0 0 18.5 10h-3.997a.5.5 0 0 1-.472-.667z" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+  <g transform="translate(5, 25) scale(1.34)" fill="#FFFFFF">
+    <path d="M 220 131 L 224 137 L 176 294 L 165 294 L 143 246 L 92 297 L 64 268 L 111 221 L 65 198 L 63 191 Z" />
+    <path d="M 127 71 L 174 116 L 164 125 L 118 81 Z" />
+    <path d="M 196 48 L 210 48 L 210 114 L 196 114 Z" />
+    <path d="M 273 82 L 284 91 L 239 135 L 230 124 Z" />
+    <path d="M 250 152 L 312 152 L 312 166 L 250 166 Z" />
+    <path d="M 242 181 L 288 226 L 279 236 L 232 191 Z" />
   </g>
 </svg>
