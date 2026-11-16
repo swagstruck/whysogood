@@ -149,12 +149,12 @@ export const TOOLS: Tool[] = [
   { name:'Audio Metadata Remover', slug:'audio-metadata-remover', category:'Audio', description:'Remove ID3 tags and metadata from audio files.', keywords:['remove audio metadata','strip id3 tags','audio privacy'], icon:'EyeOff', formats:{in:['MP3'],out:['MP3']}, related:['image-metadata-remover','audio-trimmer'], status:A, processing:c, dataStorage:n },
 
   // ── Generators ───────────────────────────────────────────────────────────
-  { name:'QR Code Generator', slug:'qr-generator', category:'Generators', description:'Generate QR codes for URLs, text, email, and more. Download as PNG or SVG.', keywords:['qr code generator','create qr code','qr code maker','qr generator'], icon:'QrCode', related:['barcode-generator','url-encoder'], status:S, processing:c, dataStorage:n },
-  { name:'Barcode Generator', slug:'barcode-generator', category:'Generators', description:'Generate barcodes in Code128, EAN-13, and other formats.', keywords:['barcode generator','create barcode','ean barcode','code128'], icon:'BarChart2', related:['qr-generator'], status:S, processing:c, dataStorage:n },
-  { name:'Password Generator', slug:'password-generator', category:'Generators', description:'Generate strong, random passwords with custom rules.', keywords:['password generator','strong password','random password','secure password'], icon:'KeyRound', related:['password-strength','uuid-generator'], status:S, processing:c, dataStorage:n },
-  { name:'Random Number Generator', slug:'random-number', category:'Generators', description:'Generate random numbers within any range.', keywords:['random number','number generator','dice roller','random integer'], icon:'Dice5', related:['uuid-generator','password-generator'], status:S, processing:c, dataStorage:n },
-  { name:'Placeholder Image Generator', slug:'placeholder-image', category:'Generators', description:'Generate placeholder images with custom size, colour, and text.', keywords:['placeholder image','dummy image','test image','placeholder.com'], icon:'ImagePlus', related:['favicon-generator','image-compressor'], status:S, processing:c, dataStorage:n },
-  { name:'Timestamp Generator', slug:'timestamp-generator', category:'Generators', description:'Generate current or custom Unix timestamps.', keywords:['timestamp generator','unix timestamp','epoch now','generate timestamp'], icon:'Clock', related:['timestamp-converter','date-difference'], status:S, processing:c, dataStorage:n },
+  { name:'QR Code Generator', slug:'qr-generator', category:'Generators', description:'Generate QR codes for URLs, text, email, and more. Download as PNG or SVG.', keywords:['qr code generator','create qr code','qr code maker','qr generator'], icon:'QrCode', related:['barcode-generator','url-encoder'], status:A, processing:c, dataStorage:n },
+  { name:'Barcode Generator', slug:'barcode-generator', category:'Generators', description:'Generate barcodes in Code128, EAN-13, and other formats.', keywords:['barcode generator','create barcode','ean barcode','code128'], icon:'BarChart2', related:['qr-generator'], status:A, processing:c, dataStorage:n },
+  { name:'Password Generator', slug:'password-generator', category:'Generators', description:'Generate strong, random passwords with custom rules.', keywords:['password generator','strong password','random password','secure password'], icon:'KeyRound', related:['password-strength','uuid-generator'], status:A, processing:c, dataStorage:n },
+  { name:'Random Number Generator', slug:'random-number', category:'Generators', description:'Generate random numbers within any range.', keywords:['random number','number generator','dice roller','random integer'], icon:'Dice5', related:['uuid-generator','password-generator'], status:A, processing:c, dataStorage:n },
+  { name:'Placeholder Image Generator', slug:'placeholder-image', category:'Generators', description:'Generate placeholder images with custom size, colour, and text.', keywords:['placeholder image','dummy image','test image','placeholder.com'], icon:'ImagePlus', related:['favicon-generator','image-compressor'], status:A, processing:c, dataStorage:n },
+  { name:'Timestamp Generator', slug:'timestamp-generator', category:'Generators', description:'Generate current or custom Unix timestamps.', keywords:['timestamp generator','unix timestamp','epoch now','generate timestamp'], icon:'Clock', related:['timestamp-converter','date-difference'], status:A, processing:c, dataStorage:n },
 
   // ── Security ────────────────────────────────────────────────────────────
   { name:'Base64 Encoder', slug:'base64-encoder', category:'Security', description:'Encode text or files to Base64 and decode Base64 back to text.', longDescription:'Encode text to Base64 or decode Base64 back to readable text. Also supports encoding files to Base64 data URLs. All processing happens locally in your browser.', keywords:['base64 encoder','base64 decoder','encode base64','decode base64','base64 converter'], icon:'Binary', related:['base64-decoder','url-encoder','hash-generator'], status:S, processing:c, dataStorage:n },
@@ -194,7 +194,7 @@ export const CATEGORIES: Category[] = [
 ];
 
 export const COMING_SOON_CATEGORIES: Category[] = [
-  'Generators', 'Security', 'Files'
+  'Security', 'Files'
 ];
 
 export function isCategoryComingSoon(category: Category): boolean {

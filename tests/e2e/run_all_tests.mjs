@@ -16,6 +16,7 @@ import { runTier4Tests } from './tier4_scenarios.test.mjs';
 import { runCompressionTests } from './compression_tiers1_4.test.mjs';
 import { runDeveloperToolsTests } from './developer_tools.test.mjs';
 import { runDataToolsTests } from './data_tools.test.mjs';
+import { runGeneratorToolsTests } from './generator_tools.test.mjs';
 import { execSync } from 'node:child_process';
 
 async function main() {
@@ -69,13 +70,17 @@ async function main() {
   const tDev = await runDeveloperToolsTests();
 
   // Step 8: Run Data Category Tools Suite (Tiers 1-4)
-  console.log('\n🧪 [STEP 8/8] Running Data Category Tools E2E Suite (Tiers 1-4)...');
+  console.log('\n🧪 [STEP 8/9] Running Data Category Tools E2E Suite (Tiers 1-4)...');
   const tData = await runDataToolsTests();
 
+  // Step 9: Run Generator Category Tools Suite (Tiers 1-4)
+  console.log('\n🧪 [STEP 9/9] Running Generator Category Tools E2E Suite (Tiers 1-4)...');
+  const tGen = await runGeneratorToolsTests();
+
   // Aggregate Metrics
-  const totalBehavioralTests = t1.total + t2.total + t3.total + t4.total + tCompress.total + tDev.total + tData.total;
-  const totalBehavioralPassed = t1.passed + t2.passed + t3.passed + t4.passed + tCompress.passed + tDev.passed + tData.passed;
-  const totalBehavioralFailed = t1.failed + t2.failed + t3.failed + t4.failed + tCompress.failed + tDev.failed + tData.failed;
+  const totalBehavioralTests = t1.total + t2.total + t3.total + t4.total + tCompress.total + tDev.total + tData.total + tGen.total;
+  const totalBehavioralPassed = t1.passed + t2.passed + t3.passed + t4.passed + tCompress.passed + tDev.passed + tData.passed + tGen.passed;
+  const totalBehavioralFailed = t1.failed + t2.failed + t3.failed + t4.failed + tCompress.failed + tDev.failed + tData.failed + tGen.failed;
   const totalDuration = Date.now() - startTime;
   const passRate = ((totalBehavioralPassed / totalBehavioralTests) * 100).toFixed(1);
 
@@ -90,6 +95,7 @@ async function main() {
   console.log(` Compression Upgrade (Tiers 1-4): ${tCompress.passed}/${tCompress.total} passed in ${tCompress.durationMs}ms`);
   console.log(` Developer Tools (Tiers 1-4):     ${tDev.passed}/${tDev.total} passed in ${tDev.durationMs}ms`);
   console.log(` Data Category Tools (Tiers 1-4): ${tData.passed}/${tData.total} passed in ${tData.durationMs}ms`);
+  console.log(` Generator Tools (Tiers 1-4):     ${tGen.passed}/${tGen.total} passed in ${tGen.durationMs}ms`);
   console.log('----------------------------------------------------------------');
   console.log(` TOTAL BEHAVIORAL TESTS:          ${totalBehavioralTests}`);
   console.log(` TOTAL PASSED:                    ${totalBehavioralPassed}`);
