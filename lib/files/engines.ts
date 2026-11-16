@@ -128,22 +128,26 @@ function md5Raw(bytes: Uint8Array): Uint8Array {
   return result;
 }
 
-export async function hashFileMd5(buffer: ArrayBuffer): Promise<string> {
-  return bytesToHex(md5Raw(new Uint8Array(buffer)));
+export async function hashFileMd5(buffer: ArrayBuffer | Uint8Array): Promise<string> {
+  const bytes = buffer instanceof Uint8Array ? buffer : new Uint8Array(buffer);
+  return bytesToHex(md5Raw(bytes));
 }
 
-export async function hashFileSha1(buffer: ArrayBuffer): Promise<string> {
-  const hash = await crypto.subtle.digest('SHA-1', buffer);
+export async function hashFileSha1(buffer: ArrayBuffer | Uint8Array): Promise<string> {
+  const data = (buffer instanceof Uint8Array ? buffer : new Uint8Array(buffer)) as unknown as BufferSource;
+  const hash = await crypto.subtle.digest('SHA-1', data);
   return bytesToHex(new Uint8Array(hash));
 }
 
-export async function hashFileSha256(buffer: ArrayBuffer): Promise<string> {
-  const hash = await crypto.subtle.digest('SHA-256', buffer);
+export async function hashFileSha256(buffer: ArrayBuffer | Uint8Array): Promise<string> {
+  const data = (buffer instanceof Uint8Array ? buffer : new Uint8Array(buffer)) as unknown as BufferSource;
+  const hash = await crypto.subtle.digest('SHA-256', data);
   return bytesToHex(new Uint8Array(hash));
 }
 
-export async function hashFileSha512(buffer: ArrayBuffer): Promise<string> {
-  const hash = await crypto.subtle.digest('SHA-512', buffer);
+export async function hashFileSha512(buffer: ArrayBuffer | Uint8Array): Promise<string> {
+  const data = (buffer instanceof Uint8Array ? buffer : new Uint8Array(buffer)) as unknown as BufferSource;
+  const hash = await crypto.subtle.digest('SHA-512', data);
   return bytesToHex(new Uint8Array(hash));
 }
 
@@ -156,9 +160,9 @@ export interface MimeDetectionResult {
 }
 
 export function detectMimeBySignature(buffer: ArrayBuffer): MimeDetectionResult {
-  const bytes = new Uint8Array(buffer.slice(0, 32));
-  const hex = Array.from(bytes).map(b => b.toString(16).padStart(2, '0').toUpperCase()).join(' ');
-  const headerBytes = Array.from(new Uint8Array(buffer.slice(0, 16))).map(b => b.toString(16).padStart(2, '0').toUpperCase()).join(' ');
+  const bytes = new Uint8Array(buffer.slice(0, 64));
+  const hex = Array.from(bytes.slice(0, 32)).map(b => b.toString(16).padStart(2, '0').toUpperCase()).join(' ');
+  const headerBytes = Array.from(bytes.slice(0, 16)).map(b => b.toString(16).padStart(2, '0').toUpperCase()).join(' ');
 
   let detected = 'application/octet-stream';
   let extension = 'bin';
@@ -168,35 +172,86 @@ export function detectMimeBySignature(buffer: ArrayBuffer): MimeDetectionResult 
   const str = Array.from(bytes).map(b => String.fromCharCode(b)).join('');
 
   if (hex.startsWith('89 50 4E 47')) {
-    detected = 'image/png'; extension = 'png'; description = 'PNG image'; confidence = 'high';
+    detected = 'image/png'; extension = 'png'; description = 'PNG Portable Network Graphics'; confidence = 'high';
   } else if (hex.startsWith('FF D8 FF')) {
-    detected = 'image/jpeg'; extension = 'jpg'; description = 'JPEG image'; confidence = 'high';
+    detected = 'image/jpeg'; extension = 'jpg'; description = 'JPEG Image'; confidence = 'high';
   } else if (hex.startsWith('25 50 44 46')) {
-    detected = 'application/pdf'; extension = 'pdf'; description = 'PDF document'; confidence = 'high';
+    detected = 'application/pdf'; extension = 'pdf'; description = 'PDF Adobe Portable Document Format'; confidence = 'high';
   } else if (hex.startsWith('50 4B 03 04')) {
-    detected = 'application/zip'; extension = 'zip'; description = 'ZIP archive (or DOCX/XLSX/PPTX)'; confidence = 'high';
+    detected = 'application/zip'; extension = 'zip'; description = 'ZIP Archive / Open Packaging (DOCX/XLSX/PPTX/JAR)'; confidence = 'high';
   } else if (hex.startsWith('47 49 46 38')) {
-    detected = 'image/gif'; extension = 'gif'; description = 'GIF image'; confidence = 'high';
+    detected = 'image/gif'; extension = 'gif'; description = 'GIF Graphics Interchange Format'; confidence = 'high';
   } else if (hex.startsWith('49 44 33') || hex.startsWith('FF FB') || hex.startsWith('FF FA') || hex.startsWith('FF F3')) {
-    detected = 'audio/mpeg'; extension = 'mp3'; description = 'MP3 audio'; confidence = 'high';
+    detected = 'audio/mpeg'; extension = 'mp3'; description = 'MP3 MPEG Audio Layer III'; confidence = 'high';
   } else if (str.startsWith('RIFF') && str.slice(8, 12) === 'WAVE') {
-    detected = 'audio/wav'; extension = 'wav'; description = 'WAV audio'; confidence = 'high';
+    detected = 'audio/wav'; extension = 'wav'; description = 'WAV Waveform Audio'; confidence = 'high';
   } else if (str.startsWith('RIFF') && str.slice(8, 12) === 'WEBP') {
-    detected = 'image/webp'; extension = 'webp'; description = 'WebP image'; confidence = 'high';
+    detected = 'image/webp'; extension = 'webp'; description = 'WebP Image'; confidence = 'high';
   } else if (str.slice(4, 8) === 'ftyp') {
-    detected = 'video/mp4'; extension = 'mp4'; description = 'MP4 video'; confidence = 'high';
-  } else if (hex.startsWith('00 00 00') || hex.startsWith('1A 45 DF A3')) {
-    if (hex.startsWith('1A 45 DF A3')) {
-      detected = 'video/webm'; extension = 'webm'; description = 'WebM video/audio'; confidence = 'high';
-    } else {
-      confidence = 'low';
+    detected = 'video/mp4'; extension = 'mp4'; description = 'MP4 ISO Media / MPEG-4 Video'; confidence = 'high';
+  } else if (hex.startsWith('1A 45 DF A3')) {
+    detected = 'video/webm'; extension = 'webm'; description = 'WebM Matroska Video/Audio'; confidence = 'high';
+  } else if (hex.startsWith('42 4D')) {
+    detected = 'image/bmp'; extension = 'bmp'; description = 'BMP Windows Bitmap'; confidence = 'high';
+  } else if (hex.startsWith('49 49 2A 00') || hex.startsWith('4D 4D 00 2A')) {
+    detected = 'image/tiff'; extension = 'tiff'; description = 'TIFF Tagged Image File Format'; confidence = 'high';
+  } else if (hex.startsWith('66 4C 61 43')) {
+    detected = 'audio/flac'; extension = 'flac'; description = 'FLAC Free Lossless Audio Codec'; confidence = 'high';
+  } else if (hex.startsWith('4F 67 67 53')) {
+    detected = 'audio/ogg'; extension = 'ogg'; description = 'OGG Ogg Vorbis/Opus Container'; confidence = 'high';
+  } else if (hex.startsWith('37 7A BC AF 27 1C')) {
+    detected = 'application/x-7z-compressed'; extension = '7z'; description = '7-Zip Compressed Archive'; confidence = 'high';
+  } else if (hex.startsWith('52 61 72 21 1A 07')) {
+    detected = 'application/vnd.rar'; extension = 'rar'; description = 'RAR Compressed Archive'; confidence = 'high';
+  } else if (hex.startsWith('1F 8B')) {
+    detected = 'application/gzip'; extension = 'gz'; description = 'GZIP Compressed Archive'; confidence = 'high';
+  } else if (str.trim().startsWith('<?xml') || str.trim().startsWith('<svg')) {
+    detected = str.includes('<svg') ? 'image/svg+xml' : 'application/xml';
+    extension = str.includes('<svg') ? 'svg' : 'xml';
+    description = str.includes('<svg') ? 'SVG Scalable Vector Graphics' : 'XML Extensible Markup Language';
+    confidence = 'high';
+  } else if (str.trim().startsWith('{') || str.trim().startsWith('[')) {
+    try {
+      JSON.parse(new TextDecoder().decode(bytes));
+      detected = 'application/json';
+      extension = 'json';
+      description = 'JSON JavaScript Object Notation';
+      confidence = 'high';
+    } catch {
+      // Possible partial JSON
+      detected = 'text/plain';
+      extension = 'txt';
+      description = 'Plain text file';
+      confidence = 'medium';
+    }
+  } else {
+    // Check if ASCII text
+    let isText = true;
+    for (let i = 0; i < Math.min(bytes.length, 32); i++) {
+      const code = bytes[i];
+      if (code < 9 || (code > 13 && code < 32)) {
+        isText = false;
+        break;
+      }
+    }
+    if (isText && bytes.length > 0) {
+      detected = 'text/plain';
+      extension = 'txt';
+      description = 'Plain text document';
+      confidence = 'medium';
     }
   }
 
   return { detected, confidence, extension, description, headerBytes };
 }
 
-import { formatFileSize } from '@/lib/utils';
+export function formatFileSize(bytes: number): string {
+  if (bytes === 0) return '0 B';
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1_048_576) return `${(bytes / 1024).toFixed(1)} KB`;
+  if (bytes < 1_073_741_824) return `${(bytes / 1_048_576).toFixed(2)} MB`;
+  return `${(bytes / 1_073_741_824).toFixed(2)} GB`;
+}
 
 export interface FileMetadata {
   name: string; 
@@ -222,4 +277,60 @@ export function extractFileMetadata(file: File): FileMetadata {
     type: file.type || 'application/octet-stream',
     extension
   };
+}
+
+export interface MimeTypeEntry {
+  mime: string;
+  extensions: string[];
+  description: string;
+  category: 'Image' | 'Audio' | 'Video' | 'Document' | 'Archive' | 'Code' | 'Data';
+}
+
+export const COMMON_MIME_TYPES: MimeTypeEntry[] = [
+  { mime: 'image/jpeg', extensions: ['jpg', 'jpeg'], description: 'JPEG Image', category: 'Image' },
+  { mime: 'image/png', extensions: ['png'], description: 'PNG Image', category: 'Image' },
+  { mime: 'image/webp', extensions: ['webp'], description: 'WebP Image', category: 'Image' },
+  { mime: 'image/gif', extensions: ['gif'], description: 'GIF Animated Image', category: 'Image' },
+  { mime: 'image/svg+xml', extensions: ['svg'], description: 'Scalable Vector Graphics', category: 'Image' },
+  { mime: 'image/bmp', extensions: ['bmp'], description: 'Windows Bitmap', category: 'Image' },
+  { mime: 'image/tiff', extensions: ['tiff', 'tif'], description: 'Tagged Image File Format', category: 'Image' },
+  { mime: 'image/x-icon', extensions: ['ico'], description: 'ICO Icon format', category: 'Image' },
+  { mime: 'image/avif', extensions: ['avif'], description: 'AV1 Image File Format', category: 'Image' },
+  { mime: 'application/pdf', extensions: ['pdf'], description: 'Portable Document Format', category: 'Document' },
+  { mime: 'application/zip', extensions: ['zip'], description: 'ZIP Archive', category: 'Archive' },
+  { mime: 'application/x-7z-compressed', extensions: ['7z'], description: '7-Zip Archive', category: 'Archive' },
+  { mime: 'application/x-tar', extensions: ['tar'], description: 'TAR Unix Tape Archive', category: 'Archive' },
+  { mime: 'application/gzip', extensions: ['gz'], description: 'GZIP Compressed File', category: 'Archive' },
+  { mime: 'application/vnd.rar', extensions: ['rar'], description: 'RAR Compressed Archive', category: 'Archive' },
+  { mime: 'audio/mpeg', extensions: ['mp3'], description: 'MP3 Audio', category: 'Audio' },
+  { mime: 'audio/wav', extensions: ['wav'], description: 'WAV Waveform Audio', category: 'Audio' },
+  { mime: 'audio/ogg', extensions: ['ogg'], description: 'OGG Vorbis Audio', category: 'Audio' },
+  { mime: 'audio/flac', extensions: ['flac'], description: 'FLAC Lossless Audio', category: 'Audio' },
+  { mime: 'audio/aac', extensions: ['aac'], description: 'Advanced Audio Coding', category: 'Audio' },
+  { mime: 'video/mp4', extensions: ['mp4'], description: 'MPEG-4 Part 14 Video', category: 'Video' },
+  { mime: 'video/webm', extensions: ['webm'], description: 'WebM Video', category: 'Video' },
+  { mime: 'video/quicktime', extensions: ['mov'], description: 'Apple QuickTime Movie', category: 'Video' },
+  { mime: 'video/x-msvideo', extensions: ['avi'], description: 'Audio Video Interleave', category: 'Video' },
+  { mime: 'text/plain', extensions: ['txt'], description: 'Plain Text File', category: 'Document' },
+  { mime: 'text/html', extensions: ['html', 'htm'], description: 'HTML Hypertext Markup Language', category: 'Code' },
+  { mime: 'text/css', extensions: ['css'], description: 'Cascading Style Sheets', category: 'Code' },
+  { mime: 'text/javascript', extensions: ['js', 'mjs'], description: 'JavaScript Source Code', category: 'Code' },
+  { mime: 'application/json', extensions: ['json'], description: 'JavaScript Object Notation', category: 'Data' },
+  { mime: 'text/csv', extensions: ['csv'], description: 'Comma-Separated Values', category: 'Data' },
+  { mime: 'application/xml', extensions: ['xml'], description: 'Extensible Markup Language', category: 'Data' },
+  { mime: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', extensions: ['docx'], description: 'Microsoft Word Document', category: 'Document' },
+  { mime: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', extensions: ['xlsx'], description: 'Microsoft Excel Spreadsheet', category: 'Document' },
+  { mime: 'application/vnd.openxmlformats-officedocument.presentationml.presentation', extensions: ['pptx'], description: 'Microsoft PowerPoint Presentation', category: 'Document' },
+  { mime: 'application/octet-stream', extensions: ['bin'], description: 'Binary Data / Executable Stream', category: 'Data' },
+];
+
+export function searchMimeDatabase(query: string): MimeTypeEntry[] {
+  const q = query.toLowerCase().trim();
+  if (!q) return [];
+  return COMMON_MIME_TYPES.filter(
+    item =>
+      item.mime.toLowerCase().includes(q) ||
+      item.extensions.some(ext => ext.toLowerCase().includes(q) || ext === q.replace(/^\./, '')) ||
+      item.description.toLowerCase().includes(q)
+  );
 }

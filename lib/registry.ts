@@ -168,10 +168,10 @@ export const TOOLS: Tool[] = [
   { name:'Password Strength Checker', slug:'password-strength', category:'Security', description:'Check the strength of any password with entropy analysis.', keywords:['password strength','password checker','strong password test','entropy'], icon:'ShieldAlert', related:['password-generator'], status:A, processing:c, dataStorage:n },
 
   // ── Files ────────────────────────────────────────────────────────────────
-  { name:'File Hash Generator', slug:'file-hash', category:'Files', description:'Generate MD5, SHA-256, and SHA-512 checksums for any file.', keywords:['file hash','file checksum','md5 file','sha256 file','verify file'], icon:'FileCheck', related:['sha256-hash','file-metadata'], status:S, processing:c, dataStorage:n },
-  { name:'File Metadata Viewer', slug:'file-metadata', category:'Files', description:'View file name, size, type, and last-modified date.', keywords:['file metadata','file info','file size','file type'], icon:'Info', related:['file-hash','mime-checker'], status:S, processing:c, dataStorage:n },
-  { name:'MIME Type Checker', slug:'mime-checker', category:'Files', description:'Detect the MIME type of any file by content inspection.', keywords:['mime type','file type checker','detect mime','file format'], icon:'FileSearch', related:['file-metadata','file-hash'], status:S, processing:c, dataStorage:n },
-  { name:'ZIP Creator', slug:'zip-creator', category:'Files', description:'Create ZIP archives from multiple files in your browser.', keywords:['zip creator','create zip','make zip','compress files'], icon:'Archive', related:['file-hash','file-metadata'], status:S, processing:c, dataStorage:n },
+  { name:'File Hash Generator', slug:'file-hash', category:'Files', description:'Generate MD5, SHA-256, and SHA-512 checksums for any file.', keywords:['file hash','file checksum','md5 file','sha256 file','verify file'], icon:'FileCheck', related:['sha256-hash','file-metadata'], status:A, processing:c, dataStorage:n },
+  { name:'File Metadata Viewer', slug:'file-metadata', category:'Files', description:'View file name, size, type, and last-modified date.', keywords:['file metadata','file info','file size','file type'], icon:'Info', related:['file-hash','mime-checker'], status:A, processing:c, dataStorage:n },
+  { name:'MIME Type Checker', slug:'mime-checker', category:'Files', description:'Detect the MIME type of any file by content inspection.', keywords:['mime type','file type checker','detect mime','file format'], icon:'FileSearch', related:['file-metadata','file-hash'], status:A, processing:c, dataStorage:n },
+  { name:'ZIP Creator', slug:'zip-creator', category:'Files', description:'Create ZIP archives from multiple files in your browser.', keywords:['zip creator','create zip','make zip','compress files'], icon:'Archive', related:['file-hash','file-metadata'], status:A, processing:c, dataStorage:n },
 ];
 
 // Remove any duplicate slugs (CSV-to-JSON appears in both Developer and Data)
@@ -193,9 +193,7 @@ export const CATEGORIES: Category[] = [
   'Images','PDF','Developer','Data','Text','Calculators','Design','Audio','Generators','Security','Files'
 ];
 
-export const COMING_SOON_CATEGORIES: Category[] = [
-  'Files'
-];
+export const COMING_SOON_CATEGORIES: Category[] = [];
 
 export function isCategoryComingSoon(category: Category): boolean {
   return COMING_SOON_CATEGORIES.includes(category);
