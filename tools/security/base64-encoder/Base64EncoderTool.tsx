@@ -1,215 +1,359 @@
 'use client';
-import React, { useState } from 'react';
-import { Copy, Download, Trash2, Check, ArrowDownUp, Upload, FileText } from 'lucide-react';
+
+import React, { useState, useId } from 'react';
+import { Copy, Download, Trash2, Check, Upload, Binary, Sparkles, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { useToast } from '@/components/ui/ToastProvider';
-import { copyToClipboard, downloadBlob } from '@/lib/utils';
+import { copyToClipboard, downloadBlob, formatFileSize } from '@/lib/utils';
 
 export default function Base64EncoderTool() {
-  const [mode, setMode] = useState<'encode' | 'decode'>('encode');
-  const [urlSafe, setUrlSafe] = useState<boolean>(false);
+  const fileInputId = useId();
   const [input, setInput] = useState<string>('');
   const [output, setOutput] = useState<string>('');
-  const [error, setError] = useState<string | null>(null);
+  const [urlSafe, setUrlSafe] = useState<boolean>(false);
+  const [formatDataUri, setFormatDataUri] = useState<boolean>(false);
+  const [mimeType, setMimeType] = useState<string>('text/plain');
+  const [splitLines, setSplitLines] = useState<boolean>(false);
+  const [fileName, setFileName] = useState<string | null>(null);
+  const [fileSize, setFileSize] = useState<number | null>(null);
   const [copied, setCopied] = useState<boolean>(false);
   const toast = useToast();
 
-  const handleProcess = (val = input, isUrlSafe = urlSafe, curMode = mode) => {
+  const encodeText = (
+    val: string,
+    isUrlSafe: boolean = urlSafe,
+    isDataUri: boolean = formatDataUri,
+    mime: string = mimeType,
+    wrap76: boolean = splitLines
+  ) => {
     if (!val) {
       setOutput('');
-      setError(null);
       return;
     }
-    setError(null);
 
     try {
-      if (curMode === 'encode') {
-        // UTF-8 safe encode
-        const bytes = new TextEncoder().encode(val);
-        let binary = '';
-        for (let j = 0; j < bytes.byteLength; j++) {
-          binary += String.fromCharCode(bytes[j]);
-        }
-        let b64 = btoa(binary);
-        if (isUrlSafe) {
-          b64 = b64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-        }
-        setOutput(b64);
-      } else {
-        // Decode
-        let norm = val.trim();
-        if (isUrlSafe) {
-          norm = norm.replace(/-/g, '+').replace(/_/g, '/');
-          while (norm.length % 4) norm += '=';
-        }
-        const binary = atob(norm);
-        const bytes = new Uint8Array(binary.length);
-        for (let j = 0; j < binary.length; j++) {
-          bytes[j] = binary.charCodeAt(j);
-        }
-        const decoded = new TextDecoder().decode(bytes);
-        setOutput(decoded);
+      // UTF-8 safe text encoding
+      const bytes = new TextEncoder().encode(val);
+      let binary = '';
+      for (let i = 0; i < bytes.byteLength; i++) {
+        binary += String.fromCharCode(bytes[i]);
       }
-    } catch {
-      setError(curMode === 'decode' ? 'Invalid Base64 string.' : 'Encoding error.');
+      let b64 = btoa(binary);
+
+      if (isUrlSafe) {
+        b64 = b64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+      }
+
+      if (wrap76 && !isDataUri) {
+        b64 = b64.match(/.{1,76}/g)?.join('\n') || b64;
+      }
+
+      if (isDataUri) {
+        setOutput(`data:${mime};base64,${b64}`);
+      } else {
+        setOutput(b64);
+      }
+    } catch (e) {
+      toast.error('Failed to encode text');
     }
+  };
+
+  const handleInputChange = (val: string) => {
+    setInput(val);
+    setFileName(null);
+    setFileSize(null);
+    encodeText(val);
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    setFileName(file.name);
+    setFileSize(file.size);
+    const mime = file.type || 'application/octet-stream';
+    setMimeType(mime);
+
     const reader = new FileReader();
-    reader.onload = evt => {
-      const dataUrl = evt.target?.result as string;
-      // Strip data url prefix if desired, or show full data url
-      setOutput(dataUrl);
-      setInput(`[File: ${file.name} (${file.type})]`);
-      toast.success('File encoded to Base64 Data URL');
+    reader.onload = () => {
+      const result = reader.result as string;
+      const b64Only = result.split(',')[1] || '';
+
+      let formatted = b64Only;
+      if (urlSafe) {
+        formatted = formatted.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+      }
+
+      if (formatDataUri) {
+        setOutput(`data:${mime};base64,${formatted}`);
+      } else {
+        if (splitLines) {
+          formatted = formatted.match(/.{1,76}/g)?.join('\n') || formatted;
+        }
+        setOutput(formatted);
+      }
+
+      setInput(`[File: ${file.name} (${formatFileSize(file.size)}) - ${mime}]`);
+      toast.success(`Encoded ${file.name}`);
+    };
+    reader.onerror = () => {
+      toast.error('Failed to read file');
     };
     reader.readAsDataURL(file);
-  };
-
-  const swapMode = () => {
-    const nextMode = mode === 'encode' ? 'decode' : 'encode';
-    setMode(nextMode);
-    setInput(output);
-    handleProcess(output, urlSafe, nextMode);
   };
 
   const handleCopy = async () => {
     if (!output) return;
     await copyToClipboard(output);
     setCopied(true);
-    toast.success('Copied to clipboard');
+    toast.success('Base64 string copied to clipboard');
     setTimeout(() => setCopied(false), 2000);
   };
 
   const handleDownload = () => {
     if (!output) return;
     const blob = new Blob([output], { type: 'text/plain;charset=utf-8' });
-    downloadBlob(blob, mode === 'encode' ? 'encoded_base64.txt' : 'decoded_text.txt');
-    toast.success('Downloaded output file');
+    downloadBlob(blob, fileName ? `${fileName}.b64.txt` : 'encoded-base64.txt');
+    toast.success('Downloaded Base64 file');
+  };
+
+  const handleClear = () => {
+    setInput('');
+    setOutput('');
+    setFileName(null);
+    setFileSize(null);
+  };
+
+  const handleLoadSample = () => {
+    const sample = 'Hello, World! 🚀 Secure, client-side Base64 encoding by whysogood.space';
+    setInput(sample);
+    encodeText(sample);
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-      {/* Control Bar */}
-      <div className="card" style={{ padding: '12px 16px', display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'center', justifyContent: 'space-between' }}>
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
-          <div style={{ display: 'flex', background: 'var(--color-surface2)', borderRadius: 'var(--radius-md)', padding: 2, border: '1px solid var(--color-border)' }}>
-            <button
-              onClick={() => {
-                setMode('encode');
-                handleProcess(input, urlSafe, 'encode');
-              }}
-              style={{
-                padding: '6px 14px', borderRadius: 'var(--radius-sm)', border: 'none',
-                background: mode === 'encode' ? 'var(--color-accent)' : 'transparent',
-                color: mode === 'encode' ? 'var(--ink-inverse)' : 'var(--color-muted)',
-                fontWeight: 600, fontSize: 13, cursor: 'pointer',
-              }}
-            >
-              Encode
-            </button>
-            <button
-              onClick={() => {
-                setMode('decode');
-                handleProcess(input, urlSafe, 'decode');
-              }}
-              style={{
-                padding: '6px 14px', borderRadius: 'var(--radius-sm)', border: 'none',
-                background: mode === 'decode' ? 'var(--color-accent)' : 'transparent',
-                color: mode === 'decode' ? 'var(--ink-inverse)' : 'var(--color-muted)',
-                fontWeight: 600, fontSize: 13, cursor: 'pointer',
-              }}
-            >
-              Decode
-            </button>
-          </div>
-
-          <Button variant="ghost" size="sm" onClick={swapMode} icon={<ArrowDownUp size={14} />}>
-            Swap
-          </Button>
-
-          <label style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--color-text)', cursor: 'pointer', marginLeft: 8 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+      {/* Top Toolbar */}
+      <div
+        style={{
+          display: 'flex',
+          flexWrap: 'wrap',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: 12,
+          paddingBottom: 16,
+          borderBottom: '1px solid var(--border)',
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
+          <label
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+              fontSize: 13,
+              fontWeight: 500,
+              color: 'var(--ink)',
+              cursor: 'pointer',
+            }}
+          >
             <input
               type="checkbox"
               checked={urlSafe}
-              onChange={e => {
+              onChange={(e) => {
                 setUrlSafe(e.target.checked);
-                handleProcess(input, e.target.checked, mode);
+                encodeText(input, e.target.checked, formatDataUri, mimeType, splitLines);
               }}
             />
-            URL-safe Base64 (- and _)
+            <span>URL-Safe (RFC 4648)</span>
           </label>
 
-          <label>
-            <input type="file" onChange={handleFileUpload} style={{ display: 'none' }} />
-            <span className="btn-secondary" style={{ display: 'inline-flex', alignItems: 'center', height: 32, padding: '0 12px', fontSize: 13, cursor: 'pointer' }}>
-              Encode File
-            </span>
+          <label
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+              fontSize: 13,
+              fontWeight: 500,
+              color: 'var(--ink)',
+              cursor: 'pointer',
+            }}
+          >
+            <input
+              type="checkbox"
+              checked={formatDataUri}
+              onChange={(e) => {
+                setFormatDataUri(e.target.checked);
+                encodeText(input, urlSafe, e.target.checked, mimeType, splitLines);
+              }}
+            />
+            <span>Data URI scheme (data:mime;base64,...)</span>
+          </label>
+
+          <label
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+              fontSize: 13,
+              fontWeight: 500,
+              color: 'var(--ink)',
+              cursor: 'pointer',
+            }}
+          >
+            <input
+              type="checkbox"
+              checked={splitLines}
+              disabled={formatDataUri}
+              onChange={(e) => {
+                setSplitLines(e.target.checked);
+                encodeText(input, urlSafe, formatDataUri, mimeType, e.target.checked);
+              }}
+            />
+            <span>Wrap lines (76 chars)</span>
           </label>
         </div>
 
-        <div style={{ display: 'flex', gap: 8 }}>
-          <Button variant="secondary" size="sm" onClick={handleCopy} disabled={!output} icon={copied ? <Check size={14} /> : <Copy size={14} />}>
-            {copied ? 'Copied' : 'Copy'}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <label htmlFor={fileInputId} style={{ margin: 0 }}>
+            <span
+              className="c-btn c-btn--secondary c-btn--sm"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}
+            >
+              <Upload size={14} />
+              <span>Encode Any File</span>
+            </span>
+            <input
+              id={fileInputId}
+              type="file"
+              onChange={handleFileUpload}
+              style={{ display: 'none' }}
+            />
+          </label>
+          <Button variant="ghost" size="sm" onClick={handleLoadSample}>
+            <Sparkles size={14} style={{ marginRight: 6 }} />
+            Sample
           </Button>
-          <Button variant="secondary" size="sm" onClick={handleDownload} disabled={!output} icon={<Download size={14} />}>
-            Download
-          </Button>
-          <Button variant="ghost" size="sm" onClick={() => { setInput(''); setOutput(''); setError(null); }} disabled={!input && !output}>
+          <Button variant="ghost" size="sm" onClick={handleClear} disabled={!input && !output}>
+            <Trash2 size={14} style={{ marginRight: 6 }} />
             Clear
           </Button>
         </div>
       </div>
 
-      {error && (
-        <div style={{ padding: '10px 14px', borderRadius: 'var(--radius-md)', background: 'var(--color-error-subtle)', color: 'var(--color-error)', fontSize: 13 }}>
-          {error}
-        </div>
-      )}
-
-      {/* Inputs Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 16 }}>
-        {/* Input Textarea */}
-        <div className="card" style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-          <div style={{ padding: '8px 14px', borderBottom: '1px solid var(--color-border)', fontSize: 12, fontWeight: 700, color: 'var(--color-muted)', textTransform: 'uppercase' }}>
-            {mode === 'encode' ? 'Plaintext to Encode' : 'Base64 to Decode'}
-          </div>
-          <textarea
-            value={input}
-            onChange={e => {
-              setInput(e.target.value);
-              handleProcess(e.target.value, urlSafe, mode);
-            }}
-            placeholder={mode === 'encode' ? 'Type or paste text to encode...' : 'Paste Base64 string to decode...'}
+      {/* Main 2-Column Responsive Layout */}
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+          gap: 24,
+        }}
+      >
+        {/* Input Card */}
+        <div className="c-card" style={{ padding: 20, display: 'flex', flexDirection: 'column' }}>
+          <div
             style={{
-              width: '100%', height: 360, padding: 14,
-              background: 'transparent', border: 'none', outline: 'none',
-              color: 'var(--color-text)', fontFamily: 'var(--font-mono)', fontSize: 13,
-              resize: 'none', boxSizing: 'border-box', lineHeight: 1.5,
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: 12,
+            }}
+          >
+            <label className="c-field__label" style={{ margin: 0, fontWeight: 700 }}>
+              Plaintext or File Content
+            </label>
+            {fileName ? (
+              <span className="c-badge c-badge--brand">
+                {fileName} ({formatFileSize(fileSize || 0)})
+              </span>
+            ) : (
+              <span style={{ fontSize: 12, color: 'var(--ink-3)' }}>
+                {input.length} characters
+              </span>
+            )}
+          </div>
+
+          <textarea
+            className="c-textarea"
+            rows={14}
+            value={input}
+            onChange={(e) => handleInputChange(e.target.value)}
+            placeholder="Type or paste text to encode, or upload any file..."
+            style={{
+              flex: 1,
+              fontFamily: 'var(--font-mono, monospace)',
+              fontSize: 13,
+              lineHeight: 1.6,
+              resize: 'vertical',
             }}
           />
         </div>
 
-        {/* Output Textarea */}
-        <div className="card" style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-          <div style={{ padding: '8px 14px', borderBottom: '1px solid var(--color-border)', fontSize: 12, fontWeight: 700, color: 'var(--color-muted)', textTransform: 'uppercase', display: 'flex', justifyContent: 'space-between' }}>
-            <span>{mode === 'encode' ? 'Base64 Result' : 'Decoded Plaintext'}</span>
-            {output && <span style={{ color: 'var(--color-accent)' }}>{output.length} characters</span>}
+        {/* Output Card */}
+        <div className="c-card" style={{ padding: 20, display: 'flex', flexDirection: 'column' }}>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: 12,
+            }}
+          >
+            <label className="c-field__label" style={{ margin: 0, fontWeight: 700 }}>
+              Base64 Encoded Output
+            </label>
+            {output && (
+              <span className="c-badge c-badge--neutral">
+                {output.length} characters
+              </span>
+            )}
           </div>
+
           <textarea
             readOnly
+            className="c-textarea"
+            rows={14}
             value={output}
-            placeholder="Result will appear here..."
+            placeholder="Base64 encoded string will appear here automatically..."
             style={{
-              width: '100%', height: 360, padding: 14,
-              background: 'transparent', border: 'none', outline: 'none',
-              color: 'var(--color-text)', fontFamily: 'var(--font-mono)', fontSize: 13,
-              resize: 'none', boxSizing: 'border-box', lineHeight: 1.5,
+              flex: 1,
+              fontFamily: 'var(--font-mono, monospace)',
+              fontSize: 13,
+              lineHeight: 1.6,
+              background: 'var(--bg-3)',
+              color: 'var(--brand)',
+              resize: 'vertical',
             }}
           />
+
+          {/* Action Buttons: Max 1 Primary Button per View per Guidelines */}
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'flex-end',
+              gap: 8,
+              marginTop: 16,
+            }}
+          >
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={handleDownload}
+              disabled={!output}
+            >
+              <Download size={14} style={{ marginRight: 6 }} />
+              Download .txt
+            </Button>
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={handleCopy}
+              disabled={!output}
+            >
+              {copied ? <Check size={14} style={{ marginRight: 6 }} /> : <Copy size={14} style={{ marginRight: 6 }} />}
+              {copied ? 'Copied' : 'Copy Base64'}
+            </Button>
+          </div>
         </div>
       </div>
     </div>

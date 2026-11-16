@@ -33,24 +33,33 @@ export function encodeQueryString(params: Record<string, string>): string {
 }
 
 // MD5 — pure JS implementation
-export function md5(input: string): string {
-  function utf8Encode(str: string) {
-    let res = '';
-    for (let i = 0; i < str.length; i++) {
-      let c = str.charCodeAt(i);
-      if (c < 128) res += String.fromCharCode(c);
-      else if (c < 2048) res += String.fromCharCode((c >> 6) | 192, (c & 63) | 128);
-      else res += String.fromCharCode((c >> 12) | 224, ((c >> 6) & 63) | 128, (c & 63) | 128);
+export function md5(input: string | Uint8Array): string {
+  let bytes: Uint8Array;
+  if (typeof input === 'string') {
+    function utf8Encode(str: string) {
+      let res = '';
+      for (let i = 0; i < str.length; i++) {
+        let c = str.charCodeAt(i);
+        if (c < 128) res += String.fromCharCode(c);
+        else if (c < 2048) res += String.fromCharCode((c >> 6) | 192, (c & 63) | 128);
+        else res += String.fromCharCode((c >> 12) | 224, ((c >> 6) & 63) | 128, (c & 63) | 128);
+      }
+      return res;
     }
-    return res;
+    const s = utf8Encode(input);
+    bytes = new Uint8Array(s.length);
+    for (let i = 0; i < s.length; i++) {
+      bytes[i] = s.charCodeAt(i);
+    }
+  } else {
+    bytes = input;
   }
-  const s = utf8Encode(input);
-  let x = Array(Math.ceil((s.length + 9) / 64) * 16).fill(0);
-  for (let i = 0; i < s.length; i++) {
-    x[i >> 2] |= (s.charCodeAt(i) & 255) << ((i % 4) * 8);
+  let x = Array(Math.ceil((bytes.length + 9) / 64) * 16).fill(0);
+  for (let i = 0; i < bytes.length; i++) {
+    x[i >> 2] |= (bytes[i] & 255) << ((i % 4) * 8);
   }
-  x[s.length >> 2] |= 128 << ((s.length % 4) * 8);
-  x[x.length - 2] = s.length * 8;
+  x[bytes.length >> 2] |= 128 << ((bytes.length % 4) * 8);
+  x[x.length - 2] = bytes.length * 8;
 
   let a =  1732584193, b = -271733879, c = -1732584194, d =  271733878;
   const F = (X: number, Y: number, Z: number) => (X & Y) | (~X & Z);
@@ -119,16 +128,25 @@ export function md5(input: string): string {
 }
 
 // SHA via Web Crypto
-export async function sha256(input: string): Promise<string> {
-  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(input));
+export async function sha256(input: string | BufferSource): Promise<string> {
+  const buf = await crypto.subtle.digest(
+    'SHA-256',
+    typeof input === 'string' ? new TextEncoder().encode(input) : input
+  );
   return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
 }
-export async function sha512(input: string): Promise<string> {
-  const buf = await crypto.subtle.digest('SHA-512', new TextEncoder().encode(input));
+export async function sha512(input: string | BufferSource): Promise<string> {
+  const buf = await crypto.subtle.digest(
+    'SHA-512',
+    typeof input === 'string' ? new TextEncoder().encode(input) : input
+  );
   return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
 }
-export async function sha1(input: string): Promise<string> {
-  const buf = await crypto.subtle.digest('SHA-1', new TextEncoder().encode(input));
+export async function sha1(input: string | BufferSource): Promise<string> {
+  const buf = await crypto.subtle.digest(
+    'SHA-1',
+    typeof input === 'string' ? new TextEncoder().encode(input) : input
+  );
   return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
