@@ -26,6 +26,7 @@ import {
   trimAudioBuffer,
   cutOutAudioBuffer,
   applyFade,
+  applyEqualizer,
   decodeAudio,
   extractWaveformPeaks,
   formatAudioTimestamp,
@@ -67,6 +68,16 @@ export default function InteractiveAudioCutter({
   const [volume, setVolume] = useState<number>(100); // 0% to 200%
   const [exportFormat, setExportFormat] = useState<string>(defaultFormat);
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
+
+  // Equalizer state (-24 to +24 dB for each band)
+  const [eqBass, setEqBass] = useState<number>(0);
+  const [eqMid, setEqMid] = useState<number>(0);
+  const [eqTreble, setEqTreble] = useState<number>(0);
+
+  // Live EQ filter refs (updated during playback without restarting)
+  const bassFilterRef = useRef<BiquadFilterNode | null>(null);
+  const midFilterRef = useRef<BiquadFilterNode | null>(null);
+  const trebleFilterRef = useRef<BiquadFilterNode | null>(null);
 
   // Interactive Drag States
   const [dragTarget, setDragTarget] = useState<'start' | 'end' | 'range' | null>(null);
@@ -200,11 +211,34 @@ export default function InteractiveAudioCutter({
       const gainNode = ctx.createGain();
       gainNode.gain.value = volume / 100;
 
-      source.connect(gainNode);
+      // Build 3-band EQ chain: source → bass → mid → treble → gain → destination
+      const bassFilter = ctx.createBiquadFilter();
+      bassFilter.type = 'lowshelf';
+      bassFilter.frequency.value = 200;
+      bassFilter.gain.value = eqBass;
+
+      const midFilter = ctx.createBiquadFilter();
+      midFilter.type = 'peaking';
+      midFilter.frequency.value = 1000;
+      midFilter.Q.value = 1.0;
+      midFilter.gain.value = eqMid;
+
+      const trebleFilter = ctx.createBiquadFilter();
+      trebleFilter.type = 'highshelf';
+      trebleFilter.frequency.value = 4000;
+      trebleFilter.gain.value = eqTreble;
+
+      source.connect(bassFilter);
+      bassFilter.connect(midFilter);
+      midFilter.connect(trebleFilter);
+      trebleFilter.connect(gainNode);
       gainNode.connect(ctx.destination);
 
       sourceNodeRef.current = source;
       gainNodeRef.current = gainNode;
+      bassFilterRef.current = bassFilter;
+      midFilterRef.current = midFilter;
+      trebleFilterRef.current = trebleFilter;
       playbackStartTimeRef.current = ctx.currentTime;
       playbackOffsetRef.current = validStart;
 
@@ -235,7 +269,7 @@ export default function InteractiveAudioCutter({
         if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
       };
     },
-    [audioBuffer, currentTime, startTime, endTime, playbackSpeed, volume, getAudioContext, stopPlayback]
+    [audioBuffer, currentTime, startTime, endTime, playbackSpeed, volume, eqBass, eqMid, eqTreble, getAudioContext, stopPlayback]
   );
 
   const togglePlay = () => {
@@ -260,6 +294,13 @@ export default function InteractiveAudioCutter({
       gainNodeRef.current.gain.value = volume / 100;
     }
   }, [playbackSpeed, volume]);
+
+  // Handle live EQ changes during playback
+  useEffect(() => {
+    if (bassFilterRef.current) bassFilterRef.current.gain.value = eqBass;
+    if (midFilterRef.current) midFilterRef.current.gain.value = eqMid;
+    if (trebleFilterRef.current) trebleFilterRef.current.gain.value = eqTreble;
+  }, [eqBass, eqMid, eqTreble]);
 
   // Draw the Waveform Canvas
   useEffect(() => {
@@ -521,6 +562,9 @@ export default function InteractiveAudioCutter({
     setCutMode('keep');
     setPlaybackSpeed(1.0);
     setVolume(100);
+    setEqBass(0);
+    setEqMid(0);
+    setEqTreble(0);
     toast.success('Reset selection to full track');
   };
 
@@ -551,18 +595,23 @@ export default function InteractiveAudioCutter({
         processed = cutOutAudioBuffer(audioBuffer, startTime, endTime);
       }
 
-      // 2. Apply Fade In / Fade Out if enabled
+      // 2. Apply Equalizer if any band is non-zero
+      if (eqBass !== 0 || eqMid !== 0 || eqTreble !== 0) {
+        processed = await applyEqualizer(processed, eqBass, eqMid, eqTreble);
+      }
+
+      // 3. Apply Fade In / Fade Out if enabled
       if (fadeIn || fadeOut) {
-        const fadeDuration = Math.min(2.0, processed.duration * 0.25);
+        const fadeDuration = Math.min(2.0, processed.duration * 0.3);
         processed = applyFade(processed, fadeIn ? fadeDuration : 0, fadeOut ? fadeDuration : 0);
       }
 
-      // 3. Apply Volume if adjusted
+      // 4. Apply Volume if adjusted
       if (volume !== 100) {
         processed = changeVolume(processed, volume / 100);
       }
 
-      // 4. Encode to WAV Blob
+      // 5. Encode to WAV Blob
       const wavBlob = audioBufferToWav(processed);
       const baseName = fileName.replace(/\.[^/.]+$/, '');
       const downloadName = `${baseName}_cut.${exportFormat === 'mp3' ? 'mp3' : 'wav'}`;
@@ -872,6 +921,69 @@ export default function InteractiveAudioCutter({
             </div>
           )}
 
+          {activeTab === 'equalizer' && (
+            <div style={{ padding: '16px', backgroundColor: 'rgba(15, 23, 42, 0.65)', borderRadius: 'var(--radius-md)', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              <span style={{ fontSize: '12px', color: '#94a3b8', letterSpacing: '0.08em', textTransform: 'uppercase', fontWeight: 600 }}>3-Band Equalizer</span>
+              {([
+                { label: 'Bass', value: eqBass, setter: setEqBass, freq: '200 Hz' },
+                { label: 'Mid', value: eqMid, setter: setEqMid, freq: '1 kHz' },
+                { label: 'Treble', value: eqTreble, setter: setEqTreble, freq: '4 kHz' },
+              ] as const).map(({ label, value, setter, freq }) => (
+                <div key={label} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div style={{ width: '60px', display: 'flex', flexDirection: 'column' }}>
+                    <span style={{ fontSize: '13px', color: '#e2e8f0', fontWeight: 600 }}>{label}</span>
+                    <span style={{ fontSize: '10px', color: '#64748b', fontFamily: 'var(--font-mono)' }}>{freq}</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="-24"
+                    max="24"
+                    step="1"
+                    value={value}
+                    onChange={(e) => setter(Number(e.target.value))}
+                    style={{ flex: 1, accentColor: value === 0 ? '#475569' : value > 0 ? '#00e5ff' : '#f43f5e', cursor: 'pointer' }}
+                  />
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{
+                      fontSize: '12px',
+                      fontFamily: 'var(--font-mono)',
+                      color: value === 0 ? '#64748b' : value > 0 ? '#00e5ff' : '#f43f5e',
+                      minWidth: '40px',
+                      textAlign: 'right'
+                    }}>
+                      {value > 0 ? '+' : ''}{value} dB
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setter(0)}
+                      title="Reset"
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        color: value !== 0 ? '#94a3b8' : '#334155',
+                        cursor: value !== 0 ? 'pointer' : 'default',
+                        padding: '2px',
+                        display: 'flex',
+                        alignItems: 'center'
+                      }}
+                    >
+                      <RotateCcw size={12} />
+                    </button>
+                  </div>
+                </div>
+              ))}
+              {(eqBass !== 0 || eqMid !== 0 || eqTreble !== 0) && (
+                <button
+                  type="button"
+                  onClick={() => { setEqBass(0); setEqMid(0); setEqTreble(0); }}
+                  style={{ alignSelf: 'flex-start', fontSize: '12px', color: '#94a3b8', background: 'none', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 'var(--radius-sm)', padding: '4px 10px', cursor: 'pointer' }}
+                >
+                  Reset All
+                </button>
+              )}
+            </div>
+          )}
+
           {/* 2. CENTRAL WAVEFORM TRACK AREA */}
           <div style={{ position: 'relative', width: '100%', display: 'flex', flexDirection: 'column' }}>
             {/* Top Info Bar inside Track */}
@@ -1008,33 +1120,66 @@ export default function InteractiveAudioCutter({
                 {isPlaying ? <Pause size={18} /> : <Play size={18} style={{ marginLeft: '2px' }} />}
               </button>
 
-              {/* Fade Toggle Button (Curve Icon) */}
+              {/* Fade In Button */}
               <button
                 type="button"
                 onClick={() => {
-                  const nextFade = !(fadeIn && fadeOut);
-                  setFadeIn(nextFade);
-                  setFadeOut(nextFade);
-                  toast.success(nextFade ? 'Fade In & Fade Out enabled' : 'Fade disabled');
+                  const next = !fadeIn;
+                  setFadeIn(next);
+                  toast.success(next ? 'Fade In enabled' : 'Fade In disabled');
                 }}
                 style={{
                   height: '44px',
-                  padding: '0 14px',
+                  padding: '0 12px',
                   borderRadius: 'var(--radius-md)',
-                  backgroundColor: fadeIn || fadeOut ? '#1a365d' : '#1e293b',
-                  color: fadeIn || fadeOut ? '#00e5ff' : '#94a3b8',
-                  border: fadeIn || fadeOut ? '1px solid rgba(0, 229, 255, 0.3)' : '1px solid rgba(255, 255, 255, 0.12)',
+                  backgroundColor: fadeIn ? '#1a365d' : '#1e293b',
+                  color: fadeIn ? '#00e5ff' : '#94a3b8',
+                  border: fadeIn ? '1px solid rgba(0, 229, 255, 0.3)' : '1px solid rgba(255, 255, 255, 0.12)',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '6px',
-                  cursor: 'pointer'
+                  gap: '5px',
+                  cursor: 'pointer',
+                  fontSize: '12px',
+                  fontWeight: 500
                 }}
-                title="Toggle Fade In & Fade Out"
+                title="Fade In (ramp up at start)"
               >
-                {/* SVG curve matching the screenshot icon */}
-                <svg width="24" height="16" viewBox="0 0 32 16" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M2 14 C 8 14, 10 2, 16 2 C 22 2, 24 14, 30 14" strokeLinecap="round" />
+                {/* Rising curve SVG */}
+                <svg width="20" height="14" viewBox="0 0 24 14" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M2 12 C 6 12, 20 2, 22 2" strokeLinecap="round" />
                 </svg>
+                <span>In</span>
+              </button>
+
+              {/* Fade Out Button */}
+              <button
+                type="button"
+                onClick={() => {
+                  const next = !fadeOut;
+                  setFadeOut(next);
+                  toast.success(next ? 'Fade Out enabled' : 'Fade Out disabled');
+                }}
+                style={{
+                  height: '44px',
+                  padding: '0 12px',
+                  borderRadius: 'var(--radius-md)',
+                  backgroundColor: fadeOut ? '#1a365d' : '#1e293b',
+                  color: fadeOut ? '#00e5ff' : '#94a3b8',
+                  border: fadeOut ? '1px solid rgba(0, 229, 255, 0.3)' : '1px solid rgba(255, 255, 255, 0.12)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  cursor: 'pointer',
+                  fontSize: '12px',
+                  fontWeight: 500
+                }}
+                title="Fade Out (ramp down at end)"
+              >
+                {/* Falling curve SVG */}
+                <svg width="20" height="14" viewBox="0 0 24 14" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M2 2 C 4 2, 18 12, 22 12" strokeLinecap="round" />
+                </svg>
+                <span>Out</span>
               </button>
 
               {/* Cut Mode Toggle: Keep Selection vs Remove Selection */}

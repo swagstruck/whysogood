@@ -248,3 +248,54 @@ export async function renderOffline(source: AudioBuffer): Promise<AudioBuffer> {
   sourceNode.start(0);
   return await offlineCtx.startRendering();
 }
+
+/**
+ * Apply a 3-band equalizer (bass / mid / treble) to an AudioBuffer offline.
+ * @param buffer    Input AudioBuffer
+ * @param bassGainDb   -24 to +24 dB gain for low-shelf at 200 Hz
+ * @param midGainDb    -24 to +24 dB gain for peaking EQ at 1 kHz
+ * @param trebleGainDb -24 to +24 dB gain for high-shelf at 4 kHz
+ */
+export async function applyEqualizer(
+  buffer: AudioBuffer,
+  bassGainDb: number,
+  midGainDb: number,
+  trebleGainDb: number
+): Promise<AudioBuffer> {
+  const offlineCtx = new OfflineAudioContext(
+    buffer.numberOfChannels,
+    buffer.length,
+    buffer.sampleRate
+  );
+
+  const source = offlineCtx.createBufferSource();
+  source.buffer = buffer;
+
+  // Bass: low-shelf at 200 Hz
+  const bassFilter = offlineCtx.createBiquadFilter();
+  bassFilter.type = 'lowshelf';
+  bassFilter.frequency.value = 200;
+  bassFilter.gain.value = bassGainDb;
+
+  // Mid: peaking at 1 kHz
+  const midFilter = offlineCtx.createBiquadFilter();
+  midFilter.type = 'peaking';
+  midFilter.frequency.value = 1000;
+  midFilter.Q.value = 1.0;
+  midFilter.gain.value = midGainDb;
+
+  // Treble: high-shelf at 4 kHz
+  const trebleFilter = offlineCtx.createBiquadFilter();
+  trebleFilter.type = 'highshelf';
+  trebleFilter.frequency.value = 4000;
+  trebleFilter.gain.value = trebleGainDb;
+
+  // Chain: source → bass → mid → treble → destination
+  source.connect(bassFilter);
+  bassFilter.connect(midFilter);
+  midFilter.connect(trebleFilter);
+  trebleFilter.connect(offlineCtx.destination);
+
+  source.start(0);
+  return await offlineCtx.startRendering();
+}
