@@ -102,6 +102,126 @@ export function changeVolume(buffer: AudioBuffer, gainMultiplier: number): Audio
   return newBuffer;
 }
 
+export function formatAudioTimestamp(seconds: number): string {
+  if (isNaN(seconds) || seconds < 0) seconds = 0;
+  const mins = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+  const wholeSecs = Math.floor(secs);
+  const tenths = Math.floor((secs - wholeSecs) * 10);
+  const mm = String(mins).padStart(2, '0');
+  const ss = String(wholeSecs).padStart(2, '0');
+  return `${mm}:${ss}.${tenths}`;
+}
+
+export function parseAudioTimestamp(str: string): number {
+  const parts = str.trim().split(':');
+  if (parts.length === 1) return parseFloat(parts[0]) || 0;
+  if (parts.length === 2) return (parseFloat(parts[0]) || 0) * 60 + (parseFloat(parts[1]) || 0);
+  if (parts.length === 3) return (parseFloat(parts[0]) || 0) * 3600 + (parseFloat(parts[1]) || 0) * 60 + (parseFloat(parts[2]) || 0);
+  return 0;
+}
+
+export function extractWaveformPeaks(
+  buffer: AudioBuffer,
+  numBuckets: number
+): { min: Float32Array; max: Float32Array } {
+  const channelData = buffer.getChannelData(0);
+  const totalSamples = channelData.length;
+  const bucketSize = totalSamples / numBuckets;
+  const minPeaks = new Float32Array(numBuckets);
+  const maxPeaks = new Float32Array(numBuckets);
+
+  for (let i = 0; i < numBuckets; i++) {
+    const start = Math.floor(i * bucketSize);
+    const end = Math.min(totalSamples, Math.floor((i + 1) * bucketSize));
+    let min = 0;
+    let max = 0;
+
+    for (let j = start; j < end; j++) {
+      const val = channelData[j];
+      if (val < min) min = val;
+      if (val > max) max = val;
+    }
+    minPeaks[i] = min;
+    maxPeaks[i] = max;
+  }
+
+  return { min: minPeaks, max: maxPeaks };
+}
+
+export function applyFade(
+  buffer: AudioBuffer,
+  fadeInDurationSec: number,
+  fadeOutDurationSec: number
+): AudioBuffer {
+  const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+  const newBuffer = ctx.createBuffer(buffer.numberOfChannels, buffer.length, buffer.sampleRate);
+  const sampleRate = buffer.sampleRate;
+  const fadeInSamples = Math.min(buffer.length, Math.floor(fadeInDurationSec * sampleRate));
+  const fadeOutSamples = Math.min(buffer.length, Math.floor(fadeOutDurationSec * sampleRate));
+  const fadeOutStart = buffer.length - fadeOutSamples;
+
+  for (let c = 0; c < buffer.numberOfChannels; c++) {
+    const src = buffer.getChannelData(c);
+    const dst = newBuffer.getChannelData(c);
+    dst.set(src);
+
+    if (fadeInSamples > 0) {
+      for (let i = 0; i < fadeInSamples; i++) {
+        const factor = i / fadeInSamples;
+        dst[i] *= factor;
+      }
+    }
+
+    if (fadeOutSamples > 0) {
+      for (let i = 0; i < fadeOutSamples; i++) {
+        const idx = fadeOutStart + i;
+        if (idx < buffer.length) {
+          const factor = 1 - (i / fadeOutSamples);
+          dst[idx] *= factor;
+        }
+      }
+    }
+  }
+
+  return newBuffer;
+}
+
+export function cutOutAudioBuffer(
+  buffer: AudioBuffer,
+  cutStartSec: number,
+  cutEndSec: number
+): AudioBuffer {
+  const sampleRate = buffer.sampleRate;
+  const cutStartOffset = Math.max(0, Math.floor(cutStartSec * sampleRate));
+  const cutEndOffset = Math.min(buffer.length, Math.ceil(cutEndSec * sampleRate));
+
+  const part1Length = cutStartOffset;
+  const part2Length = Math.max(0, buffer.length - cutEndOffset);
+  const newLength = part1Length + part2Length;
+
+  const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+  if (newLength <= 0) {
+    return ctx.createBuffer(buffer.numberOfChannels, 1, sampleRate);
+  }
+
+  const newBuffer = ctx.createBuffer(buffer.numberOfChannels, newLength, sampleRate);
+
+  for (let c = 0; c < buffer.numberOfChannels; c++) {
+    const src = buffer.getChannelData(c);
+    const dst = newBuffer.getChannelData(c);
+
+    if (part1Length > 0) {
+      dst.set(src.subarray(0, part1Length), 0);
+    }
+    if (part2Length > 0) {
+      dst.set(src.subarray(cutEndOffset, buffer.length), part1Length);
+    }
+  }
+
+  return newBuffer;
+}
+
 export function stripId3Tags(buffer: ArrayBuffer): ArrayBuffer {
   const view = new DataView(buffer);
   if (buffer.byteLength < 10) return buffer;
